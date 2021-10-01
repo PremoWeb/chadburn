@@ -1,0 +1,6 @@
+.vscode
+ofelia
+debug
+build
+bin
+*coverage*

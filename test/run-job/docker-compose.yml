@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  ofelia:
+    build:
+      dockerfile: Dockerfile
+      context: ../../.
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./chronos.ini:/etc/chronos/config.ini
+
+  job:
+    image: hello-world
