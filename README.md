@@ -1,14 +1,20 @@
-# Fork that adds the following features:
+# Chronos, a cron alternative for Docker Swarm.
+
+# Chronos is a Ofelia Fork that adds the following features:
 
 - Update tasks if docker containers are started, stopped, restarted, or changed
-- Do not require a dummy task on the ofelia container just to use ofelia
+- Do not require a dummy task on the Ofelia container just to use ofelia
 - Support INI and docker labels at the same time. The configs will simply be merged
-- Do not require ofelia to restart in order to pick up new or remove tasks
+- Do not require Ofelia to restart in order to pick up new or remove tasks
 
-#### Waiting on PR: https://github.com/mcuadros/ofelia/pull/137 for upstream merge
+#### No longer Waiting on PR: https://github.com/mcuadros/ofelia/pull/137 for upstream merge. PremoWeb aims to move this project forward.
 
+A special thanks to @rdelcorro at [cron](https://github.com/rdelcorro) for the work in fixing the issues referenced in the PR referenced above.
+PremoWeb has taken up this project independently after seeing a 30 day wait on acceptance of a working pull request. It is important that we continually improve open source software so that everyone benefits.
 
-# Chronos - a job scheduler [![GitHub version](https://badge.fury.io/gh/mcuadros%2Fofelia.svg)](https://github.com/PremoWeb/Chronos/releases) ![Test](https://github.com/PremoWeb/Chronos/workflows/Test/badge.svg)
+Much thanks to the original work that went into Ofelia by it's author and contributors.
+
+# Chronos - a job scheduler [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChronos.svg)](https://github.com/PremoWeb/Chronos/releases) ![Test](https://github.com/PremoWeb/Chronos/workflows/Test/badge.svg)
 
 **Chronos** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Ofelia aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
 
