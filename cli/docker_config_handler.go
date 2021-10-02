@@ -62,7 +62,7 @@ func (c *DockerHandler) watch() {
 		case <-tick:
 			labels, err := c.GetDockerLabels()
 			// Do not print or care if there is no container up right now
-			if err != nil && !errors.Is(err, ErrNoContainerWithOfeliaEnabled) {
+			if err != nil && !errors.Is(err, ErrNoContainerWithChronosEnabled) {
 				c.logger.Debugf("%v", err)
 			}
 			c.notifier.dockerLabelsUpdate(labels)
@@ -81,7 +81,7 @@ func (c *DockerHandler) GetDockerLabels() (map[string]map[string]string, error) 
 	}
 
 	if len(conts) == 0 {
-		return nil, ErrNoContainerWithOfeliaEnabled
+		return nil, ErrNoContainerWithChronosEnabled
 	}
 
 	var labels = make(map[string]map[string]string)
