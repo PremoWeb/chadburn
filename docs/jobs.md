@@ -47,11 +47,11 @@ tty = false
 
 ```sh
 docker run -it --rm \
-    --label ofelia.enabled=true \
-    --label ofelia.job-exec.flush-nginx-logs.schedule="@hourly" \
-    --label ofelia.job-exec.flush-nginx-logs.command="/bin/bash /flush-logs.sh" \
-    --label ofelia.job-exec.flush-nginx-logs.user="www-data" \
-    --label ofelia.job-exec.flush-nginx-logs.tty="false" \
+    --label chronos.enabled=true \
+    --label chronos.job-exec.flush-nginx-logs.schedule="@hourly" \
+    --label chronos.job-exec.flush-nginx-logs.command="/bin/bash /flush-logs.sh" \
+    --label chronos.job-exec.flush-nginx-logs.user="www-data" \
+    --label chronos.job-exec.flush-nginx-logs.tty="false" \
         nginx
 ```
 
@@ -75,7 +75,7 @@ This job can be used in 2 situations:
 - **Image** (1)
   - *description*: Image you want to use for the job.
   - *value*: String, e.g. `nginx:latest`
-  - *default*: No default. If left blank, Ofelia assumes you will specify a container to start (situation 2).
+  - *default*: No default. If left blank, Chronos assumes you will specify a container to start (situation 2).
 - **User** (1)
   - *description*: User as which the command should be executed, similar to `docker run --user <user>`
   - *value*: String, e.g. `www-data`
@@ -115,19 +115,19 @@ volume = /tmp/test:/tmp/test:rw
 
 Then you can check output in host machine file `/tmp/test/date`
 
-### Running ofelia on Docker example
+### Running Chronos on Docker example
 
 ```sh
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        mcuadros/ofelia:latest daemon 
+        premoewb/chronos:latest daemon 
 ```
 
 ## Job-local
 
-Runs the command on the host running Ofelia.
+Runs the command on the host running Chronos.
 
-**Note**: In case Ofelia is running inside a container, the command is executed inside the container. Not on the Docker host.
+**Note**: In case Chronos is running inside a container, the command is executed inside the container. Not on the Docker host.
 
 ### Parameters
 
@@ -176,7 +176,7 @@ This job can be used to:
 - **Image** * (1)
   - *description*: Image you want to use for the job.
   - *value*: String, e.g. `nginx:latest`
-  - *default*: No default. If left blank, Ofelia assumes you will specify a container to start (situation 2).
+  - *default*: No default. If left blank, Chronos assumes you will specify a container to start (situation 2).
 - **Network** (1)
   - *description*: Connect the container to this network
   - *value*: String, e.g. `backend-proxy`

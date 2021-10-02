@@ -20,12 +20,12 @@ func buildLogger() core.Logger {
 	// Set the backends to be used.
 	logging.SetBackend(stdout)
 	logging.SetFormatter(logging.MustStringFormatter(logFormat))
-	return logging.MustGetLogger("ofelia")
+	return logging.MustGetLogger("chronos")
 }
 
 func main() {
 	logger := buildLogger()
-	parser := flags.NewNamedParser("ofelia", flags.Default)
+	parser := flags.NewNamedParser("chronos", flags.Default)
 	parser.AddCommand("daemon", "daemon process", "", &cli.DaemonCommand{Logger: logger})
 	parser.AddCommand("validate", "validates the config file", "", &cli.ValidateCommand{Logger: logger})
 
