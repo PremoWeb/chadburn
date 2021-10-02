@@ -1,24 +1,18 @@
-# Chadburn, a cron alternative for Docker Swarm.
-
-# Chadburn is a Ofelia Fork that adds the following features:
-
-- Update tasks if docker containers are started, stopped, restarted, or changed
-- Do not require a dummy task on the Ofelia container just to use ofelia
-- Support INI and docker labels at the same time. The configs will simply be merged
-- Do not require Ofelia to restart in order to pick up new or remove tasks
-
-#### No longer Waiting on PR: https://github.com/mcuadros/ofelia/pull/137 for upstream merge. PremoWeb aims to move this project forward.
-
-A special thanks to @rdelcorro at [cron](https://github.com/rdelcorro) for the work in fixing the issues referenced in the PR referenced above.
-PremoWeb has taken up this project independently after seeing a 30 day wait on acceptance of a working pull request. It is important that we continually improve open source software so that everyone benefits.
-
-Much thanks to the original work that went into Ofelia by it's author and contributors.
-
-# Chadburn - a job scheduler [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Test](https://github.com/PremoWeb/Chadburn/workflows/Test/badge.svg)
+# Chadburn - a job scheduler written in Go [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Test](https://github.com/PremoWeb/Chadburn/workflows/Test/badge.svg)
 
 **Chadburn** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Chadburn aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
 
-### Why?
+*** SPECIAL NOTE ***
+
+Chadburn is a new project based on the previous and continuous work incorporated into Ofelia and a fork of Ofelia provided by @rdelcorro, of which Chadburn was forked from. This project was started as a result of needing a version of Ofelia that incorporated the following fixes:
+
+- Update tasks if docker containers are started, stopped, restarted, or changed
+- Do not require a dummy task on the Ofelia container just to use Chadburn.
+- Support INI and docker labels at the same time. The configs will simply be merged.
+- Do not require a restart in order to pick up new or remove tasks.
+
+PremoWeb will be responsive to addressing issues raised in this project and will also be monitoring issues in the original Ofelia source code repository and applying changes that should be reflected in Chadburn.
+### Why Chadburn?
 
 It has been a long time since [`cron`](https://en.wikipedia.org/wiki/Cron) was released, actually more than 28 years. The world has changed a lot and especially since the `Docker` revolution. **Vixie's cron** works great but it's not extensible and it's hard to debug when something goes wrong.
 
@@ -29,6 +23,10 @@ Many solutions are available: ready to go containerized `crons`, wrappers for yo
 The main feature of **Chadburn** is the ability to execute commands directly on Docker containers. Using Docker's API Chadburn emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
 
 ## Configuration
+
+A wiki is being written to document how to use Chadburn. Caprover users can use a One Click App (coming soon) to deploy and implement scheduled jobs using Service Label Overrides.
+
+For everyone else, here's the general approach to use Chadburn:
 
 ### Jobs
 
@@ -193,4 +191,8 @@ The easiest way to deploy **Chadburn** is using *Docker*. See examples above.
 
 If don't want to run **Chadburn** using our *Docker* image you can download a binary from [releases](https://github.com/PremoWeb/Chadburn/releases) page.
 
+### Thank You to team Ofelia and it's contributors.
 
+A special thanks to [@rdelcorro](https://github.com/rdelcorro) for the work in fixing the issues referenced in this pull request https://github.com/mcuadros/ofelia/pull/137, despite this pull request having been ignored for 30 days. PremoWeb aims to ensure that open software is continously improve and will remain responsive to raised issues and pull requests.
+
+Much thanks to the original work that went into Ofelia by it's author and contributors.
