@@ -1,4 +1,4 @@
-module github.com/PremoWeb/Chronos
+module github.com/PremoWeb/Chadburn
 
 go 1.11
 
