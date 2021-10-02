@@ -1,4 +1,4 @@
-FROM golang:1.15.6-alpine AS builder
+FROM golang:1.17.1-alpine AS builder
 
 RUN apk --no-cache add gcc musl-dev
 
@@ -7,7 +7,7 @@ COPY . ${GOPATH}/src/github.com/PremoWeb/Chronos
 
 RUN go build -o /go/bin/chronos .
 
-FROM alpine:3.12
+FROM alpine:3.14.2
 
 RUN apk --no-cache add ca-certificates tzdata
 
