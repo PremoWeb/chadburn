@@ -10,7 +10,7 @@ import (
 
 // DaemonCommand daemon process
 type DaemonCommand struct {
-	ConfigFile string `long:"config" description:"configuration file" default:"/etc/ofelia.conf"`
+	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chronos.conf"`
 	scheduler  *core.Scheduler
 	signals    chan os.Signal
 	done       chan bool

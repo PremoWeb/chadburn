@@ -9,7 +9,7 @@ import (
 	docker "github.com/fsouza/go-dockerclient"
 )
 
-var ErrNoContainerWithOfeliaEnabled = errors.New("Couldn't find containers with label 'ofelia.enabled=true'")
+var ErrNoContainerWithOfeliaEnabled = errors.New("Couldn't find containers with label 'chronos.enabled=true'")
 
 type DockerHandler struct {
 	dockerClient *docker.Client

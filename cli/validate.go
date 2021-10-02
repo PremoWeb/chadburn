@@ -6,7 +6,7 @@ import (
 
 // ValidateCommand validates the config file
 type ValidateCommand struct {
-	ConfigFile string `long:"config" description:"configuration file" default:"/etc/ofelia.conf"`
+	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chronos.conf"`
 	Logger     core.Logger
 }
 
