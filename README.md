@@ -16,7 +16,7 @@ Much thanks to the original work that went into Ofelia by it's author and contri
 
 # Chronos - a job scheduler [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChronos.svg)](https://github.com/PremoWeb/Chronos/releases) ![Test](https://github.com/PremoWeb/Chronos/workflows/Test/badge.svg)
 
-**Chronos** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Ofelia aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
+**Chronos** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Chronos aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
 
 ### Why?
 
@@ -26,7 +26,7 @@ Many solutions are available: ready to go containerized `crons`, wrappers for yo
 
 ### How?
 
-The main feature of **Chronos** is the ability to execute commands directly on Docker containers. Using Docker's API Ofelia emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
+The main feature of **Chronos** is the ability to execute commands directly on Docker containers. Using Docker's API Chronos emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
 
 ## Configuration
 
@@ -40,7 +40,7 @@ you can configure four different kind of jobs:
 
 - `job-exec`: this job is executed inside of a running container.
 - `job-run`: runs a command inside of a new container, using a specific image.
-- `job-local`: runs the command inside of the host running ofelia.
+- `job-local`: runs the command inside of the host running Chronos.
 - `job-service-run`: runs the command inside a new "run-once" service, for running inside a swarm
 
 See [Jobs reference documentation](docs/jobs.md) for all available parameters.
@@ -74,18 +74,18 @@ command =  touch /tmp/example
 
 #### Docker labels configurations
 
-In order to use this type of configurations, ofelia need access to docker socket.
+In order to use this type of configurations, Chronos need access to docker socket.
 
 ```sh
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        ghcr.io/premoweb/chronos:latest daemon --docker
+        premoweb/chronos:latest daemon --docker
 ```
 
-Labels format: `ofelia.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>.
+Labels format: `chronos.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>.
 This type of configuration supports all the capabilities provided by INI files.
 
-Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `ofelia.enabled=true` need to be present on the target container.
+Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `chronos.enabled=true` need to be present on the target container.
 
 For example, we want `chronos` to execute `uname -a` command in the existing container called `my_nginx`.
 To do that, we need to we need to start `my_nginx` container with next configurations:
@@ -108,7 +108,7 @@ Or with docker-compose:
 version: "3"
 services:
   chronos:
-    image: ghcr.io/premoweb/chronos:latest
+    image: premoweb/chronos:latest
     depends_on:
       - nginx
     command: daemon --docker
@@ -126,7 +126,7 @@ services:
 #### Dynamic docker configuration
 
 You can start Chronos in its own container or on the host itself, and it will magically pick up any container that starts, stops or is modified on the fly.
-In order to achieve this, you simply have to use docker containers with the labels described above and let ofelia take care of the rest. 
+In order to achieve this, you simply have to use docker containers with the labels described above and let Chronos take care of the rest. 
 
 #### Hybrid configuration (INI files + Docker)
 
