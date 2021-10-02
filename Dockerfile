@@ -14,5 +14,3 @@ RUN apk --no-cache add ca-certificates tzdata
 COPY --from=builder /go/bin/chronos /usr/bin/chronos
 
 ENTRYPOINT ["/usr/bin/chronos"]
-
-CMD ["daemon", "--config", "/etc/chronos/config.ini"]
