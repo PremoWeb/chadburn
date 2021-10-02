@@ -1,6 +1,6 @@
 # Package configuration
-PROJECT = Chronos
-COMMANDS = Chronos
+PROJECT = Chadburn
+COMMANDS = Chadburn
 
 # Environment
 BASE_PATH := $(shell pwd)

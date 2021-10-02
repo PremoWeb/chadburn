@@ -3,8 +3,8 @@ package cli
 import (
 	"testing"
 
-	"github.com/PremoWeb/Chronos/core"
-	"github.com/PremoWeb/Chronos/middlewares"
+	"github.com/PremoWeb/Chadburn/core"
+	"github.com/PremoWeb/Chadburn/middlewares"
 	defaults "github.com/mcuadros/go-defaults"
 	. "gopkg.in/check.v1"
 )

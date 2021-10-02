@@ -47,11 +47,11 @@ tty = false
 
 ```sh
 docker run -it --rm \
-    --label chronos.enabled=true \
-    --label chronos.job-exec.flush-nginx-logs.schedule="@hourly" \
-    --label chronos.job-exec.flush-nginx-logs.command="/bin/bash /flush-logs.sh" \
-    --label chronos.job-exec.flush-nginx-logs.user="www-data" \
-    --label chronos.job-exec.flush-nginx-logs.tty="false" \
+    --label chadburn.enabled=true \
+    --label chadburn.job-exec.flush-nginx-logs.schedule="@hourly" \
+    --label chadburn.job-exec.flush-nginx-logs.command="/bin/bash /flush-logs.sh" \
+    --label chadburn.job-exec.flush-nginx-logs.user="www-data" \
+    --label chadburn.job-exec.flush-nginx-logs.tty="false" \
         nginx
 ```
 
@@ -75,7 +75,7 @@ This job can be used in 2 situations:
 - **Image** (1)
   - *description*: Image you want to use for the job.
   - *value*: String, e.g. `nginx:latest`
-  - *default*: No default. If left blank, Chronos assumes you will specify a container to start (situation 2).
+  - *default*: No default. If left blank, Chadburn assumes you will specify a container to start (situation 2).
 - **User** (1)
   - *description*: User as which the command should be executed, similar to `docker run --user <user>`
   - *value*: String, e.g. `www-data`
@@ -115,19 +115,19 @@ volume = /tmp/test:/tmp/test:rw
 
 Then you can check output in host machine file `/tmp/test/date`
 
-### Running Chronos on Docker example
+### Running Chadburn on Docker example
 
 ```sh
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        premoewb/chronos:latest daemon 
+        premoewb/chadburn:latest daemon 
 ```
 
 ## Job-local
 
-Runs the command on the host running Chronos.
+Runs the command on the host running Chadburn.
 
-**Note**: In case Chronos is running inside a container, the command is executed inside the container. Not on the Docker host.
+**Note**: In case Chadburn is running inside a container, the command is executed inside the container. Not on the Docker host.
 
 ### Parameters
 
@@ -176,7 +176,7 @@ This job can be used to:
 - **Image** * (1)
   - *description*: Image you want to use for the job.
   - *value*: String, e.g. `nginx:latest`
-  - *default*: No default. If left blank, Chronos assumes you will specify a container to start (situation 2).
+  - *default*: No default. If left blank, Chadburn assumes you will specify a container to start (situation 2).
 - **Network** (1)
   - *description*: Connect the container to this network
   - *value*: String, e.g. `backend-proxy`

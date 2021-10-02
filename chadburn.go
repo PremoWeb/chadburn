@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/PremoWeb/Chronos/cli"
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/cli"
+	"github.com/PremoWeb/Chadburn/core"
 	"github.com/jessevdk/go-flags"
 	"github.com/op/go-logging"
 )
@@ -20,12 +20,12 @@ func buildLogger() core.Logger {
 	// Set the backends to be used.
 	logging.SetBackend(stdout)
 	logging.SetFormatter(logging.MustStringFormatter(logFormat))
-	return logging.MustGetLogger("chronos")
+	return logging.MustGetLogger("chadburn")
 }
 
 func main() {
 	logger := buildLogger()
-	parser := flags.NewNamedParser("chronos", flags.Default)
+	parser := flags.NewNamedParser("chadburn", flags.Default)
 	parser.AddCommand("daemon", "daemon process", "", &cli.DaemonCommand{Logger: logger})
 	parser.AddCommand("validate", "validates the config file", "", &cli.ValidateCommand{Logger: logger})
 

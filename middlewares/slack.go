@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 )
 
 var (
-	slackUsername   = "Chronos"
-	slackAvatarURL  = "https://raw.githubusercontent.com/PremoWeb/Chronos/master/static/avatar.png"
+	slackUsername   = "Chadburn"
+	slackAvatarURL  = "https://raw.githubusercontent.com/PremoWeb/Chadburn/master/static/avatar.png"
 	slackPayloadVar = "payload"
 )
 

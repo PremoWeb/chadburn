@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	labelPrefix = "chronos"
+	labelPrefix = "chadburn"
 
 	requiredLabel       = labelPrefix + ".enabled"
 	requiredLabelFilter = requiredLabel + "=true"

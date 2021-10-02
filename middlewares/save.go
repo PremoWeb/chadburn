@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 )
 
 // SaveConfig configuration for the Save middleware

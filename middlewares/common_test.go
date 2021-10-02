@@ -3,7 +3,7 @@ package middlewares
 import (
 	"testing"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 
 	. "gopkg.in/check.v1"
 )

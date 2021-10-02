@@ -46,7 +46,7 @@ func (s *SuiteRunJob) TestRun(c *C) {
 	ctx := &Context{}
 	ctx.Execution = NewExecution()
 	logging.SetFormatter(logging.MustStringFormatter(logFormat))
-	ctx.Logger = logging.MustGetLogger("chronos")
+	ctx.Logger = logging.MustGetLogger("chadburn")
 	ctx.Job = job
 
 	var wg sync.WaitGroup

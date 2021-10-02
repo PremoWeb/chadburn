@@ -1,6 +1,6 @@
 package middlewares
 
-import "github.com/PremoWeb/Chronos/core"
+import "github.com/PremoWeb/Chadburn/core"
 
 // OverlapConfig configuration for the Overlap middleware
 type OverlapConfig struct {

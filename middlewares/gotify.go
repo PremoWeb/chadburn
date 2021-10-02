@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 )
 
 type GotifyConfig struct {

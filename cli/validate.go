@@ -1,12 +1,12 @@
 package cli
 
 import (
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 )
 
 // ValidateCommand validates the config file
 type ValidateCommand struct {
-	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chronos.conf"`
+	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chadburn.conf"`
 	Logger     core.Logger
 }
 

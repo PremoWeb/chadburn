@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 	docker "github.com/fsouza/go-dockerclient"
 )
 
-var ErrNoContainerWithChronosEnabled = errors.New("Couldn't find containers with label 'chronos.enabled=true'")
+var ErrNoContainerWithChadburnEnabled = errors.New("Couldn't find containers with label 'chadburn.enabled=true'")
 
 type DockerHandler struct {
 	dockerClient *docker.Client
@@ -62,7 +62,7 @@ func (c *DockerHandler) watch() {
 		case <-tick:
 			labels, err := c.GetDockerLabels()
 			// Do not print or care if there is no container up right now
-			if err != nil && !errors.Is(err, ErrNoContainerWithChronosEnabled) {
+			if err != nil && !errors.Is(err, ErrNoContainerWithChadburnEnabled) {
 				c.logger.Debugf("%v", err)
 			}
 			c.notifier.dockerLabelsUpdate(labels)
@@ -81,7 +81,7 @@ func (c *DockerHandler) GetDockerLabels() (map[string]map[string]string, error) 
 	}
 
 	if len(conts) == 0 {
-		return nil, ErrNoContainerWithChronosEnabled
+		return nil, ErrNoContainerWithChadburnEnabled
 	}
 
 	var labels = make(map[string]map[string]string)

@@ -1,13 +1,13 @@
 version: "3"
 
 services:
-  chronos:
+  chadburn:
     build:
       dockerfile: Dockerfile
       context: ../../.
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./chronos.ini:/etc/chronos/config.ini
+      - ./chadburn.ini:/etc/chadburn/config.ini
 
   job:
     image: hello-world

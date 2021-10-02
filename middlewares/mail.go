@@ -11,7 +11,7 @@ import (
 
 	"gopkg.in/gomail.v2"
 
-	"github.com/PremoWeb/Chronos/core"
+	"github.com/PremoWeb/Chadburn/core"
 )
 
 // MailConfig configuration for the Mail middleware

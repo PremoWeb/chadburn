@@ -1,6 +1,6 @@
-# Chronos, a cron alternative for Docker Swarm.
+# Chadburn, a cron alternative for Docker Swarm.
 
-# Chronos is a Ofelia Fork that adds the following features:
+# Chadburn is a Ofelia Fork that adds the following features:
 
 - Update tasks if docker containers are started, stopped, restarted, or changed
 - Do not require a dummy task on the Ofelia container just to use ofelia
@@ -14,9 +14,9 @@ PremoWeb has taken up this project independently after seeing a 30 day wait on a
 
 Much thanks to the original work that went into Ofelia by it's author and contributors.
 
-# Chronos - a job scheduler [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChronos.svg)](https://github.com/PremoWeb/Chronos/releases) ![Test](https://github.com/PremoWeb/Chronos/workflows/Test/badge.svg)
+# Chadburn - a job scheduler [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Test](https://github.com/PremoWeb/Chadburn/workflows/Test/badge.svg)
 
-**Chronos** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Chronos aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
+**Chadburn** is a modern and low footprint job scheduler for __docker__ environments, built on Go. Chadburn aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
 
 ### Why?
 
@@ -26,7 +26,7 @@ Many solutions are available: ready to go containerized `crons`, wrappers for yo
 
 ### How?
 
-The main feature of **Chronos** is the ability to execute commands directly on Docker containers. Using Docker's API Chronos emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
+The main feature of **Chadburn** is the ability to execute commands directly on Docker containers. Using Docker's API Chadburn emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
 
 ## Configuration
 
@@ -40,14 +40,14 @@ you can configure four different kind of jobs:
 
 - `job-exec`: this job is executed inside of a running container.
 - `job-run`: runs a command inside of a new container, using a specific image.
-- `job-local`: runs the command inside of the host running Chronos.
+- `job-local`: runs the command inside of the host running Chadburn.
 - `job-service-run`: runs the command inside a new "run-once" service, for running inside a swarm
 
 See [Jobs reference documentation](docs/jobs.md) for all available parameters.
 
 #### INI-style config
 
-Run with `chronos daemon --config=/path/to/config.ini`
+Run with `chadburn daemon --config=/path/to/config.ini`
 
 ```ini
 [job-exec "job-executed-on-running-container"]
@@ -74,31 +74,31 @@ command =  touch /tmp/example
 
 #### Docker labels configurations
 
-In order to use this type of configurations, Chronos need access to docker socket.
+In order to use this type of configurations, Chadburn need access to docker socket.
 
 ```sh
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        premoweb/chronos:latest daemon --docker
+        premoweb/chadburn:latest daemon --docker
 ```
 
-Labels format: `chronos.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>.
+Labels format: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>.
 This type of configuration supports all the capabilities provided by INI files.
 
-Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `chronos.enabled=true` need to be present on the target container.
+Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `chadburn.enabled=true` need to be present on the target container.
 
-For example, we want `chronos` to execute `uname -a` command in the existing container called `my_nginx`.
+For example, we want `chadburn` to execute `uname -a` command in the existing container called `my_nginx`.
 To do that, we need to we need to start `my_nginx` container with next configurations:
 
 ```sh
 docker run -it --rm \
-    --label chronos.enabled=true \
-    --label chronos.job-exec.test-exec-job.schedule="@every 5s" \
-    --label chronos.job-exec.test-exec-job.command="uname -a" \
+    --label chadburn.enabled=true \
+    --label chadburn.job-exec.test-exec-job.schedule="@every 5s" \
+    --label chadburn.job-exec.test-exec-job.command="uname -a" \
         nginx
 ```
 
-Now if we start `chronos` container with the command provided above, it will execute the task:
+Now if we start `chadburn` container with the command provided above, it will execute the task:
 
 - Exec  - `uname -a`
 
@@ -107,8 +107,8 @@ Or with docker-compose:
 ```yaml
 version: "3"
 services:
-  chronos:
-    image: premoweb/chronos:latest
+  chadburn:
+    image: premoweb/chadburn:latest
     depends_on:
       - nginx
     command: daemon --docker
@@ -118,15 +118,15 @@ services:
   nginx:
     image: nginx
     labels:
-      chronos.enabled: "true"
-      chronos.job-exec.datecron.schedule: "@every 5s"
-      chronos.job-exec.datecron.command: "uname -a"
+      chadburn.enabled: "true"
+      chadburn.job-exec.datecron.schedule: "@every 5s"
+      chadburn.job-exec.datecron.command: "uname -a"
 ```
 
 #### Dynamic docker configuration
 
-You can start Chronos in its own container or on the host itself, and it will magically pick up any container that starts, stops or is modified on the fly.
-In order to achieve this, you simply have to use docker containers with the labels described above and let Chronos take care of the rest. 
+You can start Chadburn in its own container or on the host itself, and it will magically pick up any container that starts, stops or is modified on the fly.
+In order to achieve this, you simply have to use docker containers with the labels described above and let Chadburn take care of the rest. 
 
 #### Hybrid configuration (INI files + Docker)
 
@@ -157,14 +157,14 @@ command = touch /tmp/example
 
 ```sh
 docker run -it --rm \
-    --label chronos.enabled=true \
-    --label chronos.job-exec.test-exec-job.schedule="@every 5s" \
-    --label chronos.job-exec.test-exec-job.command="uname -a" \
+    --label chadburn.enabled=true \
+    --label chadburn.job-exec.test-exec-job.schedule="@every 5s" \
+    --label chadburn.job-exec.test-exec-job.command="uname -a" \
         nginx
 ```
 
 ### Logging
-**Chronos** comes with three different logging drivers that can be configured in the `[global]` section:
+**Chadburn** comes with three different logging drivers that can be configured in the `[global]` section:
 - `mail` to send mails
 - `save` to save structured execution reports to a directory
 - `slack` to send messages via a slack webhook
@@ -185,12 +185,12 @@ docker run -it --rm \
 - `slack-only-on-error` - only send a slack message if the execution was not successful.
 
 ### Overlap
-**Chronos** can prevent that a job is run twice in parallel (e.g. if the first execution didn't complete before a second execution was scheduled. If a job has the option `no-overlap` set, it will not be run concurrently. 
+**Chadburn** can prevent that a job is run twice in parallel (e.g. if the first execution didn't complete before a second execution was scheduled. If a job has the option `no-overlap` set, it will not be run concurrently. 
 
 ## Installation
 
-The easiest way to deploy **Chronos** is using *Docker*. See examples above.
+The easiest way to deploy **Chadburn** is using *Docker*. See examples above.
 
-If don't want to run **Chronos** using our *Docker* image you can download a binary from [releases](https://github.com/PremoWeb/Chronos/releases) page.
+If don't want to run **Chadburn** using our *Docker* image you can download a binary from [releases](https://github.com/PremoWeb/Chadburn/releases) page.
 
 
