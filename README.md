@@ -1,4 +1,5 @@
-# Chadburn - a job scheduler[![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)
+# Chadburn - a job scheduler
+[![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)
 
 **Chadburn** is a modern and low footprint job scheduler for __docker__ environments, written in Go. Chadburn aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
 
@@ -191,6 +192,20 @@ The easiest way to deploy **Chadburn** is using *Docker*. See examples above.
 
 If don't want to run **Chadburn** using our *Docker* image you can download a binary from [releases](https://github.com/PremoWeb/Chadburn/releases) page.
 
+## A special note for Caprover PaaS users:
+
+Chadburn is available as a One Click App via our public ppp repository at https://oneclickapps.premoweb.net. Once added, browse for the Chadburn app to deploy the Chadburn service. Our app should be listed in the official repository soon, negating the need to add our repository in your instance.
+
+Once added, you can setup the scheduler for each of your apps using the Service Override section of your app's config like so:
+
+```
+TaskTemplate:
+  ContainerSpec:
+    Labels:
+      chadburn.enabled: "true"
+      chadburn.job-exec.rotate-puzzles.command: "php /var/www/rotate_games.php"
+      chadburn.job-exec.rotate-puzzles.schedule: "@every 10m"
+```
 ### Thank You to team Ofelia and it's contributors.
 
 A special thanks to [@rdelcorro](https://github.com/rdelcorro) for the work in fixing the issues referenced in this pull request https://github.com/mcuadros/ofelia/pull/137, despite this pull request having been ignored for 30 days. PremoWeb aims to ensure that open software is continously improve and will remain responsive to raised issues and pull requests.
