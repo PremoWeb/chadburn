@@ -77,7 +77,7 @@ In order to use this type of configurations, Chadburn need access to docker sock
 ```sh
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        premoweb/chadburn:latest daemon --docker
+        premoweb/chadburn:latest daemon
 ```
 
 Labels format: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>.

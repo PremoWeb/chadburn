@@ -7,7 +7,7 @@ COPY . ${GOPATH}/src/github.com/PremoWeb/Chadburn
 
 RUN go build -o /go/bin/chadburn .
 
-FROM alpine:3.14.2
+FROM alpine:3.15.0
 
 RUN apk --no-cache add ca-certificates tzdata
 
