@@ -8,7 +8,7 @@
 Chadburn is a new project based on the previous and continuous work incorporated into Ofelia and a fork of Ofelia provided by @rdelcorro, of which Chadburn was forked from. This project was started as a result of needing a version of Ofelia that incorporated the following fixes:
 
 - Update tasks if docker containers are started, stopped, restarted, or changed
-- Do not require a dummy task on the Ofelia container just to use Chadburn.
+- Do not require a dummy task on the Chadburn container just to use Chadburn.
 - Support INI and docker labels at the same time. The configs will simply be merged.
 - Do not require a restart in order to pick up new or remove tasks.
 
