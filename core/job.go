@@ -6,15 +6,14 @@ import (
 )
 
 type BareJob struct {
-	Schedule string `hash:"true"`
-	Name     string `hash:"true"`
-	Command  string `hash:"true"`
+	Schedule string
+	Name     string
+	Command  string
 
 	middlewareContainer
 	running int32
 	lock    sync.Mutex
 	history []*Execution
-	cronID  int
 }
 
 func (j *BareJob) GetName() string {
@@ -39,12 +38,4 @@ func (j *BareJob) NotifyStart() {
 
 func (j *BareJob) NotifyStop() {
 	atomic.AddInt32(&j.running, -1)
-}
-
-func (j *BareJob) GetCronJobID() int {
-	return j.cronID
-}
-
-func (j *BareJob) SetCronJobID(id int) {
-	j.cronID = id
 }
