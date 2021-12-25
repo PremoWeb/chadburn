@@ -2,18 +2,20 @@ package core
 
 import (
 	"fmt"
-	"reflect"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/gobs/args"
 )
 
 type ExecJob struct {
-	BareJob   `mapstructure:",squash"`
-	Client    *docker.Client `json:"-"`
-	Container string         `hash:"true"`
-	User      string         `default:"root" hash:"true"`
-	TTY       bool           `default:"false" hash:"true"`
+	BareJob     `mapstructure:",squash"`
+	Client      *docker.Client `json:"-"`
+	Container   string
+	User        string `default:"root"`
+	TTY         bool   `default:"false"`
+	Environment []string
+
+	execID string
 }
 
 func NewExecJob(c *docker.Client) *ExecJob {
@@ -26,18 +28,27 @@ func (j *ExecJob) Run(ctx *Context) error {
 		return err
 	}
 
-	if err := j.startExec(ctx.Execution, exec); err != nil {
+	if exec != nil {
+		j.execID = exec.ID
+	}
+
+	if err := j.startExec(ctx.Execution); err != nil {
 		return err
 	}
 
-	return j.inspectExec(exec)
-}
+	inspect, err := j.inspectExec()
+	if err != nil {
+		return err
+	}
 
-// Returns a hash of all the job attributes. Used to detect changes
-func (j *ExecJob) Hash() string {
-	var hash string
-	getHash(reflect.TypeOf(j).Elem(), reflect.ValueOf(j).Elem(), &hash)
-	return hash
+	switch inspect.ExitCode {
+	case 0:
+		return nil
+	case -1:
+		return ErrUnexpected
+	default:
+		return fmt.Errorf("error non-zero exit code: %d", inspect.ExitCode)
+	}
 }
 
 func (j *ExecJob) buildExec() (*docker.Exec, error) {
@@ -49,6 +60,7 @@ func (j *ExecJob) buildExec() (*docker.Exec, error) {
 		Cmd:          args.GetArgs(j.Command),
 		Container:    j.Container,
 		User:         j.User,
+		Env:          j.Environment,
 	})
 
 	if err != nil {
@@ -58,8 +70,8 @@ func (j *ExecJob) buildExec() (*docker.Exec, error) {
 	return exec, nil
 }
 
-func (j *ExecJob) startExec(e *Execution, exec *docker.Exec) error {
-	err := j.Client.StartExec(exec.ID, docker.StartExecOptions{
+func (j *ExecJob) startExec(e *Execution) error {
+	err := j.Client.StartExec(j.execID, docker.StartExecOptions{
 		Tty:          j.TTY,
 		OutputStream: e.OutputStream,
 		ErrorStream:  e.ErrorStream,
@@ -73,19 +85,12 @@ func (j *ExecJob) startExec(e *Execution, exec *docker.Exec) error {
 	return nil
 }
 
-func (j *ExecJob) inspectExec(exec *docker.Exec) error {
-	i, err := j.Client.InspectExec(exec.ID)
+func (j *ExecJob) inspectExec() (*docker.ExecInspect, error) {
+	i, err := j.Client.InspectExec(j.execID)
 
 	if err != nil {
-		return fmt.Errorf("error inspecting exec: %s", err)
+		return i, fmt.Errorf("error inspecting exec: %s", err)
 	}
 
-	switch i.ExitCode {
-	case 0:
-		return nil
-	case -1:
-		return ErrUnexpected
-	default:
-		return fmt.Errorf("error non-zero exit code: %d", i.ExitCode)
-	}
+	return i, nil
 }

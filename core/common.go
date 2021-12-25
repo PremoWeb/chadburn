@@ -5,12 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/armon/circbuf"
-
 	docker "github.com/fsouza/go-dockerclient"
 )
 
@@ -23,8 +21,11 @@ var (
 	ErrLocalImageNotFound = errors.New("couldn't find image on the host")
 )
 
-// maximum size of a stdout/stderr stream to be kept in memory and optional stored/sent via mail
-const maxStreamSize = 10 * 1024 * 1024
+const (
+	// maximum size of a stdout/stderr stream to be kept in memory and optional stored/sent via mail
+	maxStreamSize = 10 * 1024 * 1024
+	logPrefix     = "[Job %q (%s)] %s"
+)
 
 type Job interface {
 	GetName() string
@@ -36,8 +37,6 @@ type Job interface {
 	Running() int32
 	NotifyStart()
 	NotifyStop()
-	GetCronJobID() int
-	SetCronJobID(int)
 }
 
 type Context struct {
@@ -115,17 +114,21 @@ func (c *Context) Stop(err error) {
 }
 
 func (c *Context) Log(msg string) {
-	format := "[Job %q (%s)] %s"
 	args := []interface{}{c.Job.GetName(), c.Execution.ID, msg}
 
 	switch {
 	case c.Execution.Failed:
-		c.Logger.Errorf(format, args...)
+		c.Logger.Errorf(logPrefix, args...)
 	case c.Execution.Skipped:
-		c.Logger.Warningf(format, args...)
+		c.Logger.Warningf(logPrefix, args...)
 	default:
-		c.Logger.Noticef(format, args...)
+		c.Logger.Noticef(logPrefix, args...)
 	}
+}
+
+func (c *Context) Warn(msg string) {
+	args := []interface{}{c.Job.GetName(), c.Execution.ID, msg}
+	c.Logger.Warningf(logPrefix, args...)
 }
 
 // Execution contains all the information relative to a Job execution.
@@ -295,32 +298,4 @@ func buildAuthConfiguration(registry string) docker.AuthConfiguration {
 	}
 
 	return auth
-}
-
-const HashmeTagName = "hash"
-
-func getHash(t reflect.Type, v reflect.Value, hash *string) {
-	for i := 0; i < t.NumField(); i++ {
-		field := t.Field(i)
-		fieldv := v.Field(i)
-		kind := field.Type.Kind()
-
-		if kind == reflect.Struct {
-			getHash(field.Type, fieldv, hash)
-			continue
-		}
-
-		hashmeTag := field.Tag.Get(HashmeTagName)
-		if hashmeTag == "true" {
-			if kind == reflect.String {
-				*hash += fieldv.String()
-			} else if kind == reflect.Int32 || kind == reflect.Int || kind == reflect.Int64 || kind == reflect.Int16 || kind == reflect.Int8 {
-				*hash += strconv.FormatInt(fieldv.Int(), 10)
-			} else if kind == reflect.Bool {
-				*hash += strconv.FormatBool(fieldv.Bool())
-			} else {
-				panic("Unsupported field type")
-			}
-		}
-	}
 }

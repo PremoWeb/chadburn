@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	slackUsername   = "Chadburn"
+	slackUsername   = "Ofelia"
 	slackAvatarURL  = "https://raw.githubusercontent.com/PremoWeb/Chadburn/master/static/avatar.png"
 	slackPayloadVar = "payload"
 )

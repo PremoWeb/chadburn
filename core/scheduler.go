@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/robfig/cron/v3"
+	"github.com/robfig/cron"
 )
 
 var (
@@ -24,39 +24,45 @@ type Scheduler struct {
 }
 
 func NewScheduler(l Logger) *Scheduler {
-	cronUtils := NewCronUtils(l)
 	return &Scheduler{
 		Logger: l,
-		cron:   cron.New(cron.WithLogger(cronUtils), cron.WithChain(cron.Recover(cronUtils))),
+		cron:   cron.New(),
 	}
 }
 
 func (s *Scheduler) AddJob(j Job) error {
+	s.Logger.Noticef("New job registered %q - %q - %q", j.GetName(), j.GetCommand(), j.GetSchedule())
+
 	if j.GetSchedule() == "" {
 		return ErrEmptySchedule
 	}
 
-	id, err := s.cron.AddJob(j.GetSchedule(), &jobWrapper{s, j})
+	err := s.cron.AddJob(j.GetSchedule(), &jobWrapper{s, j})
 	if err != nil {
 		return err
 	}
-	j.SetCronJobID(int(id)) // Cast to int in order to avoid pushing cron external to common
-	j.Use(s.Middlewares()...)
-	s.Logger.Noticef("New job registered %q - %q - %q - ID: %v", j.GetName(), j.GetCommand(), j.GetSchedule(), id)
-	return nil
-}
 
-func (s *Scheduler) RemoveJob(j Job) error {
-	s.Logger.Noticef("Job deregistered (will not fire again) %q - %q - %q - ID: %v", j.GetName(), j.GetCommand(), j.GetSchedule(), j.GetCronJobID())
-	s.cron.Remove(cron.EntryID(j.GetCronJobID()))
+	s.Jobs = append(s.Jobs, j)
 	return nil
 }
 
 func (s *Scheduler) Start() error {
-	s.Logger.Debugf("Starting scheduler")
+	if len(s.Jobs) == 0 {
+		return ErrEmptyScheduler
+	}
+
+	s.Logger.Debugf("Starting scheduler with %d jobs", len(s.Jobs))
+
+	s.mergeMiddlewares()
 	s.isRunning = true
 	s.cron.Start()
 	return nil
+}
+
+func (s *Scheduler) mergeMiddlewares() {
+	for _, j := range s.Jobs {
+		j.Use(s.Middlewares()...)
+	}
 }
 
 func (s *Scheduler) Stop() error {
@@ -101,10 +107,12 @@ func (w *jobWrapper) stop(ctx *Context, err error) {
 		errText = ctx.Execution.Error.Error()
 	}
 
-	output := ctx.Execution.OutputStream.Bytes()
+	if ctx.Execution.OutputStream.TotalWritten() > 0 {
+		ctx.Log("StdOut: " + ctx.Execution.OutputStream.String())
+	}
 
-	if len(output) > 0 {
-		ctx.Log("Output: " + string(output))
+	if ctx.Execution.ErrorStream.TotalWritten() > 0 {
+		ctx.Log("StdErr: " + ctx.Execution.ErrorStream.String())
 	}
 
 	msg := fmt.Sprintf(

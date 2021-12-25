@@ -1,23 +1,30 @@
 package cli
 
-import (
-	"github.com/PremoWeb/Chadburn/core"
-)
+import "fmt"
 
 // ValidateCommand validates the config file
 type ValidateCommand struct {
-	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chadburn.conf"`
-	Logger     core.Logger
+	ConfigFile string `long:"config" description:"configuration file" default:"/etc/ofelia.conf"`
 }
 
 // Execute runs the validation command
 func (c *ValidateCommand) Execute(args []string) error {
-	c.Logger.Debugf("Validating %q ... ", c.ConfigFile)
-	_, err := BuildFromFile(c.ConfigFile, c.Logger)
+	fmt.Printf("Validating %q ... ", c.ConfigFile)
+	config, err := BuildFromFile(c.ConfigFile)
 	if err != nil {
-		c.Logger.Errorf("ERROR")
+		fmt.Println("ERROR")
 		return err
 	}
-	c.Logger.Debugf("OK")
+
+	fmt.Println("OK")
+	fmt.Printf("Found %d jobs:\n", len(config.Jobs))
+
+	for _, j := range config.Jobs {
+		fmt.Printf(
+			"- name: %s schedule: %q command: %q\n",
+			j.GetName(), j.GetSchedule(), j.GetCommand(),
+		)
+	}
+
 	return nil
 }

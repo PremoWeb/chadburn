@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  api:
+    image: nginx:latest
+    container_name: api
+    labels:
+        chadburn.enabled: "true"
+    depends_on:
+      - scheduler
+    
+  scheduler:
+    build: .
+    container_name: scheduler
+    restart: unless-stopped
+    command: daemon --config=/etc/chadburn.conf
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "./label-update-test.conf:/etc/chadburn.conf"

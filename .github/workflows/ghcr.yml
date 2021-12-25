@@ -1,0 +1,32 @@
+name: GitHub Releases Push
+on:
+  release:
+    types:
+      - created
+  push:
+    branches:
+      - main
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build image
+      uses: mr-smithers-excellent/docker-build-push@v2
+      with:
+        image: premoweb/chadburn
+        registry: ghcr.io
+        username: premoweb
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Tag image
+      if: github.event_name == 'release'
+      uses: mr-smithers-excellent/docker-build-push@v2
+      with:
+        image: premoweb/chadburn
+        registry: ghcr.io
+        tag: latest
+        username: premoweb
+        password: ${{ secrets.GITHUB_TOKEN }}
