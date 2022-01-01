@@ -34,7 +34,7 @@ func (s *SuiteRunServiceJob) SetUpTest(c *C) {
 
 	logging.SetFormatter(logging.MustStringFormatter(logFormat))
 
-	logger = logging.MustGetLogger("ofelia")
+	logger = logging.MustGetLogger("chadburn")
 	s.server, err = testing.NewServer("127.0.0.1:0", nil, nil)
 	c.Assert(err, IsNil)
 

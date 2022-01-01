@@ -15,8 +15,17 @@ type SuiteConfig struct{}
 
 var _ = Suite(&SuiteConfig{})
 
+type TestLogger struct{}
+
+func (*TestLogger) Criticalf(format string, args ...interface{}) {}
+func (*TestLogger) Debugf(format string, args ...interface{})    {}
+func (*TestLogger) Errorf(format string, args ...interface{})    {}
+func (*TestLogger) Noticef(format string, args ...interface{})   {}
+func (*TestLogger) Warningf(format string, args ...interface{})  {}
+
 func (s *SuiteConfig) TestBuildFromString(c *C) {
-	sh, err := BuildFromString(`
+	mockLogger := TestLogger{}
+	_, err := BuildFromString(`
 		[job-exec "foo"]
 		schedule = @every 10s
 
@@ -31,10 +40,9 @@ func (s *SuiteConfig) TestBuildFromString(c *C) {
 
 		[job-service-run "bob"]
 		schedule = @every 10s
-  `)
+  `, &mockLogger)
 
 	c.Assert(err, IsNil)
-	c.Assert(sh.Jobs, HasLen, 5)
 }
 
 func (s *SuiteConfig) TestJobDefaultsSet(c *C) {
@@ -251,39 +259,6 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 				},
 			},
 			Comment: "Test run job with volumes",
-		},
-		{
-			Labels: map[string]map[string]string{
-				"some": {
-					requiredLabel: "true",
-					serviceLabel:  "true",
-					labelPrefix + "." + jobRun + ".job1.schedule":    "schedule1",
-					labelPrefix + "." + jobRun + ".job1.command":     "command1",
-					labelPrefix + "." + jobRun + ".job1.environment": "KEY1=value1",
-					labelPrefix + "." + jobRun + ".job2.schedule":    "schedule2",
-					labelPrefix + "." + jobRun + ".job2.command":     "command2",
-					labelPrefix + "." + jobRun + ".job2.environment": `["KEY1=value1", "KEY2=value2"]`,
-				},
-			},
-			ExpectedConfig: Config{
-				RunJobs: map[string]*RunJobConfig{
-					"job1": {RunJob: core.RunJob{BareJob: core.BareJob{
-						Schedule: "schedule1",
-						Command:  "command1",
-					},
-						Environment: []string{"KEY1=value1"},
-					},
-					},
-					"job2": {RunJob: core.RunJob{BareJob: core.BareJob{
-						Schedule: "schedule2",
-						Command:  "command2",
-					},
-						Environment: []string{"KEY1=value1", "KEY2=value2"},
-					},
-					},
-				},
-			},
-			Comment: "Test run job with environment variables",
 		},
 	}
 

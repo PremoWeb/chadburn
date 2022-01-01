@@ -16,4 +16,4 @@ services:
     command: daemon --config=/etc/chadburn.conf
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - "./label-update-test.conf:/etc/chadburn.conf"
+      - "./test.conf:/etc/chadburn.conf"

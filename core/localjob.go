@@ -1,7 +1,6 @@
 package core
 
 import (
-	"os"
 	"os/exec"
 
 	"github.com/gobs/args"
@@ -38,9 +37,7 @@ func (j *LocalJob) buildCommand(ctx *Context) (*exec.Cmd, error) {
 		Args:   args,
 		Stdout: ctx.Execution.OutputStream,
 		Stderr: ctx.Execution.ErrorStream,
-		// add custom env variables to the existing ones
-		// instead of overwriting them
-		Env: append(os.Environ(), j.Environment...),
-		Dir: j.Dir,
+		Env:    j.Environment,
+		Dir:    j.Dir,
 	}, nil
 }

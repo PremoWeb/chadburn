@@ -20,5 +20,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
-        goarch: amd64
+        goarch: amd64,arm64,ppc64le,armv7,armv6
         goversion: 1.17
