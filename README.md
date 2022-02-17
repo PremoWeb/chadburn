@@ -195,9 +195,7 @@ If don't want to run **Chadburn** using our *Docker* image you can download a bi
 
 ## A special note for Caprover PaaS users:
 
-Chadburn is available as a One Click App via our public app repository at https://oneclickapps.premoweb.net. Once added, browse for the Chadburn app to deploy the Chadburn service. Our app should be listed in the official repository soon, negating the need to add our repository in your instance.
-
-Once added, you can setup the scheduler for each of your apps using the Service Override section of your app's config like so:
+Chadburn has been added as a One Click App in the official Caprover app repository. Once deployed, you can setup the scheduler for each of your apps using the Service Override section of your app's config like so:
 
 ```
 TaskTemplate:
