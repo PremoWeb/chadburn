@@ -34,7 +34,7 @@ For everyone else, here's the general approach to use Chadburn:
 
 [Scheduling format](https://godoc.org/github.com/robfig/cron) is the same as the Go implementation of `cron`. E.g. `@every 10s` or `0 0 1 * * *` (every night at 1 AM).
 
-**Note**: the format starts with seconds, instead of minutes.
+**Note**: the format starts with seconds, instead of minutes. (UPDATE: It appears this is not actually the case in the most recent version of Chadburn. PremoWeb is earmarking some serious development time in the very near future to overhaul this project to address the many issues that people have reported in both Ofelia and the Chadburn fork. -- Please accept our appologies as we can't get to the development right away!)
 
 you can configure four different kind of jobs:
 
