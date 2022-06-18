@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -23,6 +24,7 @@ type MailConfig struct {
 	EmailTo         string `gcfg:"email-to" mapstructure:"email-to"`
 	EmailFrom       string `gcfg:"email-from" mapstructure:"email-from"`
 	MailOnlyOnError bool   `gcfg:"mail-only-on-error" mapstructure:"mail-only-on-error"`
+	InsecureSkipVerify bool   `gcfg:"insecure-skip-verify" mapstructure:"insecure-skip-verify"`
 }
 
 // NewMail returns a Mail middleware if the given configuration is not empty
@@ -92,6 +94,11 @@ func (m *Mail) sendMail(ctx *core.Context) error {
 	d := gomail.NewPlainDialer(m.SMTPHost, m.SMTPPort, m.SMTPUser, m.SMTPPassword)
 	if err := d.DialAndSend(msg); err != nil {
 		return err
+	}
+
+	// InsecureSkipVerify is used to skip the certificate verification
+	if m.InsecureSkipVerify == true {
+		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	return nil
