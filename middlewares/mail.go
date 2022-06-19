@@ -17,13 +17,13 @@ import (
 
 // MailConfig configuration for the Mail middleware
 type MailConfig struct {
-	SMTPHost        string `gcfg:"smtp-host" mapstructure:"smtp-host"`
-	SMTPPort        int    `gcfg:"smtp-port" mapstructure:"smtp-port"`
-	SMTPUser        string `gcfg:"smtp-user" mapstructure:"smtp-user"`
-	SMTPPassword    string `gcfg:"smtp-password" mapstructure:"smtp-password"`
-	EmailTo         string `gcfg:"email-to" mapstructure:"email-to"`
-	EmailFrom       string `gcfg:"email-from" mapstructure:"email-from"`
-	MailOnlyOnError bool   `gcfg:"mail-only-on-error" mapstructure:"mail-only-on-error"`
+	SMTPHost           string `gcfg:"smtp-host" mapstructure:"smtp-host"`
+	SMTPPort           int    `gcfg:"smtp-port" mapstructure:"smtp-port"`
+	SMTPUser           string `gcfg:"smtp-user" mapstructure:"smtp-user"`
+	SMTPPassword       string `gcfg:"smtp-password" mapstructure:"smtp-password"`
+	EmailTo            string `gcfg:"email-to" mapstructure:"email-to"`
+	EmailFrom          string `gcfg:"email-from" mapstructure:"email-from"`
+	MailOnlyOnError    bool   `gcfg:"mail-only-on-error" mapstructure:"mail-only-on-error"`
 	InsecureSkipVerify bool   `gcfg:"insecure-skip-verify" mapstructure:"insecure-skip-verify"`
 }
 
@@ -92,13 +92,13 @@ func (m *Mail) sendMail(ctx *core.Context) error {
 	}))
 
 	d := gomail.NewPlainDialer(m.SMTPHost, m.SMTPPort, m.SMTPUser, m.SMTPPassword)
-	if err := d.DialAndSend(msg); err != nil {
-		return err
-	}
-
 	// InsecureSkipVerify is used to skip the certificate verification
 	if m.InsecureSkipVerify == true {
 		d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	if err := d.DialAndSend(msg); err != nil {
+		return err
 	}
 
 	return nil

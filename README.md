@@ -177,6 +177,7 @@ docker run -it --rm \
 - `email-to` - mail address of the receiver of the mail.
 - `email-from` - mail address of the sender of the mail.
 - `mail-only-on-error` - only send a mail if the execution was not successful.
+- `insecure-skip-verify` - ignore certificate checks on SMTP host. (+1.0.2 only!)
 
 - `save-folder` - directory in which the reports shall be written.
 - `save-only-on-error` - only save a report if the execution was not successful.
