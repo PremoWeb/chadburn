@@ -2,10 +2,10 @@ name: Testing Status
 on:
   push:
     branches:
-      - main
+      - summer2022-rebuild
   pull_request:
     branches:
-      - main
+      - summer2022-rebuild
 jobs:
   test:
     strategy:

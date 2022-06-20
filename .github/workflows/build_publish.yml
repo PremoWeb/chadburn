@@ -6,7 +6,7 @@ on:
     tags:
       - v*
     branches:
-      - main
+      - summer2022-rebuild
 
 jobs:
   docker:
