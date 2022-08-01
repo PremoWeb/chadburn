@@ -111,7 +111,7 @@ services:
     image: premoweb/chadburn:latest
     depends_on:
       - nginx
-    command: daemon --docker
+    command: daemon
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
