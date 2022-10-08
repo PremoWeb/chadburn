@@ -1,16 +1,22 @@
 package cli
 
 import (
+	"context"
 	"os"
 	"os/signal"
 	"syscall"
+	"sync"
+	"net/http"
 
 	"github.com/PremoWeb/Chadburn/core"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // DaemonCommand daemon process
 type DaemonCommand struct {
 	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chadburn.conf"`
+	Metrics    bool `long:"metrics" description:"Enable Prometheus compatible metrics endpoint"`
+	MetricsAddr string `long:"listen-address" description:"Metrics endpoint listen address." default:":8080"`
 	scheduler  *core.Scheduler
 	signals    chan os.Signal
 	done       chan bool
@@ -50,16 +56,44 @@ func (c *DaemonCommand) boot() (err error) {
 	return err
 }
 
+func startHttpServer(c *DaemonCommand, wg *sync.WaitGroup) *http.Server {
+	c.Logger.Debugf("Starting metrics on %s", c.MetricsAddr)
+	srv := &http.Server{Addr: c.MetricsAddr}
+	http.Handle("/metrics", promhttp.Handler())
+
+	go func() {
+		defer wg.Done()
+
+		// always returns error. ErrServerClosed on graceful close
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			// unexpected error. port in use?
+			c.Logger.Errorf("Metrics serving failed: %v", err)
+		}
+	}()
+
+	// returning reference so caller can call Shutdown()
+	return srv
+}
+
 func (c *DaemonCommand) start() error {
-	c.setSignals()
+	if c.Metrics {
+		httpServerExitDone := &sync.WaitGroup{}
+		httpServerExitDone.Add(1)
+		srv := startHttpServer(c, httpServerExitDone)
+		c.setSignals(srv)
+	} else {
+		c.setSignals(nil)
+	}
+
 	if err := c.scheduler.Start(); err != nil {
 		return err
 	}
 
+
 	return nil
 }
 
-func (c *DaemonCommand) setSignals() {
+func (c *DaemonCommand) setSignals (srv *http.Server) {
 	c.signals = make(chan os.Signal, 1)
 	c.done = make(chan bool, 1)
 
@@ -70,7 +104,11 @@ func (c *DaemonCommand) setSignals() {
 		c.Logger.Warningf(
 			"Signal received: %s, shutting down the process\n", sig,
 		)
-
+		if srv != nil {
+			if err := srv.Shutdown(context.TODO()); err != nil {
+				panic(err) // failure/timeout shutting down the server gracefully
+			}
+		}
 		c.done <- true
 	}()
 }

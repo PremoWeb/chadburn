@@ -20,7 +20,7 @@ require (
 require (
 	github.com/docker/docker v1.4.2-0.20191101170500-ac7306503d23
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	github.com/prometheus/client_golang v1.13.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
