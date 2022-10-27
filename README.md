@@ -85,7 +85,7 @@ docker run -it --rm \
 Labels format: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>`.
 This type of configuration supports all the capabilities provided by INI files.
 
-Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `chadburn.enabled=true` need to be present on the target container.
+Also, it is possible to configure `job-exec` and `job-run` by setting labels configurations on the target container. To do that, additional label `chadburn.enabled=true` need to be present on the target container.
 
 For example, we want `chadburn` to execute `uname -a` command in the existing container called `my_nginx`.
 To do that, we need to we need to start `my_nginx` container with next configurations:
