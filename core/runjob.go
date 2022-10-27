@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"time"
-
+    "reflect"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/gobs/args"
 )
@@ -37,6 +37,13 @@ type RunJob struct {
 
 func NewRunJob(c *docker.Client) *RunJob {
 	return &RunJob{Client: c}
+}
+
+// Returns a hash of all the job attributes. Used to detect changes
+func (j *RunJob) Hash() string {
+	var hash string
+	getHash(reflect.TypeOf(j).Elem(), reflect.ValueOf(j).Elem(), &hash)
+	return hash
 }
 
 func (j *RunJob) Run(ctx *Context) error {
