@@ -46,6 +46,7 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 			case jobType == jobExec: // only job exec can be provided on the non-service container
 				if _, ok := execJobs[jobName]; !ok {
 					execJobs[jobName] = make(map[string]interface{})
+					execJobs[jobName]["fromDockerLabel"] = true
 				}
 
 				setJobParam(execJobs[jobName], jopParam, v)
