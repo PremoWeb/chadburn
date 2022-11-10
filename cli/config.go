@@ -119,6 +119,11 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 
 	// Calculate the delta
 	for name, j := range c.ExecJobs {
+		// this prevents deletion of jobs that were added by reading a configuration file
+		if !j.FromDockerLabel {
+			continue
+		}
+
 		found := false
 		for newJobsName, newJob := range parsedLabelConfig.ExecJobs {
 			// Check if the schedule has changed
@@ -178,6 +183,7 @@ type ExecJobConfig struct {
 	middlewares.SaveConfig    `mapstructure:",squash"`
 	middlewares.MailConfig    `mapstructure:",squash"`
 	middlewares.GotifyConfig  `mapstructure:",squash"`
+	FromDockerLabel bool `mapstructure:"fromDockerLabel"`
 }
 
 func (c *ExecJobConfig) buildMiddlewares() {

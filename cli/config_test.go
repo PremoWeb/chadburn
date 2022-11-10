@@ -190,17 +190,25 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 			},
 			ExpectedConfig: Config{
 				ExecJobs: map[string]*ExecJobConfig{
-					"job1": &ExecJobConfig{ExecJob: core.ExecJob{BareJob: core.BareJob{
-						Schedule: "schedule1",
-						Command:  "command1",
-					}}},
-					"job2": &ExecJobConfig{ExecJob: core.ExecJob{
-						BareJob: core.BareJob{
-							Schedule: "schedule2",
-							Command:  "command2",
+					"job1": &ExecJobConfig{
+						ExecJob: core.ExecJob{
+							BareJob: core.BareJob{
+								Schedule: "schedule1",
+								Command:  "command1",
+							},
 						},
-						Container: "other",
-					}},
+						FromDockerLabel: true,
+					},
+					"job2": &ExecJobConfig{
+						ExecJob: core.ExecJob{
+							BareJob: core.BareJob{
+								Schedule: "schedule2",
+								Command:  "command2",
+							},
+							Container: "other",
+						},
+						FromDockerLabel: true,
+					},
 				},
 			},
 			Comment: "Exec jobs from non-service container, saves container name to be able to exect to",
@@ -221,7 +229,8 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 						Schedule: "schedule1",
 						Command:  "command1",
 					}},
-						OverlapConfig: middlewares.OverlapConfig{NoOverlap: true},
+						OverlapConfig:   middlewares.OverlapConfig{NoOverlap: true},
+						FromDockerLabel: true,
 					},
 				},
 			},
