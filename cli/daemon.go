@@ -2,11 +2,11 @@ package cli
 
 import (
 	"context"
+	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
 	"sync"
-	"net/http"
+	"syscall"
 
 	"github.com/PremoWeb/Chadburn/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -14,13 +14,14 @@ import (
 
 // DaemonCommand daemon process
 type DaemonCommand struct {
-	ConfigFile string `long:"config" description:"configuration file" default:"/etc/chadburn.conf"`
-	Metrics    bool `long:"metrics" description:"Enable Prometheus compatible metrics endpoint"`
-	MetricsAddr string `long:"listen-address" description:"Metrics endpoint listen address." default:":8080"`
-	scheduler  *core.Scheduler
-	signals    chan os.Signal
-	done       chan bool
-	Logger     core.Logger
+	ConfigFile    string `long:"config" description:"configuration file" default:"/etc/chadburn.conf"`
+	Metrics       bool   `long:"metrics" description:"Enable Prometheus compatible metrics endpoint"`
+	MetricsAddr   string `long:"listen-address" description:"Metrics endpoint listen address." default:":8080"`
+	DisableDocker bool   `long:"disable-docker" description:"Disable docker integration. All job kinds except 'job-local' will be ignored"`
+	scheduler     *core.Scheduler
+	signals       chan os.Signal
+	done          chan bool
+	Logger        core.Logger
 }
 
 // Execute runs the daemon
@@ -47,7 +48,7 @@ func (c *DaemonCommand) boot() (err error) {
 		c.Logger.Debugf("Config file: %v not found", c.ConfigFile)
 	}
 
-	err = config.InitializeApp()
+	err = config.InitializeApp(c.DisableDocker)
 	if err != nil {
 		c.Logger.Criticalf("Can't start the app: %v", err)
 	}
@@ -89,11 +90,10 @@ func (c *DaemonCommand) start() error {
 		return err
 	}
 
-
 	return nil
 }
 
-func (c *DaemonCommand) setSignals (srv *http.Server) {
+func (c *DaemonCommand) setSignals(srv *http.Server) {
 	c.signals = make(chan os.Signal, 1)
 	c.done = make(chan bool, 1)
 
