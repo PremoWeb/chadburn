@@ -61,43 +61,45 @@ func BuildFromString(config string, logger core.Logger) (*Config, error) {
 }
 
 // Call this only once at app init
-func (c *Config) InitializeApp() error {
+func (c *Config) InitializeApp(dd bool) error {
 	c.sh = core.NewScheduler(c.logger)
 	c.buildSchedulerMiddlewares(c.sh)
 
-	var err error
-	c.dockerHandler, err = NewDockerHandler(c, c.logger)
-	if err != nil {
-		return err
-	}
+	if !dd {
+		var err error
+		c.dockerHandler, err = NewDockerHandler(c, c.logger)
+		if err != nil {
+			return err
+		}
 
-	for name, j := range c.ExecJobs {
-		defaults.SetDefaults(j)
-		j.Client = c.dockerHandler.GetInternalDockerClient()
-		j.Name = name
-		j.buildMiddlewares()
-		c.sh.AddJob(j)
-	}
+		for name, j := range c.ExecJobs {
+			defaults.SetDefaults(j)
+			j.Client = c.dockerHandler.GetInternalDockerClient()
+			j.Name = name
+			j.buildMiddlewares()
+			c.sh.AddJob(j)
+		}
 
-	for name, j := range c.RunJobs {
-		defaults.SetDefaults(j)
-		j.Client = c.dockerHandler.GetInternalDockerClient()
-		j.Name = name
-		j.buildMiddlewares()
-		c.sh.AddJob(j)
+		for name, j := range c.RunJobs {
+			defaults.SetDefaults(j)
+			j.Client = c.dockerHandler.GetInternalDockerClient()
+			j.Name = name
+			j.buildMiddlewares()
+			c.sh.AddJob(j)
+		}
+
+		for name, j := range c.ServiceJobs {
+			defaults.SetDefaults(j)
+			j.Name = name
+			j.Client = c.dockerHandler.GetInternalDockerClient()
+			j.buildMiddlewares()
+			c.sh.AddJob(j)
+		}
 	}
 
 	for name, j := range c.LocalJobs {
 		defaults.SetDefaults(j)
 		j.Name = name
-		j.buildMiddlewares()
-		c.sh.AddJob(j)
-	}
-
-	for name, j := range c.ServiceJobs {
-		defaults.SetDefaults(j)
-		j.Name = name
-		j.Client = c.dockerHandler.GetInternalDockerClient()
 		j.buildMiddlewares()
 		c.sh.AddJob(j)
 	}
