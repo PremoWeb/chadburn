@@ -45,7 +45,7 @@ func (c *DaemonCommand) boot() (err error) {
 	// Always try to read the config file, as there are options such as globals or some tasks that can be specified there and not in docker
 	config, err := BuildFromFile(c.ConfigFile, c.Logger)
 	if err != nil {
-		c.Logger.Debugf("Config file: %v not found", c.ConfigFile)
+		c.Logger.Debugf("Cannot read config file: %q", err)
 	}
 
 	err = config.InitializeApp(c.DisableDocker)
