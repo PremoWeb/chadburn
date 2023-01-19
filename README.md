@@ -180,7 +180,7 @@ docker run -it --rm \
 - `insecure-skip-verify` - ignore certificate checks on SMTP host. (+1.0.2 only!)
 
 - `gotify-webhook` - URL of the gotify webhook. (format: `https://GOTIFY_URL/message?token=TOKEN`)
-- `gotify-only-on-erroy` - only send a gotify message if the execution was not succesful.
+- `gotify-only-on-error` - only send a gotify message if the execution was not succesful.
 - `gotify-priority` - priority of the gotify message
 
 - `save-folder` - directory in which the reports shall be written.
