@@ -1,15 +1,3 @@
-THIS PROJECT IS TEMPERARILY OR PERMINANTLY ARCHIVED.
-
-I am living in poverty while I try and rebuild a business from scratch, but this time on my own and without anyone else involved. I foolishly entrusted a business arrangement for ~15 years where I was supposed to only focus on software and websites and the other person would market and handle finances. My own personal life was always in turmoil because living in poverty and uncertainty really doens't make it easy. For a long time, I was stuck in this arrangement because breaking away from this arrangement meant losing any semblense of income. I literally had no time for myself, no ability to visit friends or family. Today is Christmas and I should be spending it with family. However, I am without a working vehicle and live too far away to take a bus, etc.
-
-I have been living off less than $500/mo for many years and only surviving off the kindness of my friends who don't charge me rent. In 2021 I realized I need to break from the stranglehold of this business arrangement and have started investing my time back into myself of a continually failing arrangement. At this time, my bills are just over $300 and I am barely covering that each month. This doesn't even cover my personal needs and I have been sacrificing so much. To make matters worse, I lost everything in a fire in 2017 and I am still trying to recover from that.
-
-As much as really wanted to build Chadburn 2.x, every attempt has been disrupted by the pressures on me to try and survive financially, meaning putting out small fires as they come up. This has pretty much completely distracted me from focusing on Chadburn.
-
-Despite the extreme hardships, I am pushing forward. Once my own financial struggles are resolved, I can put real effort into this project. Until then, this project is temperarily or perminantly archived.
-
-I'm very sorry. I know this is unprofessional to post this here, but I feel I own an explaination to so many who depend on this software. If you want to PayPal me, the email is nick@premoweb.com.
-
 # Chadburn - a job scheduler
 [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)
 
