@@ -12,7 +12,6 @@ Chadburn is a new project based on the previous and continuous work incorporated
 - Support INI and docker labels at the same time. The configs will simply be merged.
 - Do not require a restart in order to pick up new or remove tasks.
 
-PremoWeb will be responsive to addressing issues raised in this project and will also be monitoring issues in the original Ofelia source code repository and applying changes that should be reflected in Chadburn.
 ### Why Chadburn?
 
 It has been a long time since [`cron`](https://en.wikipedia.org/wiki/Cron) was released by AT&T Bell Laboratories in March 1975, almost a half centry ago! The world has changed a lot and especially since the `Docker` revolution.
