@@ -20,6 +20,20 @@ func buildLogger() core.Logger {
 	// Set the backends to be used.
 	logging.SetBackend(stdout)
 	logging.SetFormatter(logging.MustStringFormatter(logFormat))
+
+	// set default level
+	logging.SetLevel(logging.INFO, "chadburn")
+
+	level_string, got_env_var := os.LookupEnv("CHADBURN_LOG_LEVEL")
+	if got_env_var {
+		level, err := logging.LogLevel(level_string)
+		if err == nil {
+			logging.SetLevel(level, "chadburn")
+		} else {
+			fmt.Println("WARNING: could not interpret", level_string, "as log level: ", err)
+		}
+	}
+
 	return logging.MustGetLogger("chadburn")
 }
 
