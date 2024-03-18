@@ -119,6 +119,8 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 	var parsedLabelConfig Config
 	parsedLabelConfig.buildFromDockerLabels(labels)
 
+	// -- Refresh ExecJobs --
+
 	// Calculate the delta
 	for name, j := range c.ExecJobs {
 		// this prevents deletion of jobs that were added by reading a configuration file
@@ -172,6 +174,62 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 			newJob.buildMiddlewares()
 			c.sh.AddJob(newJob)
 			c.ExecJobs[newJobsName] = newJob
+		}
+	}
+
+	// -- Refresh LocalJobs --
+
+	// Calculate the delta
+	for name, j := range c.LocalJobs {
+		// this prevents deletion of jobs that were added by reading a configuration file
+		if !j.FromDockerLabel {
+			continue
+		}
+
+		found := false
+		for newJobsName, newJob := range parsedLabelConfig.LocalJobs {
+			// Check if the schedule has changed
+			if name == newJobsName {
+				found = true
+				// There is a slight race condition were a job can be canceled / restarted with different params
+				// so, lets take care of it by simply restarting
+				// For the hash to work properly, we must fill the fields before calling it
+				defaults.SetDefaults(newJob)
+				newJob.Name = newJobsName
+				if newJob.Hash() != j.Hash() {
+					// Remove from the scheduler
+					c.sh.RemoveJob(j)
+					// Add the job back to the scheduler
+					newJob.buildMiddlewares()
+					c.sh.AddJob(newJob)
+					// Update the job config
+					c.LocalJobs[name] = newJob
+				}
+				break
+			}
+		}
+		if !found {
+			// Remove the job
+			c.sh.RemoveJob(j)
+			delete(c.LocalJobs, name)
+		}
+	}
+
+	// Check for aditions
+	for newJobsName, newJob := range parsedLabelConfig.LocalJobs {
+		found := false
+		for name := range c.LocalJobs {
+			if name == newJobsName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			defaults.SetDefaults(newJob)
+			newJob.Name = newJobsName
+			newJob.buildMiddlewares()
+			c.sh.AddJob(newJob)
+			c.LocalJobs[newJobsName] = newJob
 		}
 	}
 
@@ -231,6 +289,7 @@ type LocalJobConfig struct {
 	middlewares.SaveConfig    `mapstructure:",squash"`
 	middlewares.MailConfig    `mapstructure:",squash"`
 	middlewares.GotifyConfig  `mapstructure:",squash"`
+	FromDockerLabel bool `mapstructure:"fromDockerLabel"`
 }
 
 func (c *LocalJobConfig) buildMiddlewares() {

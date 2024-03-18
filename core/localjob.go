@@ -2,6 +2,7 @@ package core
 
 import (
 	"os/exec"
+	"reflect"
 
 	"github.com/gobs/args"
 )
@@ -14,6 +15,13 @@ type LocalJob struct {
 
 func NewLocalJob() *LocalJob {
 	return &LocalJob{}
+}
+
+// Returns a hash of all the job attributes. Used to detect changes
+func (j *LocalJob) Hash() string {
+	var hash string
+	getHash(reflect.TypeOf(j).Elem(), reflect.ValueOf(j).Elem(), &hash)
+	return hash
 }
 
 func (j *LocalJob) Run(ctx *Context) error {
