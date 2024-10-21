@@ -1,11 +1,9 @@
-version: "3.8"
-
 services:
   api:
     image: nginx:latest
     container_name: api
     labels:
-        chadburn.enabled: "true"
+      chadburn.enabled: "true"  # This line is already correct
     depends_on:
       - scheduler
     

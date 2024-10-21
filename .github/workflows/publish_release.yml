@@ -1,0 +1,98 @@
+name: Publish and Release
+
+on:
+  # Triggers on tag creation and main branch pushes
+  create:
+    tags:
+      - v*
+    branches:
+      - main
+  # Triggers on release creation
+  release:
+    types: [created]
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # Step 2: Prepare Docker Image Tags
+      - name: Prepare Docker Image
+        id: prep
+        run: |
+          DOCKER_IMAGE=premoweb/${GITHUB_REPOSITORY#*/}
+          SHORTREF=${GITHUB_SHA::8}
+          VERSION=${GITHUB_REF#refs/tags/v}
+          BRANCH_NAME=${GITHUB_REF#refs/heads/} # Extract branch name
+
+          # Add tags for Docker Hub Container registry
+          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
+
+          # Add tags for Github Container Registry
+          DOCKER_IMAGE=ghcr.io/premoweb/${GITHUB_REPOSITORY#*/}
+          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
+
+          # Set output parameters.
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "docker_image=${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
+
+      # Step 3: Set up QEMU for cross-platform builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2 # Versioning added
+        with:
+          platforms: all
+
+      # Step 4: Set up Docker Buildx for multi-arch builds
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2 # Versioning added
+
+      # Step 5: Login to DockerHub
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PAT }}
+
+      # Step 6: Login to GitHub Container Registry
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 7: Build and Push Docker Images
+      - name: Build and Push Docker Images
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v7,linux/arm/v6
+          push: true
+          tags: ${{ steps.prep.outputs.tags }}
+
+      # Step 8: Set up Go environment for building binaries
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      # Step 9: Build Go binary for linux/amd64 (add more builds if needed)
+      - name: Build Go Binary for linux/amd64
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o myapp-linux-amd64
+
+      # Step 10: Attach Built Binary to Release
+      - name: Attach Go Binary to GitHub Release
+        uses: wangyoucao577/go-release-action@v1.32
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            myapp-linux-amd64
