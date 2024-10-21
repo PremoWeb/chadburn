@@ -1,6 +1,6 @@
-FROM golang:1.17.1-alpine AS builder
+FROM golang:1.23.2-alpine AS builder
 
-LABEL org.opencontainers.image.description Cron alternative for Docker Swarm enviornments.
+LABEL org.opencontainers.image.description="Cron alternative for Docker Swarm enviornments."
 
 RUN apk --no-cache add gcc musl-dev
 
@@ -9,7 +9,7 @@ COPY . ${GOPATH}/src/github.com/PremoWeb/Chadburn
 
 RUN go build -o /go/bin/chadburn .
 
-FROM alpine:3.15.0
+FROM alpine:3.20.3
 
 RUN apk --update --no-cache add ca-certificates tzdata
 

@@ -1,0 +1,47 @@
+name: Testing Status
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        go-version: [1.17.x, 1.18.x, 1.19.x]
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      # Step 1: Install Go
+      - name: Install Go
+        uses: actions/setup-go@v3  # Updated to v3
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      # Step 2: Cache Go Modules
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: go-mod-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-mod-${{ matrix.go-version }}
+
+      # Step 3: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3  # Updated to v3
+
+      # Step 4: Test
+      - name: Run Tests
+        run: go test ./...
+
+      # Step 5: Conditional Summary (optional, to show test results)
+      - name: Test Summary
+        if: failure()
+        run: echo "Some tests failed on ${{ matrix.platform }} with Go ${{ matrix.go-version }}"

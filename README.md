@@ -1,52 +1,66 @@
-# Chadburn - a job scheduler
+# Chadburn: A Modern Job Scheduler
+
 [![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)
 
-**Chadburn** is a modern and low footprint job scheduler for __docker__ environments, written in Go. Chadburn aims to be a replacement for the old fashioned [cron](https://en.wikipedia.org/wiki/Cron).
+**Chadburn** is a lightweight job scheduler designed for __Docker__ environments, developed in Go. It serves as a contemporary replacement for the traditional [cron](https://en.wikipedia.org/wiki/Cron).
 
-*** SPECIAL NOTE ***
+---
 
-Chadburn is a new project based on the previous and continuous work incorporated into Ofelia and a fork of Ofelia provided by @rdelcorro, of which Chadburn was forked from. This project was started as a result of needing a version of Ofelia that incorporated the following fixes:
+### Special Note
 
-- Update tasks if docker containers are started, stopped, restarted, or changed
-- Do not require a dummy task on the Chadburn container just to use Chadburn.
-- Support INI and docker labels at the same time. The configs will simply be merged.
-- Do not require a restart in order to pick up new or remove tasks.
+Chadburn is a project built upon the ongoing development from Ofelia, a fork initiated by @rdelcorro. This project was created to address specific needs, including:
 
-### Why Chadburn?
+- Automatic task updates when Docker containers are started, stopped, restarted, or modified.
+- Elimination of the need for a dummy task in the Chadburn container.
+- Concurrent support for both INI files and Docker labels, allowing configurations to be merged seamlessly.
+- The ability to recognize new tasks or remove existing ones without needing a restart.
 
-It has been a long time since [`cron`](https://en.wikipedia.org/wiki/Cron) was released by AT&T Bell Laboratories in March 1975, almost a half centry ago! The world has changed a lot and especially since the `Docker` revolution.
-**Vixie's cron** works great but it's not extensible and it's hard to debug when something goes wrong.
+---
 
-Many solutions are available: ready to go containerized `crons`, wrappers for your commands, etc. but in the end simple tasks become complex.
+### Why Choose Chadburn?
 
-### How?
+Since the release of [`cron`](https://en.wikipedia.org/wiki/Cron) by AT&T Bell Laboratories in March 1975, much has changed in the computing landscape, especially with the rise of Docker. While **Vixie’s cron** remains functional, it lacks extensibility and can be challenging to debug when issues arise.
 
-The main feature of **Chadburn** is the ability to execute commands directly on Docker containers. Using Docker's API Chadburn emulates the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), being able to run a command inside of a running container. Also you can run the command in a new container destroying it at the end of the execution.
+Various solutions exist, including containerized cron implementations and command wrappers, but these often complicate straightforward tasks.
+
+---
+
+### Key Features
+
+Chadburn's primary feature is its ability to execute commands directly within Docker containers. Utilizing Docker's API, Chadburn mimics the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), enabling commands to run inside active containers. Additionally, it allows for command execution in new containers, which are destroyed after use.
+
+---
 
 ## Configuration
 
-A wiki is being written to document how to use Chadburn. Caprover users can use a One Click App (coming soon) to deploy and implement scheduled jobs using Service Label Overrides.
+A comprehensive wiki is underway to detail Chadburn's usage. Caprover users will soon have access to a One Click App for deploying and managing scheduled jobs via Service Label Overrides.
 
-For everyone else, here's the general approach to use Chadburn:
+For others, here’s a quick guide to get started with Chadburn:
 
-### Jobs
+### Job Scheduling
 
-[Scheduling format](https://godoc.org/github.com/robfig/cron) is the same as the Go implementation of `cron`. E.g. `@every 10s` or `0 0 1 * * *` (every night at 1 AM).
+Chadburn uses a scheduling format consistent with the Go implementation of `cron`. Examples include `@every 10s` or `0 0 1 * * *` (which runs every night at 1 AM).
 
-**Note**: the format starts with seconds, instead of minutes. (UPDATE: It appears this is not actually the case in the most recent version of Chadburn. PremoWeb is earmarking some serious development time in the very near future to overhaul this project to address the many issues that people have reported in both Ofelia and the Chadburn fork. -- Please accept our appologies as we can't get to the development right away!)
+**Note**: The scheduling format previously included seconds; however, this has been updated in the latest version of Chadburn. Significant development is planned to resolve various issues reported with both Ofelia and Chadburn.
 
-you can configure four different kind of jobs:
+You can configure four types of jobs:
 
-- `job-exec`: this job is executed inside of a running container.
-- `job-run`: runs a command inside of a new container, using a specific image.
-- `job-local`: runs the command inside of the host running Chadburn.
-- `job-service-run`: runs the command inside a new "run-once" service, for running inside a swarm
+- `job-exec`: Executes a command inside a running container.
+- `job-run`: Runs a command in a new container using a specified image.
+- `job-local`: Executes a command on the host running Chadburn.
+- `job-service-run`: Runs a command inside a new "run-once" service for swarm environments.
 
-See [Jobs reference documentation](docs/jobs.md) for all available parameters.
+For detailed parameters, refer to the [Jobs reference documentation](docs/jobs.md).
 
-#### INI-style config
+#### INI Configuration
 
-Run with `chadburn daemon --config=/path/to/config.ini`
+To run Chadburn with an INI file, use the command:
+
+```bash
+chadburn daemon --config=/path/to/config.ini
+```
+
+Here’s a sample INI configuration:
 
 ```ini
 [job-exec "job-executed-on-running-container"]
@@ -63,45 +77,38 @@ command = touch /tmp/example
 schedule = @hourly
 command = touch /tmp/example
 
-
 [job-service-run "service-executed-on-new-container"]
 schedule = 0,20,40 * * * *
 image = ubuntu
 network = swarm_network
-command =  touch /tmp/example
+command = touch /tmp/example
 ```
 
-#### Docker labels configurations
+#### Docker Label Configurations
 
-In order to use this type of configurations, Chadburn need access to docker socket.
+For Docker label configurations, Chadburn needs access to the Docker socket:
 
-```sh
+```bash
 docker run -it --rm \
     -v /var/run/docker.sock:/var/run/docker.sock:ro \
-        premoweb/chadburn:latest daemon
+    premoweb/chadburn:latest daemon
 ```
 
-Labels format: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>`.
-This type of configuration supports all the capabilities provided by INI files.
+The labels format is: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>`. This configuration method supports all capabilities provided by INI files.
 
-Also, it is possible to configure `job-exec` by setting labels configurations on the target container. To do that, additional label `chadburn.enabled=true` need to be present on the target container.
+To execute `job-exec`, the target container must have the label `chadburn.enabled=true`.
 
-For example, we want `chadburn` to execute `uname -a` command in the existing container called `my_nginx`.
-To do that, we need to we need to start `my_nginx` container with next configurations:
+For example, to run the `uname -a` command in an existing container called `my_nginx`, start `my_nginx` with the following configurations:
 
-```sh
+```bash
 docker run -it --rm \
     --label chadburn.enabled=true \
     --label chadburn.job-exec.test-exec-job.schedule="@every 5s" \
     --label chadburn.job-exec.test-exec-job.command="uname -a" \
-        nginx
+    nginx
 ```
 
-Now if we start `chadburn` container with the command provided above, it will execute the task:
-
-- Exec  - `uname -a`
-
-Or with docker-compose:
+Alternatively, you can use Docker Compose:
 
 ```yaml
 version: "3"
@@ -122,25 +129,13 @@ services:
       chadburn.job-exec.datecron.command: "uname -a"
 ```
 
-#### Dynamic docker configuration
+#### Dynamic Docker Configuration
 
-You can start Chadburn in its own container or on the host itself, and it will magically pick up any container that starts, stops or is modified on the fly.
-In order to achieve this, you simply have to use docker containers with the labels described above and let Chadburn take care of the rest. 
+Chadburn can be run in its own container or directly on the host. It will automatically detect any containers that start, stop, or change, utilizing the labeled containers for dynamic task management.
 
-#### Hybrid configuration (INI files + Docker)
+#### Hybrid Configuration (INI + Docker)
 
-You can specify part of the configuration on the INI files, such as globals for the middlewares or even declare tasks in there but also merge them with docker.
-The docker labels will be parsed, added and removed on the fly but also, the file config can be used to execute tasks that are not possible using just docker labels 
-such as:
-
-- job-local
-- job-run
-
-**Use the INI file to:**
-
-- Configure the slack or other middleware integration
-- Configure any global setting
-- Create a job-run so it executes on a new container each time
+You can combine INI files and Docker labels to manage configurations. Use INI files for global settings or tasks that cannot be defined solely through labels, while Docker labels can be employed for dynamically managed tasks.
 
 ```ini
 [global]
@@ -152,56 +147,60 @@ image = ubuntu:latest
 command = touch /tmp/example
 ```
 
-**Use docker to:**
+Use Docker labels for dynamic jobs:
 
-```sh
+```bash
 docker run -it --rm \
     --label chadburn.enabled=true \
     --label chadburn.job-exec.test-exec-job.schedule="@every 5s" \
     --label chadburn.job-exec.test-exec-job.command="uname -a" \
-        nginx
+    nginx
 ```
 
 ### Logging
-**Chadburn** comes with three different logging drivers that can be configured in the `[global]` section:
-- `mail` to send mails
-- `save` to save structured execution reports to a directory
-- `slack` to send messages via a slack webhook
 
-#### Options
-- `smtp-host` - address of the SMTP server.
-- `smtp-port` - port number of the SMTP server.
-- `smtp-user` - user name used to connect to the SMTP server.
-- `smtp-password` - password used to connect to the SMTP server.
-- `email-to` - mail address of the receiver of the mail.
-- `email-from` - mail address of the sender of the mail.
-- `mail-only-on-error` - only send a mail if the execution was not successful.
-- `insecure-skip-verify` - ignore certificate checks on SMTP host. (+1.0.2 only!)
+Chadburn offers three logging drivers that can be configured in the `[global]` section:
 
-- `gotify-webhook` - URL of the gotify webhook. (format: `https://GOTIFY_URL/message?token=TOKEN`)
-- `gotify-only-on-error` - only send a gotify message if the execution was not succesful.
-- `gotify-priority` - priority of the gotify message
+- `mail` to send notifications via email.
+- `save` to save structured execution reports in a specified directory.
+- `slack` to send messages through a Slack webhook.
 
-- `save-folder` - directory in which the reports shall be written.
-- `save-only-on-error` - only save a report if the execution was not successful.
+#### Logging Options
 
-- `slack-webhook` - URL of the slack webhook.
-- `slack-only-on-error` - only send a slack message if the execution was not successful.
+- `smtp-host`, `smtp-port`, `smtp-user`, `smtp-password`: SMTP server settings for email notifications.
+- `email-to`, `email-from`: Sender and receiver email addresses.
+- `mail-only-on-error`: Send email notifications only for failed executions.
+- `insecure-skip-verify`: Skip SSL verification for SMTP (available in version 1.0.2+).
 
-### Overlap
-**Chadburn** can prevent that a job is run twice in parallel (e.g. if the first execution didn't complete before a second execution was scheduled. If a job has the option `no-overlap` set, it will not be run concurrently. 
+- `gotify-webhook`: URL for Gotify notifications.
+- `gotify-only-on-error`: Send Gotify messages only for failures.
+- `gotify-priority`: Priority level for Gotify messages.
+
+- `save-folder`: Directory for storing execution reports.
+- `save-only-on-error`: Save reports only for failed executions.
+
+- `slack-webhook`: URL for Slack notifications.
+- `slack-only-on-error`: Send Slack messages only for failures.
+
+### Overlap Prevention
+
+Chadburn prevents jobs from running concurrently if a previous execution has not yet completed. If a job has the `no-overlap` option enabled, it will not run multiple instances simultaneously.
+
+---
 
 ## Installation
 
-The easiest way to deploy **Chadburn** is using *Docker*. See examples above.
+The simplest way to deploy **Chadburn** is using Docker, as outlined above.
 
-If don't want to run **Chadburn** using our *Docker* image you can download a binary from [releases](https://github.com/PremoWeb/Chadburn/releases) page.
+If you prefer not to use the provided Docker image, you can download a binary from the [releases](https://github.com/PremoWeb/Chadburn/releases) page.
 
-## A special note for Caprover PaaS users:
+---
 
-Chadburn has been added as a One Click App in the official Caprover app repository. Once deployed, you can setup the scheduler for each of your apps using the Service Override section of your app's config like so:
+### Special Note for Caprover PaaS Users
 
-```
+Chadburn is available as a One Click App in the official Caprover app repository. After deployment, you can configure the scheduler for your apps using the Service Override section in your app’s configuration:
+
+```yaml
 TaskTemplate:
   ContainerSpec:
     Labels:
@@ -209,8 +208,15 @@ TaskTemplate:
       chadburn.job-exec.rotate-puzzles.command: "php /var/www/rotate_games.php"
       chadburn.job-exec.rotate-puzzles.schedule: "@every 10m"
 ```
-### Thank You to team Ofelia and it's contributors.
 
-A special thanks to [@rdelcorro](https://github.com/rdelcorro) for the work in fixing the issues referenced in this pull request https://github.com/mcuadros/ofelia/pull/137, despite this pull request having been ignored for 30 days. PremoWeb aims to ensure that open software is continously improve and will remain responsive to raised issues and pull requests.
+---
 
-Much thanks to the original work that went into Ofelia by it's author and contributors.
+### Acknowledgments
+
+We extend our gratitude to the Ofelia team and its contributors, particularly [@rdelcorro](https://github.com/rdelcorro) for addressing the issues highlighted in [this pull request](https://github.com/mcuadros/ofelia/pull/137).
+
+Thank you to the original authors and contributors of Ofelia for their foundational work.
+
+--- 
+
+Feel free to modify or expand on any sections as needed!
