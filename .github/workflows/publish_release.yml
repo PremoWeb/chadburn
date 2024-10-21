@@ -27,13 +27,14 @@ jobs:
           DOCKER_IMAGE=premoweb/${GITHUB_REPOSITORY#*/}
           SHORTREF=${GITHUB_SHA::8}
           VERSION=${GITHUB_REF#refs/tags/v}
+          BRANCH_NAME=${GITHUB_REF#refs/heads/} # Extract branch name
 
           # Add tags for Docker Hub Container registry
-          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
+          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
 
           # Add tags for Github Container Registry
           DOCKER_IMAGE=ghcr.io/premoweb/${GITHUB_REPOSITORY#*/}
-          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
+          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
 
           # Set output parameters.
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
@@ -41,14 +42,14 @@ jobs:
 
       # Step 3: Set up QEMU for cross-platform builds
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2  # Versioning added
+        uses: docker/setup-qemu-action@v2 # Versioning added
         with:
           platforms: all
 
       # Step 4: Set up Docker Buildx for multi-arch builds
       - name: Set up Docker Buildx
         id: buildx
-        uses: docker/setup-buildx-action@v2  # Versioning added
+        uses: docker/setup-buildx-action@v2 # Versioning added
 
       # Step 5: Login to DockerHub
       - name: Login to DockerHub
