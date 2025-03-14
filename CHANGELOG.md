@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/PremoWeb/chadburn/compare/v1.2.0...v1.2.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* add note about semantic versioning to README ([ae96d78](https://github.com/PremoWeb/chadburn/commit/ae96d7810939d1bb5fb26f1a6921ddd213cd5fac))
+
 # [1.2.0](https://github.com/PremoWeb/chadburn/compare/v1.1.0...v1.2.0) (2025-03-14)
 
 
