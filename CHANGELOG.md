@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/PremoWeb/chadburn/compare/v1.2.1...v1.3.0) (2025-03-14)
+
+
+### Features
+
+* implement Git hooks for commit message validation ([2ed31b8](https://github.com/PremoWeb/chadburn/commit/2ed31b8a15c5e8085ae2e6f6c069bd89086c25d6))
+
 ## [1.2.1](https://github.com/PremoWeb/chadburn/compare/v1.2.0...v1.2.1) (2025-03-14)
 
 
