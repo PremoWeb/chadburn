@@ -81,11 +81,15 @@ jobs:
       # Step 9: Build Go binary for linux/amd64 (add more builds if needed)
       - name: Build Go Binary for linux/amd64
         run: |
-          GOOS=linux GOARCH=amd64 go build -o myapp-linux-amd64
+          GOOS=linux GOARCH=amd64 go build -o chadburn-linux-amd64
 
       # Step 10: Attach Built Binary to Release
-      - name: Attach Built Binary to GitHub Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Attach Go Binary to GitHub Release
+        uses: wangyoucao577/go-release-action@v1.32
         with:
-          files: myapp-linux-amd64
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: linux
+          goarch: amd64
+          binary_name: "chadburn"
+          asset_name: "chadburn-linux-amd64"
+          extra_files: LICENSE README.md
