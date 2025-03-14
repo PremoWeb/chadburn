@@ -1,3 +1,11 @@
+## [1.3.3](https://github.com/PremoWeb/chadburn/compare/v1.3.2...v1.3.3) (2025-03-14)
+
+
+### Bug Fixes
+
+* update Dockerfile to use Go 1.19 instead of Go 1.23.2 ([82e4f28](https://github.com/PremoWeb/chadburn/commit/82e4f28b90a6c56078ae0e7a0894305b69714b43))
+* update Go version to 1.23 ([09ba910](https://github.com/PremoWeb/chadburn/commit/09ba9104a83d10c6bb8689ae7aee4abc46bfc379))
+
 ## [1.3.2](https://github.com/PremoWeb/chadburn/compare/v1.3.1...v1.3.2) (2025-03-14)
 
 
