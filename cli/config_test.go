@@ -121,19 +121,6 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 			Labels: map[string]map[string]string{
 				"some": map[string]string{
 					requiredLabel: "true",
-					labelPrefix + "." + jobLocal + ".job1.schedule": "everyday! yey!",
-					labelPrefix + "." + jobLocal + ".job1.command":  "rm -rf *test*",
-					labelPrefix + "." + jobLocal + ".job2.schedule": "everynanosecond! yey!",
-					labelPrefix + "." + jobLocal + ".job2.command":  "ls -al *test*",
-				},
-			},
-			ExpectedConfig: Config{},
-			Comment:        "No service label, no 'local' jobs",
-		},
-		{
-			Labels: map[string]map[string]string{
-				"some": map[string]string{
-					requiredLabel: "true",
 					serviceLabel:  "true",
 					labelPrefix + "." + jobLocal + ".job1.schedule":      "schedule1",
 					labelPrefix + "." + jobLocal + ".job1.command":       "command1",
@@ -154,10 +141,15 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 			},
 			ExpectedConfig: Config{
 				LocalJobs: map[string]*LocalJobConfig{
-					"job1": &LocalJobConfig{LocalJob: core.LocalJob{BareJob: core.BareJob{
-						Schedule: "schedule1",
-						Command:  "command1",
-					}}},
+					"job1": &LocalJobConfig{
+						LocalJob: core.LocalJob{
+							BareJob: core.BareJob{
+								Schedule: "schedule1",
+								Command:  "command1",
+							},
+						},
+						FromDockerLabel: false,
+					},
 				},
 				RunJobs: map[string]*RunJobConfig{
 					"job2": &RunJobConfig{RunJob: core.RunJob{BareJob: core.BareJob{
@@ -268,6 +260,41 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 				},
 			},
 			Comment: "Test run job with volumes",
+		},
+		{
+			Labels: map[string]map[string]string{
+				"some": map[string]string{
+					requiredLabel: "true",
+					serviceLabel:  "true",
+					labelPrefix + "." + jobLocal + ".job1.schedule": "everyday! yey!",
+					labelPrefix + "." + jobLocal + ".job1.command":  "rm -rf *test*",
+					labelPrefix + "." + jobLocal + ".job2.schedule": "everynanosecond! yey!",
+					labelPrefix + "." + jobLocal + ".job2.command":  "ls -al *test*",
+				},
+			},
+			ExpectedConfig: Config{
+				LocalJobs: map[string]*LocalJobConfig{
+					"job1": &LocalJobConfig{
+						LocalJob: core.LocalJob{
+							BareJob: core.BareJob{
+								Schedule: "everyday! yey!",
+								Command:  "rm -rf *test*",
+							},
+						},
+						FromDockerLabel: false,
+					},
+					"job2": &LocalJobConfig{
+						LocalJob: core.LocalJob{
+							BareJob: core.BareJob{
+								Schedule: "everynanosecond! yey!",
+								Command:  "ls -al *test*",
+							},
+						},
+						FromDockerLabel: false,
+					},
+				},
+			},
+			Comment: "No service label, no 'local' jobs",
 		},
 	}
 

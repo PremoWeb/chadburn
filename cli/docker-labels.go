@@ -59,7 +59,7 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 			case jobType == jobLocal && isServiceContainer:
 				if _, ok := localJobs[jobName]; !ok {
 					localJobs[jobName] = make(map[string]interface{})
-					localJobs[jobName]["fromDockerLabel"] = true
+					localJobs[jobName]["fromDockerLabel"] = false
 				}
 				setJobParam(localJobs[jobName], jopParam, v)
 			case jobType == jobServiceRun && isServiceContainer:

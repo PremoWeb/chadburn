@@ -243,7 +243,7 @@ type ExecJobConfig struct {
 	middlewares.SaveConfig    `mapstructure:",squash"`
 	middlewares.MailConfig    `mapstructure:",squash"`
 	middlewares.GotifyConfig  `mapstructure:",squash"`
-	FromDockerLabel bool `mapstructure:"fromDockerLabel"`
+	FromDockerLabel           bool `mapstructure:"fromDockerLabel"`
 }
 
 func (c *ExecJobConfig) buildMiddlewares() {
@@ -289,7 +289,7 @@ type LocalJobConfig struct {
 	middlewares.SaveConfig    `mapstructure:",squash"`
 	middlewares.MailConfig    `mapstructure:",squash"`
 	middlewares.GotifyConfig  `mapstructure:",squash"`
-	FromDockerLabel bool `mapstructure:"fromDockerLabel"`
+	FromDockerLabel           bool `mapstructure:"fromDockerLabel" default:"false"`
 }
 
 func (c *LocalJobConfig) buildMiddlewares() {
