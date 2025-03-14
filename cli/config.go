@@ -13,6 +13,7 @@ const (
 	jobRun        = "job-run"
 	jobServiceRun = "job-service-run"
 	jobLocal      = "job-local"
+	jobLifecycle  = "job-lifecycle"
 )
 
 // Config contains the configuration
@@ -23,10 +24,11 @@ type Config struct {
 		middlewares.MailConfig   `mapstructure:",squash"`
 		middlewares.GotifyConfig `mapstructure:",squash"`
 	}
-	ExecJobs      map[string]*ExecJobConfig    `gcfg:"job-exec" mapstructure:"job-exec,squash"`
-	RunJobs       map[string]*RunJobConfig     `gcfg:"job-run" mapstructure:"job-run,squash"`
-	ServiceJobs   map[string]*RunServiceConfig `gcfg:"job-service-run" mapstructure:"job-service-run,squash"`
-	LocalJobs     map[string]*LocalJobConfig   `gcfg:"job-local" mapstructure:"job-local,squash"`
+	ExecJobs      map[string]*ExecJobConfig      `gcfg:"job-exec" mapstructure:"job-exec,squash"`
+	RunJobs       map[string]*RunJobConfig       `gcfg:"job-run" mapstructure:"job-run,squash"`
+	ServiceJobs   map[string]*RunServiceConfig   `gcfg:"job-service-run" mapstructure:"job-service-run,squash"`
+	LocalJobs     map[string]*LocalJobConfig     `gcfg:"job-local" mapstructure:"job-local,squash"`
+	LifecycleJobs map[string]*LifecycleJobConfig `gcfg:"job-lifecycle" mapstructure:"job-lifecycle,squash"`
 	sh            *core.Scheduler
 	dockerHandler *DockerHandler
 	logger        core.Logger
@@ -39,6 +41,7 @@ func NewConfig(logger core.Logger) *Config {
 	c.RunJobs = make(map[string]*RunJobConfig)
 	c.ServiceJobs = make(map[string]*RunServiceConfig)
 	c.LocalJobs = make(map[string]*LocalJobConfig)
+	c.LifecycleJobs = make(map[string]*LifecycleJobConfig)
 	c.logger = logger
 	defaults.SetDefaults(c)
 	return c
@@ -95,6 +98,18 @@ func (c *Config) InitializeApp(dd bool) error {
 			j.buildMiddlewares()
 			c.sh.AddJob(j)
 		}
+
+		for name, j := range c.LifecycleJobs {
+			defaults.SetDefaults(j)
+			j.Client = c.dockerHandler.GetInternalDockerClient()
+			j.Name = name
+			j.buildMiddlewares()
+			// Lifecycle jobs are not added to the scheduler
+			// They will be triggered by Docker events
+		}
+
+		// Pass the lifecycle jobs to the DockerHandler
+		c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
 	}
 
 	for name, j := range c.LocalJobs {
@@ -233,6 +248,58 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 		}
 	}
 
+	// -- Refresh LifecycleJobs --
+
+	// Calculate the delta
+	for name, j := range c.LifecycleJobs {
+		// this prevents deletion of jobs that were added by reading a configuration file
+		if !j.FromDockerLabel {
+			continue
+		}
+
+		found := false
+		for newJobsName, newJob := range parsedLabelConfig.LifecycleJobs {
+			// Check if the job has changed
+			if name == newJobsName {
+				found = true
+				// For the hash to work properly, we must fill the fields before calling it
+				defaults.SetDefaults(newJob)
+				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+				newJob.Name = newJobsName
+				if newJob.Hash() != j.Hash() {
+					// Update the job config
+					newJob.buildMiddlewares()
+					c.LifecycleJobs[name] = newJob
+				}
+				break
+			}
+		}
+		if !found {
+			// Remove the job
+			delete(c.LifecycleJobs, name)
+		}
+	}
+
+	// Check for additions
+	for newJobsName, newJob := range parsedLabelConfig.LifecycleJobs {
+		found := false
+		for name := range c.LifecycleJobs {
+			if name == newJobsName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			defaults.SetDefaults(newJob)
+			newJob.Client = c.dockerHandler.GetInternalDockerClient()
+			newJob.Name = newJobsName
+			newJob.buildMiddlewares()
+			c.LifecycleJobs[newJobsName] = newJob
+		}
+	}
+
+	// Update the lifecycle jobs in the DockerHandler
+	c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
 }
 
 // ExecJobConfig contains all configuration params needed to build a ExecJob
@@ -309,4 +376,23 @@ func (c *RunServiceConfig) buildMiddlewares() {
 	c.RunServiceJob.Use(middlewares.NewSave(&c.SaveConfig))
 	c.RunServiceJob.Use(middlewares.NewMail(&c.MailConfig))
 	c.RunServiceJob.Use(middlewares.NewGotify(&c.GotifyConfig))
+}
+
+// LifecycleJobConfig contains all configuration params needed to build a LifecycleJob
+type LifecycleJobConfig struct {
+	core.LifecycleJob         `mapstructure:",squash"`
+	middlewares.OverlapConfig `mapstructure:",squash"`
+	middlewares.SlackConfig   `mapstructure:",squash"`
+	middlewares.SaveConfig    `mapstructure:",squash"`
+	middlewares.MailConfig    `mapstructure:",squash"`
+	middlewares.GotifyConfig  `mapstructure:",squash"`
+	FromDockerLabel           bool `mapstructure:"fromDockerLabel" default:"false"`
+}
+
+func (c *LifecycleJobConfig) buildMiddlewares() {
+	c.LifecycleJob.Use(middlewares.NewOverlap(&c.OverlapConfig))
+	c.LifecycleJob.Use(middlewares.NewSlack(&c.SlackConfig))
+	c.LifecycleJob.Use(middlewares.NewSave(&c.SaveConfig))
+	c.LifecycleJob.Use(middlewares.NewMail(&c.MailConfig))
+	c.LifecycleJob.Use(middlewares.NewGotify(&c.GotifyConfig))
 }

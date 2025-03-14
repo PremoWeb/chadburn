@@ -6,6 +6,63 @@
 - [job-service-run](#job-service-run)
 - [Variable Substitution](#variable-substitution)
 
+## Job Types
+
+Chadburn supports several job types:
+
+- `job-local`: Executes commands on the host machine.
+- `job-exec`: Executes commands inside a running container.
+- `job-run`: Creates a new container to execute commands.
+- `job-service-run`: Creates a service to execute commands.
+- `job-lifecycle`: Executes commands on container lifecycle events (start/stop).
+
+### job-lifecycle
+
+The `job-lifecycle` type allows you to execute commands when a container starts or stops. This is useful for sending notifications, performing cleanup, or triggering other actions based on container lifecycle events.
+
+Unlike other job types, `job-lifecycle` jobs don't run on a schedule. Instead, they run once when the specified container lifecycle event occurs.
+
+#### Configuration
+
+```toml
+[job-lifecycle "notify-on-start"]
+container = "my-container"
+event-type = "start"
+command = "echo 'Container my-container started' | mail -s 'Container Started' admin@example.com"
+
+[job-lifecycle "cleanup-on-stop"]
+container = "my-container"
+event-type = "stop"
+command = "echo 'Container my-container stopped' | mail -s 'Container Stopped' admin@example.com"
+```
+
+#### Docker Compose Labels
+
+```yaml
+services:
+  my-service:
+    image: nginx
+    labels:
+      chadburn.enabled: "true"
+      chadburn.job-lifecycle.notify-on-start.command: "echo 'Container {{.Container.Name}} started' | mail -s 'Container Started' admin@example.com"
+      chadburn.job-lifecycle.notify-on-start.event-type: "start"
+      chadburn.job-lifecycle.cleanup-on-stop.command: "echo 'Container {{.Container.Name}} stopped' | mail -s 'Container Stopped' admin@example.com"
+      chadburn.job-lifecycle.cleanup-on-stop.event-type: "stop"
+```
+
+#### Parameters
+
+- `container`: The name or ID of the container to monitor.
+- `event-type`: The type of event to trigger on. Valid values are `start` and `stop`.
+- `command`: The command to execute when the event occurs.
+
+#### Variables
+
+You can use the following variables in your commands:
+
+- `{{.Container.Name}}`: The name of the container.
+- `{{.Container.ID}}`: The ID of the container.
+
 ## Job-exec
 
 This job is executed inside a running container. Similar to `docker exec`
