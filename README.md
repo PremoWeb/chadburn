@@ -165,7 +165,7 @@ docker run -it --rm \
 
 #### Running Containers with Labels
 
-You can also add `job-run` labels directly to containers you want to start periodically. Chadburn will automatically detect these containers and schedule them to start according to the specified schedule:
+You can add `job-run` labels directly to containers you want to start periodically. Chadburn will automatically detect these containers and schedule them to start according to the specified schedule:
 
 ```bash
 docker run -d --name my-periodic-container \
@@ -174,6 +174,30 @@ docker run -d --name my-periodic-container \
 ```
 
 This will create a job that starts the `my-periodic-container` container once a day. The container will be started using the same configuration it was created with.
+
+> **Important Note about job-run with Docker Compose**: When using `job-run` with Docker Compose, there's a key difference from `job-exec`. The `job-run` type is designed to **start new containers** or **start existing stopped containers**, not to execute commands in already running containers. 
+>
+> For example, this configuration will **NOT** run the command every 5 seconds inside the running container:
+> ```yaml
+> services:
+>   alpine:
+>     image: alpine
+>     labels:
+>       chadburn.enabled: "true"
+>       chadburn.job-run.datecron.schedule: "@every 5s"
+>       chadburn.job-run.datecron.command: "uname -a"
+> ```
+>
+> Instead, if you want to run a command periodically inside a running container, use `job-exec`:
+> ```yaml
+> services:
+>   alpine:
+>     image: alpine
+>     labels:
+>       chadburn.enabled: "true"
+>       chadburn.job-exec.datecron.schedule: "@every 5s"
+>       chadburn.job-exec.datecron.command: "uname -a"
+> ```
 
 ### Logging
 

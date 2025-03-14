@@ -122,6 +122,91 @@ volume = /tmp/test:/tmp/test:rw
 
 Then you can check output in host machine file `/tmp/test/date`
 
+### Docker Compose example
+
+When using `job-run` with Docker Compose, it's important to understand that this job type is designed to:
+1. Run a command in a **new** container using a specific image, or
+2. Start an **existing stopped** container
+
+It is **not** designed to run commands inside already running containers (use `job-exec` for that).
+
+#### Example 1: Running a command in a new container
+
+```yaml
+version: "3"
+services:
+  chadburn:
+    image: premoweb/chadburn:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: daemon
+
+  # This container doesn't need to be running for the job to work
+  # It just defines the job configuration
+  job-config:
+    image: alpine:latest
+    labels:
+      chadburn.enabled: "true"
+      chadburn.job-run.periodic-task.schedule: "@every 5m"
+      chadburn.job-run.periodic-task.image: "alpine:latest"
+      chadburn.job-run.periodic-task.command: "sh -c 'date | tee -a /tmp/log'"
+      chadburn.job-run.periodic-task.volume: "/tmp:/tmp:rw"
+```
+
+In this example, Chadburn will create a new Alpine container every 5 minutes to run the date command.
+
+#### Example 2: Starting an existing container periodically
+
+```yaml
+version: "3"
+services:
+  chadburn:
+    image: premoweb/chadburn:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: daemon
+
+  periodic-container:
+    image: alpine:latest
+    command: "sh -c 'date | tee -a /tmp/log'"
+    labels:
+      chadburn.job-run.restart-me.schedule: "@every 30m"
+      chadburn.job-run.restart-me.container: "periodic-container"
+```
+
+In this example, the `periodic-container` will be started every 30 minutes. The container will execute its defined command each time it starts.
+
+#### Common Mistake
+
+A common mistake is trying to use `job-run` to execute commands inside a running container:
+
+```yaml
+# This will NOT work as expected
+services:
+  alpine:
+    image: alpine
+    # This container will start and stay running
+    command: "tail -f /dev/null"
+    labels:
+      chadburn.enabled: "true"
+      chadburn.job-run.datecron.schedule: "@every 5s"
+      chadburn.job-run.datecron.command: "uname -a"
+```
+
+This configuration will not run `uname -a` every 5 seconds inside the running Alpine container. Instead, use `job-exec` for that purpose:
+
+```yaml
+# Correct way to run commands in an existing container
+services:
+  alpine:
+    image: alpine
+    command: "tail -f /dev/null"
+    labels:
+      chadburn.enabled: "true"
+      chadburn.job-exec.datecron.schedule: "@every 5s"
+      chadburn.job-exec.datecron.command: "uname -a"
+```
+
 ### Running Chadburn on Docker example
 
 ```sh
