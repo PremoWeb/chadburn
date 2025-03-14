@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/PremoWeb/chadburn/compare/v1.3.4...v1.3.5) (2025-03-14)
+
+
+### Bug Fixes
+
+* update GitHub release action to use wangyoucao577/go-release-action with correct parameters ([2d47d69](https://github.com/PremoWeb/chadburn/commit/2d47d6926cfa2c9d52d9b6764a608c31e16a1b5d))
+
 ## [1.3.4](https://github.com/PremoWeb/chadburn/compare/v1.3.3...v1.3.4) (2025-03-14)
 
 
