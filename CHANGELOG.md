@@ -1,3 +1,10 @@
+## [1.3.8](https://github.com/PremoWeb/chadburn/compare/v1.3.7...v1.3.8) (2025-03-14)
+
+
+### Bug Fixes
+
+* update version management in semantic-release workflow ([9ff2d1f](https://github.com/PremoWeb/chadburn/commit/9ff2d1f45d79303df420cd0967817a22a9704fc7)), closes [#100](https://github.com/PremoWeb/chadburn/issues/100)
+
 ## [1.3.7](https://github.com/PremoWeb/chadburn/compare/v1.3.6...v1.3.7) (2025-03-14)
 
 
