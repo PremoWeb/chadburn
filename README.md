@@ -29,6 +29,14 @@ Various solutions exist, including containerized cron implementations and comman
 
 ---
 
+### Important Update: Migration to Official Docker Client
+
+Chadburn has removed all references to the legacy polyfill dependency `fsouza/go-dockerclient` and migrated to the official Docker client library. This change brings improved compatibility with the latest Docker features and better long-term maintainability.
+
+We would like to express our sincere gratitude to Francisco Souza and all contributors to the `fsouza/go-dockerclient` library. Their exceptional work provided a robust foundation for Chadburn and many other Docker-related projects over the years. The library's reliability and comprehensive API coverage were instrumental in Chadburn's early development and success.
+
+---
+
 ### Key Features
 
 Chadburn's primary feature is its ability to execute commands directly within Docker containers. Utilizing Docker's API, Chadburn mimics the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), enabling commands to run inside active containers. Additionally, it allows for command execution in new containers, which are destroyed after use.

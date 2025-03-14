@@ -7,11 +7,10 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/armon/circbuf"
-
-	docker "github.com/fsouza/go-dockerclient"
 )
 
 var (
@@ -43,54 +42,46 @@ type Job interface {
 }
 
 type Context struct {
-	Scheduler *Scheduler
-	Logger    Logger
-	Job       Job
-	Execution *Execution
-
+	Scheduler   *Scheduler
+	Logger      Logger
+	Job         Job
+	Execution   *Execution
+	middlewares []Middleware
 	current     int
 	executed    bool
-	middlewares []Middleware
 }
 
+// NewContext creates a new Context
 func NewContext(s *Scheduler, j Job, e *Execution) *Context {
 	return &Context{
 		Scheduler:   s,
-		Logger:      s.Logger,
 		Job:         j,
+		Logger:      s.Logger,
 		Execution:   e,
 		middlewares: j.Middlewares(),
 	}
 }
 
-func (c *Context) Start() {
-	c.Execution.Start()
+func (c *Context) Run() error {
 	c.Job.NotifyStart()
-}
+	c.Execution.Start()
 
-func (c *Context) Next() error {
-	if err := c.doNext(); err != nil || c.executed {
-		c.Stop(err)
-	}
-
-	return nil
-}
-
-func (c *Context) doNext() error {
 	for {
 		m, end := c.getNext()
 		if end {
 			break
 		}
 
-		if !c.Execution.IsRunning && !m.ContinueOnStop() {
+		// Check if execution is still running
+		if c.Execution.Error() != nil && !m.ContinueOnStop() {
 			continue
 		}
 
 		return m.Run(c)
 	}
 
-	if !c.Execution.IsRunning {
+	// Check if execution is still running
+	if c.Execution.Error() != nil {
 		return nil
 	}
 
@@ -108,7 +99,7 @@ func (c *Context) getNext() (Middleware, bool) {
 }
 
 func (c *Context) Stop(err error) {
-	if !c.Execution.IsRunning {
+	if c.Execution.Error() != nil {
 		return
 	}
 
@@ -121,9 +112,9 @@ func (c *Context) Log(msg string) {
 	args := []interface{}{c.Job.GetName(), c.Execution.ID, msg}
 
 	switch {
-	case c.Execution.Failed:
+	case c.Execution.Failed():
 		c.Logger.Errorf(format, args...)
-	case c.Execution.Skipped:
+	case c.Execution.Skipped():
 		c.Logger.Warningf(format, args...)
 	default:
 		c.Logger.Noticef(format, args...)
@@ -132,47 +123,59 @@ func (c *Context) Log(msg string) {
 
 // Execution contains all the information relative to a Job execution.
 type Execution struct {
-	ID        string
-	Date      time.Time
-	Duration  time.Duration
-	IsRunning bool
-	Failed    bool
-	Skipped   bool
-	Error     error
-
-	OutputStream, ErrorStream *circbuf.Buffer `json:"-"`
+	ID           string
+	Date         time.Time
+	OutputStream *circbuf.Buffer
+	ErrorStream  *circbuf.Buffer
+	mutex        sync.Mutex
+	current      int
+	start        time.Time
+	err          error
 }
 
-// NewExecution returns a new Execution, with a random ID
 func NewExecution() *Execution {
-	bufOut, _ := circbuf.NewBuffer(maxStreamSize)
-	bufErr, _ := circbuf.NewBuffer(maxStreamSize)
+	stdout, _ := circbuf.NewBuffer(maxStreamSize)
+	stderr, _ := circbuf.NewBuffer(maxStreamSize)
+
 	return &Execution{
 		ID:           randomID(),
-		OutputStream: bufOut,
-		ErrorStream:  bufErr,
+		OutputStream: stdout,
+		ErrorStream:  stderr,
+		Date:         time.Now(),
 	}
 }
 
-// Start start the exection, initialize the running flags and the start date.
 func (e *Execution) Start() {
-	e.IsRunning = true
-	e.Date = time.Now()
+	e.start = time.Now()
 }
 
-// Stop stops the executions, if a ErrSkippedExecution is given the exection
-// is mark as skipped, if any other error is given the exection is mark as
-// failed. Also mark the exection as IsRunning false and save the duration time
 func (e *Execution) Stop(err error) {
-	e.IsRunning = false
-	e.Duration = time.Since(e.Date)
+	e.err = err
+}
 
-	if err != nil && err != ErrSkippedExecution {
-		e.Error = err
-		e.Failed = true
-	} else if err == ErrSkippedExecution {
-		e.Skipped = true
+func (e *Execution) Error() error {
+	return e.err
+}
+
+func (e *Execution) Failed() bool {
+	if e.err != nil && e.err != ErrSkippedExecution {
+		return true
 	}
+
+	return false
+}
+
+func (e *Execution) Skipped() bool {
+	return e.err == ErrSkippedExecution
+}
+
+func (e *Execution) Duration() time.Duration {
+	if e.start.IsZero() {
+		return 0
+	}
+
+	end := time.Now()
+	return end.Sub(e.start)
 }
 
 // Middleware can wrap any job execution, allowing to execution code before
@@ -238,30 +241,7 @@ func randomID() string {
 	return fmt.Sprintf("%x", b)
 }
 
-func buildFindLocalImageOptions(image string) docker.ListImagesOptions {
-	return docker.ListImagesOptions{
-		Filters: map[string][]string{
-			"reference": []string{image},
-		},
-	}
-}
-
-func buildPullOptions(image string) (docker.PullImageOptions, docker.AuthConfiguration) {
-	repository, tag := docker.ParseRepositoryTag(image)
-
-	registry := parseRegistry(repository)
-
-	if tag == "" {
-		tag = "latest"
-	}
-
-	return docker.PullImageOptions{
-		Repository: repository,
-		Registry:   registry,
-		Tag:        tag,
-	}, buildAuthConfiguration(registry)
-}
-
+// Helper function to parse a registry from a repository
 func parseRegistry(repository string) string {
 	parts := strings.Split(repository, "/")
 	if len(parts) < 2 {
@@ -273,30 +253,6 @@ func parseRegistry(repository string) string {
 	}
 
 	return ""
-}
-
-func buildAuthConfiguration(registry string) docker.AuthConfiguration {
-	var auth docker.AuthConfiguration
-	if dockercfg == nil {
-		return auth
-	}
-
-	if v, ok := dockercfg.Configs[registry]; ok {
-		return v
-	}
-
-	// try to fetch configs from docker hub default registry urls
-	// see example here: https://www.projectatomic.io/blog/2016/03/docker-credentials-store/
-	if registry == "" {
-		if v, ok := dockercfg.Configs["https://index.docker.io/v2/"]; ok {
-			return v
-		}
-		if v, ok := dockercfg.Configs["https://index.docker.io/v1/"]; ok {
-			return v
-		}
-	}
-
-	return auth
 }
 
 const HashmeTagName = "hash"
@@ -325,4 +281,19 @@ func getHash(t reflect.Type, v reflect.Value, hash *string) {
 			}
 		}
 	}
+}
+
+// Start starts the execution
+func (c *Context) Start() {
+	c.Execution.Start()
+}
+
+// Next executes the next middleware in the chain
+func (c *Context) Next() error {
+	return c.Run()
+}
+
+// IsRunning returns true if the execution is running
+func (e *Execution) IsRunning() bool {
+	return e.start.IsZero() == false && e.err == nil
 }

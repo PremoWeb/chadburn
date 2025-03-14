@@ -50,10 +50,10 @@ func (m *Mail) ContinueOnStop() bool {
 
 // Run sents a email with the result of the execution
 func (m *Mail) Run(ctx *core.Context) error {
-	err := ctx.Next()
+	err := ctx.Run()
 	ctx.Stop(err)
 
-	if ctx.Execution.Failed || !m.MailOnlyOnError {
+	if ctx.Execution.Failed() || !m.MailOnlyOnError {
 		err := m.sendMail(ctx)
 		if err != nil {
 			ctx.Logger.Errorf("Mail error: %q", err)
@@ -154,9 +154,9 @@ func init() {
 
 func executionLabel(e *core.Execution) string {
 	status := "successful"
-	if e.Skipped {
+	if e.Skipped() {
 		status = "skipped"
-	} else if e.Failed {
+	} else if e.Failed() {
 		status = "failed"
 	}
 

@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/PremoWeb/chadburn/compare/v1.5.1...v1.6.0) (2025-03-14)
+
+
+### Features
+
+* migrate from fsouza/go-dockerclient to official Docker client library ([commit-hash](https://github.com/PremoWeb/chadburn/commit/commit-hash))
+
+
 ## [1.5.1](https://github.com/PremoWeb/chadburn/compare/v1.5.0...v1.5.1) (2025-03-14)
 
 

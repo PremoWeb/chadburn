@@ -2,31 +2,27 @@ package core
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 
-	docker "github.com/fsouza/go-dockerclient"
 	"github.com/gobs/args"
 )
 
-var dockercfg *docker.AuthConfigurations
-
-func init() {
-	dockercfg, _ = docker.NewAuthConfigurationsFromDockerCfg()
-}
-
+// RunJob represents a job that runs a command in a Docker container
 type RunJob struct {
 	BareJob   `mapstructure:",squash"`
-	Client    *docker.Client `json:"-"`
-	Container string         `hash:"true"`
-	Image     string         `hash:"true"`
-	User      string         `default:"root" hash:"true"`
-	TTY       bool           `default:"false" hash:"true"`
-	Delete    bool           `default:"true" hash:"true"`
-	Network   string         `hash:"true"`
-	Volume    []string       `hash:"true"`
+	Client    DockerClient `json:"-"`
+	Container string       `hash:"true"`
+	Image     string       `hash:"true"`
+	User      string       `default:"root" hash:"true"`
+	TTY       bool         `default:"false" hash:"true"`
+	Delete    bool         `default:"true" hash:"true"`
+	Network   string       `hash:"true"`
+	Volume    []string     `hash:"true"`
 }
 
-func NewRunJob(c *docker.Client) *RunJob {
+// NewRunJob creates a new RunJob
+func NewRunJob(c DockerClient) *RunJob {
 	return &RunJob{Client: c}
 }
 
@@ -50,29 +46,20 @@ func (j *RunJob) Hash() string {
 }
 
 func (j *RunJob) startContainer(ctx *Context) error {
-	err := j.Client.StartContainer(j.Container, nil)
+	// Check if container exists and is running
+	container, err := j.Client.InspectContainer(j.Container)
 	if err != nil {
-		return err
+		return fmt.Errorf("error inspecting container: %s", err)
 	}
 
-	if ctx.Execution.OutputStream != nil {
-		err = j.Client.Logs(docker.LogsOptions{
-			Container:    j.Container,
-			OutputStream: ctx.Execution.OutputStream,
-			ErrorStream:  ctx.Execution.ErrorStream,
-			Stdout:       true,
-			Stderr:       true,
-		})
-
+	if !container.State.Running {
+		// Start the container
+		err = j.Client.StartContainer(j.Container)
 		if err != nil {
-			return err
+			return fmt.Errorf("error starting container: %s", err)
 		}
 	}
 
-	return nil
-}
-
-func (j *RunJob) runContainer(ctx *Context) error {
 	// Create variable context
 	varContext := VariableContext{
 		Container: ContainerInfo{
@@ -84,145 +71,109 @@ func (j *RunJob) runContainer(ctx *Context) error {
 	// Get processed command with variables replaced
 	processedCommand := j.GetProcessedCommand(varContext)
 
-	c, err := j.buildContainer(processedCommand)
-	if err != nil {
-		return err
-	}
-
-	if err := j.createContainer(c); err != nil {
-		return err
-	}
-
-	defer j.removeContainer(c)
-
-	if err := j.startContainerWithExec(c, ctx.Execution); err != nil {
-		return err
-	}
-
-	return j.watchContainer(c)
-}
-
-func (j *RunJob) buildContainer(processedCommand string) (*docker.Container, error) {
-	var cmds []string
-	if processedCommand != "" {
-		// Use a try/catch approach to handle potential errors from args.GetArgs
-		defer func() {
-			if r := recover(); r != nil {
-				// If there's a panic in GetArgs, just use the command as is
-				cmds = []string{processedCommand}
-			}
-		}()
-
-		cmds = args.GetArgs(processedCommand)
-	}
-
-	var err error
-	var binds []string
-	for _, volume := range j.Volume {
-		binds = append(binds, volume)
-	}
-
-	config := &docker.Config{
-		Image:        j.Image,
+	// Create exec config
+	config := &ExecConfig{
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          j.TTY,
-		Cmd:          cmds,
 		User:         j.User,
 	}
 
-	hostConfig := &docker.HostConfig{
-		Binds:       binds,
-		NetworkMode: j.Network,
-	}
-
-	name := fmt.Sprintf("chadburn-%s", randomID())
-	c, err := j.Client.CreateContainer(docker.CreateContainerOptions{
-		Name:       name,
-		Config:     config,
-		HostConfig: hostConfig,
-	})
-
+	// Create exec instance
+	execID, err := j.Client.CreateExec(j.Container, args.GetArgs(processedCommand), config)
 	if err != nil {
-		if err != docker.ErrNoSuchImage {
-			return c, err
-		}
-
-		if err = j.pullImage(); err != nil {
-			return nil, err
-		}
-
-		c, err = j.Client.CreateContainer(docker.CreateContainerOptions{
-			Name:       name,
-			Config:     config,
-			HostConfig: hostConfig,
-		})
-
-		if err != nil {
-			return c, err
-		}
+		return fmt.Errorf("error creating exec: %s", err)
 	}
 
-	return c, nil
-}
-
-func (j *RunJob) createContainer(c *docker.Container) error {
-	return nil
-}
-
-func (j *RunJob) removeContainer(c *docker.Container) error {
-	if !j.Delete {
-		return nil
-	}
-
-	return j.Client.RemoveContainer(docker.RemoveContainerOptions{
-		ID:            c.ID,
-		RemoveVolumes: true,
-		Force:         true,
-	})
-}
-
-func (j *RunJob) startContainerWithExec(c *docker.Container, e *Execution) error {
-	err := j.Client.StartContainer(c.ID, nil)
+	// Start exec
+	reader, err := j.Client.StartExec(execID, true, true)
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting exec: %s", err)
+	}
+	defer reader.Close()
+
+	// Copy output to the execution streams
+	if ctx.Execution.OutputStream != nil {
+		_, err = io.Copy(ctx.Execution.OutputStream, reader)
+		if err != nil {
+			return fmt.Errorf("error copying output: %s", err)
+		}
 	}
 
-	if e.OutputStream != nil {
-		err = j.Client.Logs(docker.LogsOptions{
-			Container:    c.ID,
-			OutputStream: e.OutputStream,
-			ErrorStream:  e.ErrorStream,
-			Stdout:       true,
-			Stderr:       true,
-			Follow:       true,
-		})
+	// Inspect exec
+	inspect, err := j.Client.InspectExec(execID)
+	if err != nil {
+		return fmt.Errorf("error inspecting exec: %s", err)
+	}
 
-		if err != nil {
-			return err
-		}
+	if inspect.ExitCode != 0 {
+		return fmt.Errorf("error non-zero exit code: %d", inspect.ExitCode)
 	}
 
 	return nil
 }
 
-func (j *RunJob) watchContainer(c *docker.Container) error {
-	statusCode, err := j.Client.WaitContainer(c.ID)
-	if err != nil {
-		return err
+func (j *RunJob) runContainer(ctx *Context) error {
+	// Pull the image
+	if err := j.Client.PullImage(j.Image); err != nil {
+		return fmt.Errorf("error pulling image: %s", err)
 	}
 
-	if statusCode != 0 {
-		return fmt.Errorf("error non-zero exit code: %d", statusCode)
+	// Create container config
+	config := &ContainerConfig{
+		Image:        j.Image,
+		Cmd:          args.GetArgs(j.GetCommand()),
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          j.TTY,
+		User:         j.User,
+	}
+
+	// Add host config if network or volumes are specified
+	if j.Network != "" || len(j.Volume) > 0 {
+		config.HostConfig = &HostConfig{
+			NetworkMode: j.Network,
+			Binds:       j.Volume,
+		}
+	}
+
+	// Create the container
+	container, err := j.Client.CreateContainer(config)
+	if err != nil {
+		return fmt.Errorf("error creating container: %s", err)
+	}
+
+	// Start the container
+	err = j.Client.StartContainer(container.ID)
+	if err != nil {
+		return fmt.Errorf("error starting container: %s", err)
+	}
+
+	// Wait for the container to finish
+	exitCode, err := j.Client.WaitContainer(container.ID)
+	if err != nil {
+		return fmt.Errorf("error waiting for container: %s", err)
+	}
+
+	// Remove the container if Delete is true
+	if j.Delete {
+		err = j.Client.RemoveContainer(container.ID)
+		if err != nil {
+			ctx.Logger.Errorf("error removing container: %s", err)
+		}
+	}
+
+	if exitCode != 0 {
+		return fmt.Errorf("error non-zero exit code: %d", exitCode)
 	}
 
 	return nil
 }
 
 func (j *RunJob) pullImage() error {
-	o, a := buildPullOptions(j.Image)
-	if err := j.Client.PullImage(o, a); err != nil {
+	// Pull the image directly
+	if err := j.Client.PullImage(j.Image); err != nil {
 		return err
 	}
 
