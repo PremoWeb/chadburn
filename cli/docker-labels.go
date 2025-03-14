@@ -67,11 +67,22 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 					serviceJobs[jobName] = make(map[string]interface{})
 				}
 				setJobParam(serviceJobs[jobName], jopParam, v)
-			case jobType == jobRun && isServiceContainer:
+			case jobType == jobRun:
+				// Allow job-run on any container, not just the service container
 				if _, ok := runJobs[jobName]; !ok {
 					runJobs[jobName] = make(map[string]interface{})
 				}
 				setJobParam(runJobs[jobName], jopParam, v)
+
+				// If the label is on a non-service container, set the container name
+				// so that the job will start this specific container
+				if !isServiceContainer {
+					// Only set the container name if it's not already set
+					// This allows overriding the container name in the service container
+					if _, ok := runJobs[jobName]["container"]; !ok {
+						runJobs[jobName]["container"] = c
+					}
+				}
 			default:
 				// TODO: warn about unknown parameter
 			}

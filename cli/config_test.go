@@ -156,6 +156,12 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 						Schedule: "schedule2",
 						Command:  "command2",
 					}}},
+					"job5": &RunJobConfig{RunJob: core.RunJob{BareJob: core.BareJob{
+						Schedule: "schedule5",
+						Command:  "command5",
+					},
+						Container: "other",
+					}},
 				},
 				ServiceJobs: map[string]*RunServiceConfig{
 					"job3": &RunServiceConfig{RunServiceJob: core.RunServiceJob{BareJob: core.BareJob{

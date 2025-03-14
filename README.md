@@ -19,7 +19,7 @@ Chadburn is a project built upon the ongoing development from Ofelia, a fork ini
 
 ### Why Choose Chadburn?
 
-Since the release of [`cron`](https://en.wikipedia.org/wiki/Cron) by AT&T Bell Laboratories in March 1975, much has changed in the computing landscape, especially with the rise of Docker. While **Vixie’s cron** remains functional, it lacks extensibility and can be challenging to debug when issues arise.
+Since the release of [`cron`](https://en.wikipedia.org/wiki/Cron) by AT&T Bell Laboratories in March 1975, much has changed in the computing landscape, especially with the rise of Docker. While **Vixie's cron** remains functional, it lacks extensibility and can be challenging to debug when issues arise.
 
 Various solutions exist, including containerized cron implementations and command wrappers, but these often complicate straightforward tasks.
 
@@ -35,7 +35,7 @@ Chadburn's primary feature is its ability to execute commands directly within Do
 
 A comprehensive wiki is underway to detail Chadburn's usage. Caprover users will soon have access to a One Click App for deploying and managing scheduled jobs via Service Label Overrides.
 
-For others, here’s a quick guide to get started with Chadburn:
+For others, here's a quick guide to get started with Chadburn:
 
 ### Job Scheduling
 
@@ -60,7 +60,7 @@ To run Chadburn with an INI file, use the command:
 chadburn daemon --config=/path/to/config.ini
 ```
 
-Here’s a sample INI configuration:
+Here's a sample INI configuration:
 
 ```ini
 [job-exec "job-executed-on-running-container"]
@@ -157,6 +157,18 @@ docker run -it --rm \
     nginx
 ```
 
+#### Running Containers with Labels
+
+You can also add `job-run` labels directly to containers you want to start periodically. Chadburn will automatically detect these containers and schedule them to start according to the specified schedule:
+
+```bash
+docker run -d --name my-periodic-container \
+    --label chadburn.job-run.schedule="@daily" \
+    my-image
+```
+
+This will create a job that starts the `my-periodic-container` container once a day. The container will be started using the same configuration it was created with.
+
 ### Logging
 
 Chadburn offers three logging drivers that can be configured in the `[global]` section:
@@ -198,7 +210,7 @@ If you prefer not to use the provided Docker image, you can download a binary fr
 
 ### Special Note for Caprover PaaS Users
 
-Chadburn is available as a One Click App in the official Caprover app repository. After deployment, you can configure the scheduler for your apps using the Service Override section in your app’s configuration:
+Chadburn is available as a One Click App in the official Caprover app repository. After deployment, you can configure the scheduler for your apps using the Service Override section in your app's configuration:
 
 ```yaml
 TaskTemplate:
