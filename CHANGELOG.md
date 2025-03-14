@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/PremoWeb/chadburn/compare/v1.7.0...v1.7.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* update tests to work with the new Docker client implementation ([5ee9329](https://github.com/PremoWeb/chadburn/commit/5ee93297fb0f9bfb44123c1664c5775d11606e85))
+
 # [1.7.0](https://github.com/PremoWeb/chadburn/compare/v1.6.0...v1.7.0) (2025-03-14)
 
 
