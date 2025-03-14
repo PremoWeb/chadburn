@@ -103,3 +103,8 @@
 ### Features
 
 * implement automatic version bump system and update README badges ([7ff96c3](https://github.com/PremoWeb/chadburn/commit/7ff96c36dec1b73d0deb472dda1375a5281ca272))
+
+## Unreleased
+
+### Added
+- Added support for container lifecycle jobs (`job-lifecycle`) that run once on container start or stop events.

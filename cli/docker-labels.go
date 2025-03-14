@@ -24,6 +24,7 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 	localJobs := make(map[string]map[string]interface{})
 	runJobs := make(map[string]map[string]interface{})
 	serviceJobs := make(map[string]map[string]interface{})
+	lifecycleJobs := make(map[string]map[string]interface{})
 	globalConfigs := make(map[string]interface{})
 
 	for c, l := range labels {
@@ -80,6 +81,14 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 				if !isServiceContainer {
 					runJobs[jobName]["container"] = c
 				}
+			case jobType == jobLifecycle:
+				if _, ok := lifecycleJobs[jobName]; !ok {
+					lifecycleJobs[jobName] = make(map[string]interface{})
+					lifecycleJobs[jobName]["fromDockerLabel"] = true
+				}
+				setJobParam(lifecycleJobs[jobName], jopParam, v)
+				// Set the container name for the lifecycle job
+				lifecycleJobs[jobName]["container"] = c
 			default:
 				// TODO: warn about unknown parameter
 			}
@@ -112,6 +121,12 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 
 	if len(runJobs) > 0 {
 		if err := mapstructure.WeakDecode(runJobs, &c.RunJobs); err != nil {
+			return err
+		}
+	}
+
+	if len(lifecycleJobs) > 0 {
+		if err := mapstructure.WeakDecode(lifecycleJobs, &c.LifecycleJobs); err != nil {
 			return err
 		}
 	}
@@ -204,6 +219,10 @@ func buildJob(client *docker.Client, jobType, jobName, containerId, containerNam
 		j := core.NewServiceJob(client)
 		j.Container = containerId
 		return j, nil
+	case "job-lifecycle":
+		j := core.NewLifecycleJob(client)
+		j.Container = containerId
+		return j, nil
 	default:
 		return nil, fmt.Errorf("unknown job type: %s", jobType)
 	}
@@ -226,6 +245,18 @@ func updateJobField(job core.Job, field, value string) error {
 			return err
 		}
 		job.SetVolumeMounts(arr)
+	case "event-type":
+		// Handle event-type field for lifecycle jobs
+		if lifecycleJob, ok := job.(*core.LifecycleJob); ok {
+			switch value {
+			case "start":
+				lifecycleJob.EventType = core.ContainerStart
+			case "stop":
+				lifecycleJob.EventType = core.ContainerStop
+			default:
+				return fmt.Errorf("unknown event type: %s", value)
+			}
+		}
 	default:
 		// TODO: handle other fields
 	}
