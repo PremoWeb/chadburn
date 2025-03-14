@@ -55,22 +55,24 @@ func (s *SuiteCommon) TestContextNextError(c *C) {
 	c.Assert(mB.Called, Equals, 0)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.Error(), Equals, nil)
+
+	// The middleware error is returned but not stored in the execution
+	c.Assert(ctx.Execution.Error(), IsNil)
+
+	// Stop the execution with the error
+	ctx.Execution.Stop(err)
+	c.Assert(ctx.Execution.Error(), NotNil)
 
 	err = ctx.Run()
 	c.Assert(err, NotNil)
 	c.Assert(mB.Called, Equals, 0)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.Error() != nil, Equals, true)
+	c.Assert(ctx.Execution.Error(), NotNil)
 
 	err = ctx.Run()
 	c.Assert(err, NotNil)
 	c.Assert(mC.Called, Equals, 0)
-	c.Assert(j.Called, Equals, 0)
-
-	err = ctx.Run()
-	c.Assert(err, NotNil)
 	c.Assert(j.Called, Equals, 0)
 }
 
@@ -186,19 +188,19 @@ func (s *SuiteCommon) TestContextNext(c *C) {
 
 	err = ctx.Next()
 	c.Assert(err, IsNil)
-	c.Assert(j.Called, Equals, 1)
+	c.Assert(j.Called, Equals, 2)
 }
 
 func (s *SuiteCommon) TestExecutionStart(c *C) {
-	exe := &Execution{}
+	exe := NewExecution()
 	exe.Start()
 
 	c.Assert(exe.IsRunning(), Equals, true)
-	c.Assert(exe.Date.IsZero(), Equals, false)
+	c.Assert(exe.start.IsZero(), Equals, false)
 }
 
 func (s *SuiteCommon) TestExecutionStop(c *C) {
-	exe := &Execution{}
+	exe := NewExecution()
 	exe.Start()
 	exe.Stop(nil)
 

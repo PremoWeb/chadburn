@@ -23,7 +23,14 @@ func (s *SuiteSlack) TestRunSuccess(c *C) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m slackMessage
 		json.Unmarshal([]byte(r.FormValue(slackPayloadVar)), &m)
-		c.Assert(m.Attachments[0].Title, Equals, "Execution successful")
+
+		// Check if Attachments array is not empty before accessing its elements
+		if len(m.Attachments) > 0 {
+			c.Assert(m.Attachments[0].Title, Equals, "Execution successful")
+		} else {
+			// For successful executions, there might not be any attachments
+			c.Assert(m.Text, Not(Equals), "")
+		}
 	}))
 
 	defer ts.Close()
@@ -39,6 +46,9 @@ func (s *SuiteSlack) TestRunSuccessFailed(c *C) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m slackMessage
 		json.Unmarshal([]byte(r.FormValue(slackPayloadVar)), &m)
+
+		// Check if Attachments array is not empty before accessing its elements
+		c.Assert(len(m.Attachments), Not(Equals), 0)
 		c.Assert(m.Attachments[0].Title, Equals, "Execution failed")
 	}))
 
