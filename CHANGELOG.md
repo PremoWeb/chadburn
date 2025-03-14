@@ -1,3 +1,10 @@
+## [1.3.7](https://github.com/PremoWeb/chadburn/compare/v1.3.6...v1.3.7) (2025-03-14)
+
+
+### Bug Fixes
+
+* update GitHub Actions workflow to use Go 1.23 ([7316d1d](https://github.com/PremoWeb/chadburn/commit/7316d1d15b01c6bee20d58112767b5f33d257131))
+
 ## [1.3.6](https://github.com/PremoWeb/chadburn/compare/v1.3.5...v1.3.6) (2025-03-14)
 
 
