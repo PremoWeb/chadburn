@@ -53,14 +53,13 @@ func (j *LifecycleJob) Run(ctx *Context) error {
 	processedCommand := j.GetProcessedCommand(varContext)
 
 	// Execute the command locally
-	localJob := &LocalJob{
-		BareJob:       j.BareJob,
-		ContainerID:   j.Container,
-		ContainerName: j.Container,
-	}
-
-	// Override the command with the processed one
-	localJob.Command = processedCommand
+	localJob := &LocalJob{}
+	// Set fields individually instead of copying the BareJob struct
+	localJob.Name = j.Name
+	localJob.Schedule = j.Schedule
+	localJob.Command = processedCommand // Use the processed command
+	localJob.ContainerID = j.Container
+	localJob.ContainerName = j.Container
 
 	// Run the local job
 	err := localJob.Run(ctx)
