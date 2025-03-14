@@ -11,6 +11,9 @@ type LocalJob struct {
 	BareJob     `mapstructure:",squash"`
 	Dir         string
 	Environment []string
+	// Variables for command processing
+	ContainerName string `hash:"-"`
+	ContainerID   string `hash:"-"`
 }
 
 func NewLocalJob() *LocalJob {
@@ -34,7 +37,18 @@ func (j *LocalJob) Run(ctx *Context) error {
 }
 
 func (j *LocalJob) buildCommand(ctx *Context) (*exec.Cmd, error) {
-	args := args.GetArgs(j.Command)
+	// Create variable context
+	varContext := VariableContext{
+		Container: ContainerInfo{
+			Name: j.ContainerName,
+			ID:   j.ContainerID,
+		},
+	}
+
+	// Get processed command with variables replaced
+	processedCommand := j.GetProcessedCommand(varContext)
+
+	args := args.GetArgs(processedCommand)
 	bin, err := exec.LookPath(args[0])
 	if err != nil {
 		return nil, err

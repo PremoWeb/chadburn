@@ -2,13 +2,17 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
+	"github.com/PremoWeb/Chadburn/core"
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/mitchellh/mapstructure"
 )
 
 const (
-	labelPrefix = "chadburn"
+	labelPrefix    = "chadburn"
+	LabelNamespace = "chadburn"
 
 	requiredLabel       = labelPrefix + ".enabled"
 	requiredLabelFilter = requiredLabel + "=true"
@@ -126,4 +130,105 @@ func setJobParam(params map[string]interface{}, paramName, paramVal string) {
 	}
 
 	params[paramName] = paramVal
+}
+
+func buildFromDockerLabels(client *docker.Client, labels map[string]string, container string) (map[string]core.Job, error) {
+	jobs := make(map[string]core.Job, 0)
+	prefix := fmt.Sprintf("%s.", LabelNamespace)
+	prefixLen := len(prefix)
+
+	containerId := container
+	containerName := container
+	if strings.Contains(container, ":") {
+		parts := strings.Split(container, ":")
+		containerId = parts[0]
+		containerName = parts[1]
+	}
+
+	for key, _ := range labels {
+		if !strings.HasPrefix(key, prefix) {
+			continue
+		}
+
+		jobType, jobName, field := extractFromKey(key[prefixLen:])
+		if field == "schedule" {
+			job, err := buildJob(client, jobType, jobName, containerId, containerName)
+			if err != nil {
+				return nil, err
+			}
+
+			job.SetCronJobID(0)
+			jobs[jobName] = job
+		}
+	}
+
+	for key, value := range labels {
+		if !strings.HasPrefix(key, prefix) {
+			continue
+		}
+
+		_, jobName, field := extractFromKey(key[prefixLen:])
+		if field == "schedule" {
+			continue
+		}
+
+		if _, ok := jobs[jobName]; !ok {
+			continue
+		}
+
+		if err := updateJobField(jobs[jobName], field, value); err != nil {
+			return nil, err
+		}
+	}
+
+	return jobs, nil
+}
+
+func buildJob(client *docker.Client, jobType, jobName, containerId, containerName string) (core.Job, error) {
+	switch jobType {
+	case "job-exec":
+		j := core.NewExecJob(client)
+		j.Container = containerId
+		j.ContainerName = containerName
+		return j, nil
+	case "job-run":
+		j := core.NewRunJob(client)
+		j.Container = containerId
+		return j, nil
+	case "job-local":
+		j := core.NewLocalJob()
+		j.ContainerName = containerName
+		j.ContainerID = containerId
+		return j, nil
+	case "service":
+		j := core.NewServiceJob(client)
+		j.Container = containerId
+		return j, nil
+	default:
+		return nil, fmt.Errorf("unknown job type: %s", jobType)
+	}
+}
+
+func extractFromKey(key string) (string, string, string) {
+	parts := strings.Split(key, ".")
+	if len(parts) < 3 {
+		return "", "", ""
+	}
+
+	return parts[0], parts[1], parts[2]
+}
+
+func updateJobField(job core.Job, field, value string) error {
+	switch field {
+	case "volume":
+		arr := []string{}
+		if err := json.Unmarshal([]byte(value), &arr); err != nil {
+			return err
+		}
+		job.SetVolumeMounts(arr)
+	default:
+		// TODO: handle other fields
+	}
+
+	return nil
 }

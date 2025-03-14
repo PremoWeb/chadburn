@@ -102,10 +102,13 @@ func (j *RunServiceJob) buildService() (*swarm.Service, error) {
 }
 
 const (
-
 	// TODO are these const defined somewhere in the docker API?
 	swarmError   = -999
 	timeoutError = -998
+
+	// Duration constants
+	watchDuration      = time.Millisecond * 100
+	maxProcessDuration = time.Hour * 24
 )
 
 var svcChecker = time.NewTicker(watchDuration)

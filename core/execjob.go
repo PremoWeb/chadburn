@@ -15,6 +15,8 @@ type ExecJob struct {
 	User      string         `default:"root" hash:"true"`
 	TTY       bool           `default:"false" hash:"true"`
 	Workdir   string         `default:"" hash:"true"`
+	// ContainerName is used for variable processing and is not included in the hash
+	ContainerName string `hash:"-"`
 }
 
 func NewExecJob(c *docker.Client) *ExecJob {
@@ -22,7 +24,7 @@ func NewExecJob(c *docker.Client) *ExecJob {
 }
 
 func (j *ExecJob) Run(ctx *Context) error {
-	exec, err := j.buildExec()
+	exec, err := j.buildExec(ctx)
 	if err != nil {
 		return err
 	}
@@ -41,13 +43,24 @@ func (j *ExecJob) Hash() string {
 	return hash
 }
 
-func (j *ExecJob) buildExec() (*docker.Exec, error) {
+func (j *ExecJob) buildExec(ctx *Context) (*docker.Exec, error) {
+	// Create variable context
+	varContext := VariableContext{
+		Container: ContainerInfo{
+			Name: j.Container,
+			ID:   j.Container, // We use the container name as ID for now
+		},
+	}
+
+	// Get processed command with variables replaced
+	processedCommand := j.GetProcessedCommand(varContext)
+
 	createOpts := docker.CreateExecOptions{
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          j.TTY,
-		Cmd:          args.GetArgs(j.Command),
+		Cmd:          args.GetArgs(processedCommand),
 		Container:    j.Container,
 		User:         j.User,
 	}

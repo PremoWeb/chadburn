@@ -30,6 +30,7 @@ type Job interface {
 	GetName() string
 	GetSchedule() string
 	GetCommand() string
+	GetProcessedCommand(VariableContext) string
 	Middlewares() []Middleware
 	Use(...Middleware)
 	Run(*Context) error
@@ -38,6 +39,7 @@ type Job interface {
 	NotifyStop()
 	GetCronJobID() int
 	SetCronJobID(int)
+	SetVolumeMounts([]string)
 }
 
 type Context struct {
