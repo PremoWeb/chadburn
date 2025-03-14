@@ -154,16 +154,27 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 			},
 			ExpectedConfig: Config{
 				LocalJobs: map[string]*LocalJobConfig{
-					"job1": &LocalJobConfig{LocalJob: core.LocalJob{BareJob: core.BareJob{
-						Schedule: "schedule1",
-						Command:  "command1",
-					}}},
+					"job1": &LocalJobConfig{
+						LocalJob: core.LocalJob{
+							BareJob: core.BareJob{
+								Schedule: "schedule1",
+								Command:  "command1",
+							},
+						},
+						FromDockerLabel: false,
+					},
 				},
 				RunJobs: map[string]*RunJobConfig{
 					"job2": &RunJobConfig{RunJob: core.RunJob{BareJob: core.BareJob{
 						Schedule: "schedule2",
 						Command:  "command2",
 					}}},
+					"job5": &RunJobConfig{RunJob: core.RunJob{BareJob: core.BareJob{
+						Schedule: "schedule5",
+						Command:  "command5",
+					},
+						Container: "other",
+					}},
 				},
 				ServiceJobs: map[string]*RunServiceConfig{
 					"job3": &RunServiceConfig{RunServiceJob: core.RunServiceJob{BareJob: core.BareJob{
@@ -172,7 +183,7 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 					}}},
 				},
 			},
-			Comment: "Local/Run/Service jobs from non-service container ignored",
+			Comment: "Local jobs from non-service container ignored, but job-run labels on target containers are supported",
 		},
 		{
 			Labels: map[string]map[string]string{

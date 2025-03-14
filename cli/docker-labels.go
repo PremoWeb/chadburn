@@ -59,7 +59,7 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 			case jobType == jobLocal && isServiceContainer:
 				if _, ok := localJobs[jobName]; !ok {
 					localJobs[jobName] = make(map[string]interface{})
-					localJobs[jobName]["fromDockerLabel"] = true
+					localJobs[jobName]["fromDockerLabel"] = false
 				}
 				setJobParam(localJobs[jobName], jopParam, v)
 			case jobType == jobServiceRun && isServiceContainer:
@@ -67,11 +67,15 @@ func (c *Config) buildFromDockerLabels(labels map[string]map[string]string) erro
 					serviceJobs[jobName] = make(map[string]interface{})
 				}
 				setJobParam(serviceJobs[jobName], jopParam, v)
-			case jobType == jobRun && isServiceContainer:
+			case jobType == jobRun:
 				if _, ok := runJobs[jobName]; !ok {
 					runJobs[jobName] = make(map[string]interface{})
 				}
 				setJobParam(runJobs[jobName], jopParam, v)
+				// If the label is on a non-service container, set the container name
+				if !isServiceContainer {
+					runJobs[jobName]["container"] = c
+				}
 			default:
 				// TODO: warn about unknown parameter
 			}
