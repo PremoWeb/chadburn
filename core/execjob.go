@@ -14,6 +14,7 @@ type ExecJob struct {
 	Container string         `hash:"true"`
 	User      string         `default:"root" hash:"true"`
 	TTY       bool           `default:"false" hash:"true"`
+	Workdir   string         `default:"" hash:"true"`
 }
 
 func NewExecJob(c *docker.Client) *ExecJob {
@@ -41,7 +42,7 @@ func (j *ExecJob) Hash() string {
 }
 
 func (j *ExecJob) buildExec() (*docker.Exec, error) {
-	exec, err := j.Client.CreateExec(docker.CreateExecOptions{
+	createOpts := docker.CreateExecOptions{
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,
@@ -49,8 +50,14 @@ func (j *ExecJob) buildExec() (*docker.Exec, error) {
 		Cmd:          args.GetArgs(j.Command),
 		Container:    j.Container,
 		User:         j.User,
-	})
+	}
 
+	// Only set WorkingDir if it's not empty
+	if j.Workdir != "" {
+		createOpts.WorkingDir = j.Workdir
+	}
+
+	exec, err := j.Client.CreateExec(createOpts)
 	if err != nil {
 		return exec, fmt.Errorf("error creating exec: %s", err)
 	}
