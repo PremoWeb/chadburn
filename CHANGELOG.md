@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/PremoWeb/chadburn/compare/v1.5.0...v1.5.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* fix tests after removing Pull field from RunJob struct ([90ee9b0](https://github.com/PremoWeb/chadburn/commit/90ee9b021b8d3938f686830334b292e2ff361ef9))
+
 # [1.5.0](https://github.com/PremoWeb/chadburn/compare/v1.4.0...v1.5.0) (2025-03-14)
 
 
