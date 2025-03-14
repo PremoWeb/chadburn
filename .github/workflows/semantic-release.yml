@@ -34,7 +34,7 @@ jobs:
               "@semantic-release/release-notes-generator",
               "@semantic-release/changelog",
               ["@semantic-release/exec", {
-                "prepareCmd": "echo ${nextRelease.version} > VERSION && sed -i 's/var version string/var version = \"${nextRelease.version}\"/' chadburn.go && sed -i 's/var build string/var build = \"'$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")'\"/' chadburn.go"
+                "prepareCmd": "echo ${nextRelease.version} > VERSION && sed -i 's/var version = \".*\"/var version = \"${nextRelease.version}\"/' chadburn.go && sed -i 's/var build = \".*\"/var build = \"'$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")'\"/' chadburn.go"
               }],
               ["@semantic-release/git", {
                 "assets": ["VERSION", "CHANGELOG.md", "chadburn.go"],
