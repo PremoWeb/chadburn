@@ -84,10 +84,8 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -o myapp-linux-amd64
 
       # Step 10: Attach Built Binary to Release
-      - name: Attach Go Binary to GitHub Release
-        uses: wangyoucao577/go-release-action@v1.32
+      - name: Attach Built Binary to GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: linux
-          goarch: amd64
-          binary_name: myapp
+          files: myapp-linux-amd64
