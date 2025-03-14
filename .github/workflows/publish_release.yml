@@ -28,13 +28,26 @@ jobs:
           SHORTREF=${GITHUB_SHA::8}
           VERSION=${GITHUB_REF#refs/tags/v}
           BRANCH_NAME=${GITHUB_REF#refs/heads/} # Extract branch name
+          
+          # Replace slashes with hyphens for Docker tag compatibility
+          SAFE_BRANCH_NAME=$(echo "${BRANCH_NAME}" | sed 's/\//-/g')
 
           # Add tags for Docker Hub Container registry
-          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
+          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
+          
+          # Only add branch tag if it's not a tag event
+          if [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            TAGS="${TAGS},${DOCKER_IMAGE}:${SAFE_BRANCH_NAME}"
+          fi
 
           # Add tags for Github Container Registry
           DOCKER_IMAGE=ghcr.io/premoweb/${GITHUB_REPOSITORY#*/}
-          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${BRANCH_NAME}"  # Include branch tag without refs/heads
+          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
+          
+          # Only add branch tag if it's not a tag event
+          if [[ "${GITHUB_REF}" == refs/heads/* ]]; then
+            TAGS="${TAGS},${DOCKER_IMAGE}:${SAFE_BRANCH_NAME}"
+          fi
 
           # Set output parameters.
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
