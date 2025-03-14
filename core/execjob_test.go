@@ -4,7 +4,7 @@ import (
 	"archive/tar"
 	"bytes"
 
-	"github.com/fsouza/go-dockerclient"
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/fsouza/go-dockerclient/testing"
 	. "gopkg.in/check.v1"
 )
@@ -40,6 +40,8 @@ func (s *SuiteExecJob) TestRun(c *C) {
 	job.Command = `echo -a "foo bar"`
 	job.User = "foo"
 	job.TTY = true
+	// Workdir is not set in the test because the Docker API version used in the test
+	// is too old to support it (requires API v1.35+)
 
 	e := NewExecution()
 

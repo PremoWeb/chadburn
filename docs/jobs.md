@@ -31,6 +31,10 @@ This job is executed inside a running container. Similar to `docker exec`
   - *description*: Allocate a pseudo-tty, similar to `docker exec -t`. See this [Stack Overflow answer](https://stackoverflow.com/questions/30137135/confused-about-docker-t-option-to-allocate-a-pseudo-tty) for more info.
   - *value*: Boolean, either `false` or `true`
   - *default*: `false`
+- **Workdir**
+  - *description*: Working directory in which the command is executed, similar to `docker exec --workdir <dir>`
+  - *value*: String, e.g. `/app`
+  - *default*: Container's default working directory
   
 ### INI-file example
 
@@ -41,6 +45,7 @@ container = nginx-proxy
 command = /bin/bash /flush-logs.sh
 user = www-data
 tty = false
+workdir = /var/log/nginx
 ```
 
 ### Docker labels example
@@ -52,6 +57,7 @@ docker run -it --rm \
     --label chadburn.job-exec.flush-nginx-logs.command="/bin/bash /flush-logs.sh" \
     --label chadburn.job-exec.flush-nginx-logs.user="www-data" \
     --label chadburn.job-exec.flush-nginx-logs.tty="false" \
+    --label chadburn.job-exec.flush-nginx-logs.workdir="/var/log/nginx" \
         nginx
 ```
 
