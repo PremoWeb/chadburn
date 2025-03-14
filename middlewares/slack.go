@@ -44,10 +44,10 @@ func (m *Slack) ContinueOnStop() bool {
 // Run sends a message to the slack channel, its close stop the exection to
 // collect the metrics
 func (m *Slack) Run(ctx *core.Context) error {
-	err := ctx.Next()
+	err := ctx.Run()
 	ctx.Stop(err)
 
-	if ctx.Execution.Failed || !m.SlackOnlyOnError {
+	if ctx.Execution.Failed() || !m.SlackOnlyOnError {
 		m.pushMessage(ctx)
 	}
 
@@ -75,24 +75,24 @@ func (m *Slack) buildMessage(ctx *core.Context) *slackMessage {
 
 	msg.Text = fmt.Sprintf(
 		"Job *%q* finished in *%s*, command `%s`",
-		ctx.Job.GetName(), ctx.Execution.Duration, ctx.Job.GetCommand(),
+		ctx.Job.GetName(), ctx.Execution.Duration(), ctx.Job.GetCommand(),
 	)
 
-	if ctx.Execution.Failed {
+	if ctx.Execution.Failed() {
+		errText := "Unknown error"
+		if ctx.Execution.Error() != nil {
+			errText = ctx.Execution.Error().Error()
+		}
+
 		msg.Attachments = append(msg.Attachments, slackAttachment{
 			Title: "Execution failed",
-			Text:  ctx.Execution.Error.Error(),
+			Text:  errText,
 			Color: "#F35A00",
 		})
-	} else if ctx.Execution.Skipped {
+	} else if ctx.Execution.Skipped() {
 		msg.Attachments = append(msg.Attachments, slackAttachment{
 			Title: "Execution skipped",
 			Color: "#FFA500",
-		})
-	} else {
-		msg.Attachments = append(msg.Attachments, slackAttachment{
-			Title: "Execution successful",
-			Color: "#7CD197",
 		})
 	}
 

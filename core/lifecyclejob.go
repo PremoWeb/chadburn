@@ -2,8 +2,6 @@ package core
 
 import (
 	"reflect"
-
-	docker "github.com/fsouza/go-dockerclient"
 )
 
 // LifecycleEventType represents the type of container lifecycle event
@@ -19,14 +17,14 @@ const (
 // LifecycleJob represents a job that runs once on container lifecycle events
 type LifecycleJob struct {
 	BareJob   `mapstructure:",squash"`
-	Client    *docker.Client     `json:"-"`
+	Client    DockerClient       `json:"-"`
 	Container string             `hash:"true"` // Container ID or name to monitor
 	EventType LifecycleEventType `hash:"true"` // Type of event to trigger on (start, stop)
 	Executed  bool               `hash:"-"`    // Whether this job has been executed
 }
 
 // NewLifecycleJob creates a new LifecycleJob
-func NewLifecycleJob(c *docker.Client) *LifecycleJob {
+func NewLifecycleJob(c DockerClient) *LifecycleJob {
 	return &LifecycleJob{
 		Client:    c,
 		EventType: ContainerStart, // Default to start event

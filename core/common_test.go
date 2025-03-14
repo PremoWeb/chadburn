@@ -30,10 +30,9 @@ func (s *SuiteCommon) TestNewContext(c *C) {
 }
 
 func (s *SuiteCommon) TestContextNextError(c *C) {
-	mA := &TestMiddlewareAltA{}
-	mB := &TestMiddlewareAltB{}
-	mC := &TestMiddlewareAltC{}
-	mB.Error, mC.Error = fmt.Errorf("foo"), fmt.Errorf("foo")
+	mA := &TestMiddleware{Error: fmt.Errorf("foo")}
+	mB := &TestMiddleware{}
+	mC := &TestMiddleware{}
 
 	j := &TestJob{}
 	j.Use(mA, mB, mC)
@@ -41,31 +40,37 @@ func (s *SuiteCommon) TestContextNextError(c *C) {
 	e := NewExecution()
 
 	h := NewScheduler(&TestLogger{})
-	ctx := NewContext(h, j, e)
-	ctx.Start()
+	ctx := &Context{
+		Scheduler:   h,
+		Job:         j,
+		Logger:      h.Logger,
+		Execution:   e,
+		middlewares: j.Middlewares(),
+	}
 
-	err := ctx.Next()
-	c.Assert(err, IsNil)
+	err := ctx.Run()
+	c.Assert(err, NotNil)
+	c.Assert(err.Error(), Equals, "foo")
 	c.Assert(mA.Called, Equals, 1)
 	c.Assert(mB.Called, Equals, 0)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.IsRunning, Equals, true)
+	c.Assert(ctx.Execution.Error(), Equals, nil)
 
-	err = ctx.Next()
-	c.Assert(err, IsNil)
-	c.Assert(mB.Called, Equals, 1)
+	err = ctx.Run()
+	c.Assert(err, NotNil)
+	c.Assert(mB.Called, Equals, 0)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.IsRunning, Equals, false)
+	c.Assert(ctx.Execution.Error() != nil, Equals, true)
 
-	err = ctx.Next()
-	c.Assert(err, IsNil)
+	err = ctx.Run()
+	c.Assert(err, NotNil)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
 
-	err = ctx.Next()
-	c.Assert(err, IsNil)
+	err = ctx.Run()
+	c.Assert(err, NotNil)
 	c.Assert(j.Called, Equals, 0)
 }
 
@@ -161,14 +166,14 @@ func (s *SuiteCommon) TestContextNext(c *C) {
 	c.Assert(mB.Called, Equals, 0)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.IsRunning, Equals, true)
+	c.Assert(ctx.Execution.IsRunning(), Equals, true)
 
 	err = ctx.Next()
 	c.Assert(err, IsNil)
 	c.Assert(mB.Called, Equals, 1)
 	c.Assert(mC.Called, Equals, 0)
 	c.Assert(j.Called, Equals, 0)
-	c.Assert(ctx.Execution.IsRunning, Equals, true)
+	c.Assert(ctx.Execution.IsRunning(), Equals, true)
 
 	err = ctx.Next()
 	c.Assert(err, IsNil)
@@ -188,7 +193,7 @@ func (s *SuiteCommon) TestExecutionStart(c *C) {
 	exe := &Execution{}
 	exe.Start()
 
-	c.Assert(exe.IsRunning, Equals, true)
+	c.Assert(exe.IsRunning(), Equals, true)
 	c.Assert(exe.Date.IsZero(), Equals, false)
 }
 
@@ -197,11 +202,11 @@ func (s *SuiteCommon) TestExecutionStop(c *C) {
 	exe.Start()
 	exe.Stop(nil)
 
-	c.Assert(exe.IsRunning, Equals, false)
-	c.Assert(exe.Failed, Equals, false)
-	c.Assert(exe.Skipped, Equals, false)
-	c.Assert(exe.Error, Equals, nil)
-	c.Assert(exe.Duration.Seconds() > .0, Equals, true)
+	c.Assert(exe.IsRunning(), Equals, false)
+	c.Assert(exe.Failed(), Equals, false)
+	c.Assert(exe.Skipped(), Equals, false)
+	c.Assert(exe.Error(), Equals, nil)
+	c.Assert(exe.Duration().Seconds() > .0, Equals, true)
 }
 
 func (s *SuiteCommon) TestExecutionStopError(c *C) {
@@ -211,25 +216,23 @@ func (s *SuiteCommon) TestExecutionStopError(c *C) {
 	exe.Start()
 	exe.Stop(err)
 
-	c.Assert(exe.IsRunning, Equals, false)
-	c.Assert(exe.Failed, Equals, true)
-	c.Assert(exe.Skipped, Equals, false)
-	c.Assert(exe.Error, Equals, err)
-
-	// Having some issues testing in 1.16.x
-	// c.Assert(exe.Duration.Seconds() > .0, Equals, true)
-
+	c.Assert(exe.IsRunning(), Equals, false)
+	c.Assert(exe.Failed(), Equals, true)
+	c.Assert(exe.Skipped(), Equals, false)
+	c.Assert(exe.Error(), Equals, err)
+	c.Assert(exe.Duration().Seconds() > .0, Equals, true)
 }
 
-func (s *SuiteCommon) TestExecutionStopErrorSkip(c *C) {
+func (s *SuiteCommon) TestExecutionStopSkip(c *C) {
 	exe := &Execution{}
 	exe.Start()
 	exe.Stop(ErrSkippedExecution)
 
-	c.Assert(exe.IsRunning, Equals, false)
-	c.Assert(exe.Failed, Equals, false)
-	c.Assert(exe.Skipped, Equals, true)
-	c.Assert(exe.Error, Equals, nil)
+	c.Assert(exe.IsRunning(), Equals, false)
+	c.Assert(exe.Failed(), Equals, false)
+	c.Assert(exe.Skipped(), Equals, true)
+	c.Assert(exe.Error(), Equals, ErrSkippedExecution)
+	c.Assert(exe.Duration().Seconds() > .0, Equals, true)
 }
 
 func (s *SuiteCommon) TestMiddlewareContainerUseTwice(c *C) {
@@ -285,11 +288,11 @@ func (m *TestMiddleware) Run(ctx *Context) error {
 	m.Called++
 
 	if m.Stop != nil {
-		ctx.Execution.Stop(m.Stop)
+		ctx.Stop(m.Stop)
 	}
 
 	if m.Nested {
-		ctx.Next()
+		ctx.Run()
 	}
 
 	return m.Error

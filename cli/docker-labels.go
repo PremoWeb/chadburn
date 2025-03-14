@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/PremoWeb/Chadburn/core"
-	docker "github.com/fsouza/go-dockerclient"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -147,7 +146,7 @@ func setJobParam(params map[string]interface{}, paramName, paramVal string) {
 	params[paramName] = paramVal
 }
 
-func buildFromDockerLabels(client *docker.Client, labels map[string]string, container string) (map[string]core.Job, error) {
+func buildFromDockerLabels(client core.DockerClient, labels map[string]string, container string) (map[string]core.Job, error) {
 	jobs := make(map[string]core.Job, 0)
 	prefix := fmt.Sprintf("%s.", LabelNamespace)
 	prefixLen := len(prefix)
@@ -199,16 +198,16 @@ func buildFromDockerLabels(client *docker.Client, labels map[string]string, cont
 	return jobs, nil
 }
 
-func buildJob(client *docker.Client, jobType, jobName, containerId, containerName string) (core.Job, error) {
+func buildJob(client core.DockerClient, jobType, jobName, containerId, containerName string) (core.Job, error) {
 	switch jobType {
 	case "job-exec":
-		j := core.NewExecJob(client)
+		j := client.CreateExecJob()
 		j.Container = containerId
-		j.ContainerName = containerName
 		return j, nil
 	case "job-run":
-		j := core.NewRunJob(client)
-		j.Container = containerId
+		j := client.CreateRunJob()
+		// RunJob doesn't have Container field, but uses Image
+		// We'll set it during job configuration
 		return j, nil
 	case "job-local":
 		j := core.NewLocalJob()
@@ -216,11 +215,11 @@ func buildJob(client *docker.Client, jobType, jobName, containerId, containerNam
 		j.ContainerID = containerId
 		return j, nil
 	case "service":
-		j := core.NewServiceJob(client)
+		j := client.CreateServiceJob()
 		j.Container = containerId
 		return j, nil
 	case "job-lifecycle":
-		j := core.NewLifecycleJob(client)
+		j := client.CreateLifecycleJob()
 		j.Container = containerId
 		return j, nil
 	default:
@@ -256,6 +255,21 @@ func updateJobField(job core.Job, field, value string) error {
 			default:
 				return fmt.Errorf("unknown event type: %s", value)
 			}
+		} else if officialLifecycleJob, ok := job.(*core.OfficialLifecycleJob); ok {
+			switch value {
+			case "start":
+				officialLifecycleJob.EventType = core.ContainerStart
+			case "stop":
+				officialLifecycleJob.EventType = core.ContainerStop
+			default:
+				return fmt.Errorf("unknown event type: %s", value)
+			}
+		}
+	case "container":
+		// Handle container field for run jobs
+		if runJob, ok := job.(*core.OfficialRunJob); ok {
+			// For run jobs, we use the container value as the image
+			runJob.Image = value
 		}
 	default:
 		// TODO: handle other fields

@@ -35,10 +35,10 @@ func (m *Gotify) ContinueOnStop() bool {
 }
 
 func (m *Gotify) Run(ctx *core.Context) error {
-	err := ctx.Next()
+	err := ctx.Run()
 	ctx.Stop(err)
 
-	if ctx.Execution.Failed || !m.GotifyOnlyOnError {
+	if ctx.Execution.Failed() || !m.GotifyOnlyOnError {
 		m.pushMessage(ctx)
 	}
 
@@ -61,12 +61,12 @@ func (m *Gotify) buildMessage(ctx *core.Context) *gotifyMessage {
 
 	msg.Message = fmt.Sprintf(
 		"Job *%q* finished in *%s*, command `%s`",
-		ctx.Job.GetName(), ctx.Execution.Duration, ctx.Job.GetCommand(),
+		ctx.Job.GetName(), ctx.Execution.Duration(), ctx.Job.GetCommand(),
 	)
 
-	if ctx.Execution.Failed {
+	if ctx.Execution.Failed() {
 		msg.Message = "FAILED: " + msg.Message
-	} else if ctx.Execution.Skipped {
+	} else if ctx.Execution.Skipped() {
 		msg.Message = "Skipped: " + msg.Message
 	}
 	return msg

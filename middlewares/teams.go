@@ -43,10 +43,10 @@ func (m *Teams) ContinueOnStop() bool {
 // Run sends a message to the Teams channel, its close stop the execution to
 // collect the metrics
 func (m *Teams) Run(ctx *core.Context) error {
-	err := ctx.Next()
+	err := ctx.Run()
 	ctx.Stop(err)
 
-	if ctx.Execution.Failed || !m.TeamsOnlyOnError {
+	if ctx.Execution.Failed() || !m.TeamsOnlyOnError {
 		m.pushMessage(ctx)
 	}
 
@@ -71,7 +71,7 @@ func (m *Teams) buildMessage(ctx *core.Context) *teamsMessage {
 
 	title := fmt.Sprintf(
 		"Job *%q* finished in *%s*, command `%s`",
-		ctx.Job.GetName(), ctx.Execution.Duration, ctx.Job.GetCommand(),
+		ctx.Job.GetName(), ctx.Execution.Duration(), ctx.Job.GetCommand(),
 	)
 
 	s1 := teamsMessageSections{
@@ -82,14 +82,23 @@ func (m *Teams) buildMessage(ctx *core.Context) *teamsMessage {
 		Markdown:         true,
 	}
 
-	if ctx.Execution.Failed {
+	if ctx.Execution.Failed() {
 		msg.ThemeColor = "F35A00"
 		msg.Summary = "Execution failed"
-		s1.ActivitySubtitle = fmt.Sprintf("Execution failed: %v", ctx.Execution.Error.Error())
-	} else if ctx.Execution.Skipped {
+
+		errText := "Unknown error"
+		if ctx.Execution.Error() != nil {
+			errText = ctx.Execution.Error().Error()
+		}
+
+		s1.ActivitySubtitle = fmt.Sprintf("Execution failed: %v", errText)
+	} else if ctx.Execution.Skipped() {
 		msg.ThemeColor = "FFA500"
 		msg.Summary = "Execution skipped"
-		s1.ActivitySubtitle = fmt.Sprintf("Execution skipped")
+		s1.ActivitySubtitle = "Execution skipped"
+	} else {
+		msg.ThemeColor = "7CD197"
+		msg.Summary = "Execution successful"
 	}
 
 	msg.Sections = append(msg.Sections, s1)
@@ -109,7 +118,7 @@ func (m *Teams) buildMessage(ctx *core.Context) *teamsMessage {
 }
 
 func isSuccess(e *core.Execution) bool {
-	if e.Failed || e.Skipped {
+	if e.Failed() || e.Skipped() {
 		return false
 	}
 	return true

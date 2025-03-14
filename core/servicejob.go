@@ -2,17 +2,23 @@ package core
 
 import (
 	"fmt"
+	"io"
 
-	docker "github.com/fsouza/go-dockerclient"
 	"github.com/gobs/args"
 )
 
+// ServiceJob represents a job that runs a command in a Docker container as a service
 type ServiceJob struct {
 	BareJob   `mapstructure:",squash"`
-	Container string         `hash:"true"`
-	Client    *docker.Client `json:"-"`
-	TTY       bool           `default:"false" hash:"true"`
-	User      string         `default:"root" hash:"true"`
+	Container string       `hash:"true"`
+	Client    DockerClient `json:"-"`
+	TTY       bool         `default:"false" hash:"true"`
+	User      string       `default:"root" hash:"true"`
+}
+
+// NewServiceJob creates a new ServiceJob
+func NewServiceJob(c DockerClient) *ServiceJob {
+	return &ServiceJob{Client: c}
 }
 
 func (j *ServiceJob) Run(ctx *Context) error {
@@ -27,71 +33,54 @@ func (j *ServiceJob) Run(ctx *Context) error {
 	// Get processed command with variables replaced
 	processedCommand := j.GetProcessedCommand(varContext)
 
-	exec, err := j.buildExec(processedCommand)
-	if err != nil {
-		return err
-	}
-
-	if err := j.startExec(exec, ctx.Execution); err != nil {
-		return err
-	}
-
-	return j.inspectExec(exec.ID)
-}
-
-func (j *ServiceJob) buildExec(processedCommand string) (*docker.Exec, error) {
+	// Check if container exists and is running
 	container, err := j.Client.InspectContainer(j.Container)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("error inspecting container: %s", err)
 	}
 
 	if !container.State.Running {
-		return nil, fmt.Errorf("unable to exec because container %q is not running", j.Container)
+		return fmt.Errorf("unable to exec because container %q is not running", j.Container)
 	}
 
-	var cmds []string
-	if processedCommand != "" {
-		cmds = args.GetArgs(processedCommand)
-	}
-
-	exec, err := j.Client.CreateExec(docker.CreateExecOptions{
+	// Create exec config
+	config := &ExecConfig{
 		AttachStdin:  false,
 		AttachStdout: true,
 		AttachStderr: true,
 		Tty:          j.TTY,
-		Cmd:          cmds,
-		Container:    j.Container,
 		User:         j.User,
-	})
-
-	if err != nil {
-		return exec, fmt.Errorf("error creating exec: %s", err)
 	}
 
-	return exec, nil
-}
-
-func (j *ServiceJob) startExec(exec *docker.Exec, e *Execution) error {
-	err := j.Client.StartExec(exec.ID, docker.StartExecOptions{
-		OutputStream: e.OutputStream,
-		ErrorStream:  e.ErrorStream,
-	})
-
+	// Create exec instance
+	execID, err := j.Client.CreateExec(j.Container, args.GetArgs(processedCommand), config)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating exec: %s", err)
 	}
 
-	return nil
-}
-
-func (j *ServiceJob) inspectExec(execID string) error {
-	execInspect, err := j.Client.InspectExec(execID)
+	// Start exec
+	reader, err := j.Client.StartExec(execID, true, true)
 	if err != nil {
-		return err
+		return fmt.Errorf("error starting exec: %s", err)
+	}
+	defer reader.Close()
+
+	// Copy output to the execution streams
+	if ctx.Execution.OutputStream != nil {
+		_, err = io.Copy(ctx.Execution.OutputStream, reader)
+		if err != nil {
+			return fmt.Errorf("error copying output: %s", err)
+		}
 	}
 
-	if execInspect.ExitCode != 0 {
-		return fmt.Errorf("error non-zero exit code: %d", execInspect.ExitCode)
+	// Inspect exec
+	inspect, err := j.Client.InspectExec(execID)
+	if err != nil {
+		return fmt.Errorf("error inspecting exec: %s", err)
+	}
+
+	if inspect.ExitCode != 0 {
+		return fmt.Errorf("error non-zero exit code: %d", inspect.ExitCode)
 	}
 
 	return nil
@@ -100,10 +89,6 @@ func (j *ServiceJob) inspectExec(execID string) error {
 func (j *ServiceJob) GetProcessedCommand(varContext VariableContext) string {
 	// Use the BareJob's implementation
 	return j.BareJob.GetProcessedCommand(varContext)
-}
-
-func NewServiceJob(c *docker.Client) *ServiceJob {
-	return &ServiceJob{Client: c}
 }
 
 // ... rest of the existing code ...

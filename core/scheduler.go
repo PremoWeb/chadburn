@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/robfig/cron/v3"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/robfig/cron/v3"
 )
 
 var (
@@ -122,19 +122,20 @@ type jobWrapper struct {
 }
 
 func (w *jobWrapper) Run() {
-	w.s.wg.Add(1)
-	defer w.s.wg.Done()
-
-	e := NewExecution()
-	ctx := NewContext(w.s, w.j, e)
+	ctx := &Context{
+		Scheduler:   w.s,
+		Job:         w.j,
+		Logger:      w.s.Logger,
+		Execution:   NewExecution(),
+		middlewares: w.s.Middlewares(),
+	}
 
 	w.start(ctx)
-	err := ctx.Next()
+	err := ctx.Run()
 	w.stop(ctx, err)
 }
 
 func (w *jobWrapper) start(ctx *Context) {
-	ctx.Start()
 	ctx.Log("Started - " + ctx.Job.GetCommand())
 }
 
@@ -142,8 +143,8 @@ func (w *jobWrapper) stop(ctx *Context, err error) {
 	ctx.Stop(err)
 
 	errText := "none"
-	if ctx.Execution.Error != nil {
-		errText = ctx.Execution.Error.Error()
+	if ctx.Execution.Error() != nil {
+		errText = ctx.Execution.Error().Error()
 	}
 
 	output := ctx.Execution.OutputStream.Bytes()
@@ -154,15 +155,15 @@ func (w *jobWrapper) stop(ctx *Context, err error) {
 
 	msg := fmt.Sprintf(
 		"Finished in %q, failed: %t, skipped: %t, error: %s",
-		ctx.Execution.Duration, ctx.Execution.Failed, ctx.Execution.Skipped, errText,
+		ctx.Execution.Duration(), ctx.Execution.Failed(), ctx.Execution.Skipped(), errText,
 	)
 
 	RunsTotal.WithLabelValues(ctx.Job.GetName()).Inc()
-	if ctx.Execution.Failed {
+	if ctx.Execution.Failed() {
 		RunErrorsTotal.WithLabelValues(ctx.Job.GetName()).Inc()
 	}
 	RunLatest.WithLabelValues(ctx.Job.GetName()).SetToCurrentTime()
-	RunDuration.WithLabelValues(ctx.Job.GetName()).Observe(ctx.Execution.Duration.Seconds())
+	RunDuration.WithLabelValues(ctx.Job.GetName()).Observe(ctx.Execution.Duration().Seconds())
 
 	ctx.Log(msg)
 }

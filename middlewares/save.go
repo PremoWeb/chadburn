@@ -40,10 +40,10 @@ func (m *Save) ContinueOnStop() bool {
 
 // Run save the result of the execution to disk
 func (m *Save) Run(ctx *core.Context) error {
-	err := ctx.Next()
+	err := ctx.Run()
 	ctx.Stop(err)
 
-	if ctx.Execution.Failed || !m.SaveOnlyOnError {
+	if ctx.Execution.Failed() || !m.SaveOnlyOnError {
 		err := m.saveToDisk(ctx)
 		if err != nil {
 			ctx.Logger.Errorf("Save error: %q", err)

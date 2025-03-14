@@ -34,5 +34,5 @@ func (m *Overlap) Run(ctx *core.Context) error {
 		ctx.Stop(core.ErrSkippedExecution)
 	}
 
-	return ctx.Next()
+	return ctx.Run()
 }

@@ -31,7 +31,11 @@ type Config struct {
 	LifecycleJobs map[string]*LifecycleJobConfig `gcfg:"job-lifecycle" mapstructure:"job-lifecycle,squash"`
 	sh            *core.Scheduler
 	dockerHandler *DockerHandler
-	logger        core.Logger
+	// New official Docker handler
+	officialDockerHandler *OfficialDockerHandler
+	// Flag to indicate if we're using the official Docker client
+	useOfficialDocker bool
+	logger            core.Logger
 }
 
 func NewConfig(logger core.Logger) *Config {
@@ -70,14 +74,43 @@ func (c *Config) InitializeApp(dd bool) error {
 
 	if !dd {
 		var err error
-		c.dockerHandler, err = NewDockerHandler(c, c.logger)
+
+		// Try to use the official Docker client first
+		c.officialDockerHandler, err = NewOfficialDockerHandler(c, c.logger)
 		if err != nil {
-			return err
+			c.logger.Warningf("Failed to initialize official Docker client: %v. Falling back to legacy client.", err)
+
+			// Fall back to the legacy Docker client
+			c.dockerHandler, err = NewDockerHandler(c, c.logger)
+			if err != nil {
+				return err
+			}
+			c.useOfficialDocker = false
+		} else {
+			c.useOfficialDocker = true
+			c.logger.Noticef("Using official Docker client")
+		}
+
+		// Set lifecycle jobs for the appropriate handler
+		if c.useOfficialDocker {
+			c.officialDockerHandler.SetLifecycleJobs(c.LifecycleJobs)
+		} else {
+			c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
 		}
 
 		for name, j := range c.ExecJobs {
 			defaults.SetDefaults(j)
-			j.Client = c.dockerHandler.GetInternalDockerClient()
+			if c.useOfficialDocker {
+				// We can't use the official client for ExecJobs yet
+				// This will need to be updated in a future PR
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					return err
+				}
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			}
 			j.Name = name
 			j.buildMiddlewares()
 			c.sh.AddJob(j)
@@ -85,7 +118,17 @@ func (c *Config) InitializeApp(dd bool) error {
 
 		for name, j := range c.RunJobs {
 			defaults.SetDefaults(j)
-			j.Client = c.dockerHandler.GetInternalDockerClient()
+			if c.useOfficialDocker {
+				// We can't use the official client for RunJobs yet
+				// This will need to be updated in a future PR
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					return err
+				}
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			}
 			j.Name = name
 			j.buildMiddlewares()
 			c.sh.AddJob(j)
@@ -94,22 +137,41 @@ func (c *Config) InitializeApp(dd bool) error {
 		for name, j := range c.ServiceJobs {
 			defaults.SetDefaults(j)
 			j.Name = name
-			j.Client = c.dockerHandler.GetInternalDockerClient()
+			if c.useOfficialDocker {
+				// We can't use the official client for ServiceJobs yet
+				// This will need to be updated in a future PR
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					return err
+				}
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			}
 			j.buildMiddlewares()
 			c.sh.AddJob(j)
 		}
 
 		for name, j := range c.LifecycleJobs {
 			defaults.SetDefaults(j)
-			j.Client = c.dockerHandler.GetInternalDockerClient()
+			// Set the Docker client based on which handler we're using
+			if c.useOfficialDocker {
+				// We can't use the official client for LifecycleJobs yet
+				// This will need to be updated in a future PR
+				var err error
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					return err
+				}
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				j.Client = c.dockerHandler.GetInternalDockerClient()
+			}
 			j.Name = name
 			j.buildMiddlewares()
 			// Lifecycle jobs are not added to the scheduler
 			// They will be triggered by Docker events
 		}
-
-		// Pass the lifecycle jobs to the DockerHandler
-		c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
 	}
 
 	for name, j := range c.LocalJobs {
@@ -152,7 +214,22 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 				// so, lets take care of it by simply restarting
 				// For the hash to work properly, we must fill the fields before calling it
 				defaults.SetDefaults(newJob)
-				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+
+				// Set the Docker client based on which handler we're using
+				if c.useOfficialDocker {
+					// We can't use the official client for ExecJobs yet
+					// This will need to be updated in a future PR
+					var err error
+					c.dockerHandler, err = NewDockerHandler(c, c.logger)
+					if err != nil {
+						c.logger.Errorf("Failed to create Docker handler: %v", err)
+						continue
+					}
+					newJob.Client = c.dockerHandler.GetInternalDockerClient()
+				} else {
+					newJob.Client = c.dockerHandler.GetInternalDockerClient()
+				}
+
 				newJob.Name = newJobsName
 				if newJob.Hash() != j.Hash() {
 					// Remove from the scheduler
@@ -184,7 +261,22 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 		}
 		if !found {
 			defaults.SetDefaults(newJob)
-			newJob.Client = c.dockerHandler.GetInternalDockerClient()
+
+			// Set the Docker client based on which handler we're using
+			if c.useOfficialDocker {
+				// We can't use the official client for ExecJobs yet
+				// This will need to be updated in a future PR
+				var err error
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					c.logger.Errorf("Failed to create Docker handler: %v", err)
+					continue
+				}
+				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+			}
+
 			newJob.Name = newJobsName
 			newJob.buildMiddlewares()
 			c.sh.AddJob(newJob)
@@ -259,12 +351,27 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 
 		found := false
 		for newJobsName, newJob := range parsedLabelConfig.LifecycleJobs {
-			// Check if the job has changed
+			// Check if the schedule has changed
 			if name == newJobsName {
 				found = true
 				// For the hash to work properly, we must fill the fields before calling it
 				defaults.SetDefaults(newJob)
-				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+
+				// Set the Docker client based on which handler we're using
+				if c.useOfficialDocker {
+					// We can't use the official client for LifecycleJobs yet
+					// This will need to be updated in a future PR
+					var err error
+					c.dockerHandler, err = NewDockerHandler(c, c.logger)
+					if err != nil {
+						c.logger.Errorf("Failed to create Docker handler: %v", err)
+						continue
+					}
+					newJob.Client = c.dockerHandler.GetInternalDockerClient()
+				} else {
+					newJob.Client = c.dockerHandler.GetInternalDockerClient()
+				}
+
 				newJob.Name = newJobsName
 				if newJob.Hash() != j.Hash() {
 					// Update the job config
@@ -280,7 +387,7 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 		}
 	}
 
-	// Check for additions
+	// Check for aditions
 	for newJobsName, newJob := range parsedLabelConfig.LifecycleJobs {
 		found := false
 		for name := range c.LifecycleJobs {
@@ -291,7 +398,22 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 		}
 		if !found {
 			defaults.SetDefaults(newJob)
-			newJob.Client = c.dockerHandler.GetInternalDockerClient()
+
+			// Set the Docker client based on which handler we're using
+			if c.useOfficialDocker {
+				// We can't use the official client for LifecycleJobs yet
+				// This will need to be updated in a future PR
+				var err error
+				c.dockerHandler, err = NewDockerHandler(c, c.logger)
+				if err != nil {
+					c.logger.Errorf("Failed to create Docker handler: %v", err)
+					continue
+				}
+				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+			} else {
+				newJob.Client = c.dockerHandler.GetInternalDockerClient()
+			}
+
 			newJob.Name = newJobsName
 			newJob.buildMiddlewares()
 			c.LifecycleJobs[newJobsName] = newJob
@@ -299,7 +421,11 @@ func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
 	}
 
 	// Update the lifecycle jobs in the DockerHandler
-	c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
+	if c.useOfficialDocker {
+		c.officialDockerHandler.SetLifecycleJobs(c.LifecycleJobs)
+	} else {
+		c.dockerHandler.SetLifecycleJobs(c.LifecycleJobs)
+	}
 }
 
 // ExecJobConfig contains all configuration params needed to build a ExecJob
