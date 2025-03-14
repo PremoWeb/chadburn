@@ -187,4 +187,44 @@ All logs include timestamps in the format `YYYY-MM-DD HH:MM:SS.mmm`. You can als
 
 #### Logging Options
 
-- `smtp-host`,
+- `smtp-host`, `smtp-port`, `smtp-user`, `smtp-password`: SMTP server configuration for email notifications.
+- `email-to`, `email-from`: Email addresses for notifications.
+- `mail-only-on-error`: If set to true, emails are only sent when a job fails.
+- `insecure-skip-verify`: If set to true, skips TLS certificate verification for SMTP.
+- `slack-webhook`: Webhook URL for Slack notifications.
+- `slack-only-on-error`: If set to true, Slack messages are only sent when a job fails.
+- `save-folder`: Directory where execution logs should be saved.
+- `save-only-on-error`: If set to true, logs are only saved when a job fails.
+
+Example configuration with logging:
+
+```ini
+[global]
+smtp-host = smtp.example.com
+smtp-port = 587
+smtp-user = user
+smtp-password = password
+email-to = alerts@example.com
+email-from = chadburn@example.com
+mail-only-on-error = true
+
+slack-webhook = https://hooks.slack.com/services/XXX/YYY/ZZZ
+slack-only-on-error = true
+
+save-folder = /var/log/chadburn
+save-only-on-error = false
+```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Ofelia](https://github.com/mcuadros/ofelia) - The original project that inspired Chadburn.
+- [Cron](https://github.com/robfig/cron) - The Go cron library used by Chadburn.
+- [Docker](https://www.docker.com/) - The container platform that Chadburn integrates with.
