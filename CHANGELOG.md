@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/PremoWeb/chadburn/compare/v1.4.0...v1.5.0) (2025-03-14)
+
+
+### Features
+
+* add support for variables in job commands ([8b392ea](https://github.com/PremoWeb/chadburn/commit/8b392ea965272afca328b844b1b58b826e157abd))
+
 # [1.4.0](https://github.com/PremoWeb/chadburn/compare/v1.3.8...v1.4.0) (2025-03-14)
 
 
