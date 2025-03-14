@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/PremoWeb/chadburn/compare/v1.3.0...v1.3.1) (2025-03-14)
+
+
+### Bug Fixes
+
+* update go.mod to use Go 1.19 and remove toolchain directive ([bf47752](https://github.com/PremoWeb/chadburn/commit/bf477527a355e15245dc9aaaa1a3327cafc6b38a))
+
 # [1.3.0](https://github.com/PremoWeb/chadburn/compare/v1.2.1...v1.3.0) (2025-03-14)
 
 
