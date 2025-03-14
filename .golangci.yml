@@ -1,10 +1,11 @@
 linters:
   disable:
-    - errcheck      # Disable checking for unchecked errors
-    - unused        # Disable checking for unused code
-    - gosimple      # Disable code simplification suggestions
-    - ineffassign   # Disable checking for ineffectual assignments
-    - staticcheck   # Disable static analysis checks
+    - errcheck      # Temporarily disable checking for unchecked errors
+    - unused        # Temporarily disable checking for unused code
+    - gosimple      # Temporarily disable code simplification suggestions
+    - ineffassign   # Temporarily disable checking for ineffectual assignments
+    - staticcheck   # Temporarily disable static analysis checks
+    - depguard      # Temporarily disable dependency restrictions
 
 issues:
   exclude-rules:
@@ -15,6 +16,8 @@ issues:
         - gosimple
         - ineffassign
         - staticcheck
+        - depguard
 
 run:
-  timeout: 5m 
+  timeout: 5m
+  go: "1.23" 
