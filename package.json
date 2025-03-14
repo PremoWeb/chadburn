@@ -1,0 +1,30 @@
+{
+  "name": "chadburn",
+  "version": "1.0.0",
+  "description": "[![GitHub release](https://img.shields.io/github/v/release/PremoWeb/Chadburn)](https://github.com/PremoWeb/Chadburn/releases) [![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)](https://github.com/PremoWeb/Chadburn/actions?query=workflow%3A%22Testing+Status%22) [![Docker Pulls](https://img.shields.io/docker/pulls/premoweb/chadburn)](https://hub.docker.com/r/premoweb/chadburn) [![Docker Image Size](https://img.shields.io/docker/image-size/premoweb/chadburn/latest)](https://hub.docker.com/r/premoweb/chadburn) [![License](https://img.shields.io/github/license/PremoWeb/Chadburn)](https://github.com/PremoWeb/Chadburn/blob/main/LICENSE)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PremoWeb/chadburn.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PremoWeb/chadburn/issues"
+  },
+  "homepage": "https://github.com/PremoWeb/chadburn#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "husky": "^8.0.0"
+  }
+}

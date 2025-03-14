@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Add any pre-commit checks here
+# For example, you could run tests, linting, etc.
+echo "Running pre-commit checks..."
+
+# Example: Run Go tests
+# go test ./...
+
+# Example: Run Go linting
+# golangci-lint run
+
+# If all checks pass, allow the commit
+exit 0

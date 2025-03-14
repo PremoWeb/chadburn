@@ -62,6 +62,33 @@ docs: update README with new configuration options
 chore(deps): update dependencies
 ```
 
+### Git Hooks
+
+This repository uses Git hooks to enforce commit message format and code quality. The hooks are managed by Husky and commitlint.
+
+#### Setup
+
+After cloning the repository, run:
+
+```bash
+npm install
+```
+
+This will set up the Git hooks automatically.
+
+#### Commit Message Validation
+
+When you commit changes, the commit-msg hook will validate your commit message against the Conventional Commits format. If the message doesn't follow the format, the commit will be rejected.
+
+#### Pre-commit Checks
+
+The pre-commit hook runs various checks before allowing a commit, such as:
+- Code formatting
+- Linting
+- Tests
+
+If any of these checks fail, the commit will be rejected.
+
 ## Pull Request Process
 
 1. Ensure your code adheres to the project's coding standards.
