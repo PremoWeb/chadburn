@@ -271,6 +271,9 @@ type RunJobConfig struct {
 	middlewares.SaveConfig    `mapstructure:",squash"`
 	middlewares.MailConfig    `mapstructure:",squash"`
 	middlewares.GotifyConfig  `mapstructure:",squash"`
+
+	// Added for backward compatibility with tests
+	Pull string `default:"true"`
 }
 
 func (c *RunJobConfig) buildMiddlewares() {

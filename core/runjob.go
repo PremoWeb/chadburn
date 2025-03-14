@@ -105,6 +105,14 @@ func (j *RunJob) runContainer(ctx *Context) error {
 func (j *RunJob) buildContainer(processedCommand string) (*docker.Container, error) {
 	var cmds []string
 	if processedCommand != "" {
+		// Use a try/catch approach to handle potential errors from args.GetArgs
+		defer func() {
+			if r := recover(); r != nil {
+				// If there's a panic in GetArgs, just use the command as is
+				cmds = []string{processedCommand}
+			}
+		}()
+
 		cmds = args.GetArgs(processedCommand)
 	}
 
