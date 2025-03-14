@@ -3,8 +3,6 @@ name: Publish Releases
 on:
   # Triggers on tag creation
   create:
-    tags:
-      - v*
   # Triggers on release creation
   release:
     types: [created]
@@ -70,7 +68,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v7,linux/arm/v6
+          platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v7
           push: true
           tags: ${{ steps.prep.outputs.tags }}
 
