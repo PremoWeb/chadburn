@@ -170,7 +170,7 @@ func (s *SuiteConfig) TestLabelsConfig(c *C) {
 					}}},
 				},
 			},
-			Comment: "Local/Run/Service jobs from non-service container ignored",
+			Comment: "Local jobs from non-service container ignored, but job-run labels on target containers are supported",
 		},
 		{
 			Labels: map[string]map[string]string{
