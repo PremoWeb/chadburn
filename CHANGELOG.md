@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/PremoWeb/chadburn/compare/v1.3.8...v1.4.0) (2025-03-14)
+
+
+### Features
+
+* add workdir parameter to job-exec ([7979d52](https://github.com/PremoWeb/chadburn/commit/7979d5202f17e399cbaf8379635b9278cc282180)), closes [#100](https://github.com/PremoWeb/chadburn/issues/100)
+
 ## [1.3.8](https://github.com/PremoWeb/chadburn/compare/v1.3.7...v1.3.8) (2025-03-14)
 
 
