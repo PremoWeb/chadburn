@@ -88,5 +88,6 @@ jobs:
         uses: wangyoucao577/go-release-action@v1.32
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            myapp-linux-amd64
+          goos: linux
+          goarch: amd64
+          binary_name: myapp
