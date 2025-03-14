@@ -13,7 +13,7 @@ import (
 var version string
 var build string
 
-const logFormat = "%{color}%{shortfile} ▶ %{level}%{color:reset} %{message}"
+const logFormat = "%{color}%{time:2006-01-02 15:04:05.000} %{shortfile} ▶ %{level}%{color:reset} %{message}"
 
 func buildLogger() core.Logger {
 	stdout := logging.NewLogBackend(os.Stdout, "", 0)
