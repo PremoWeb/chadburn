@@ -1,10 +1,15 @@
 # [1.6.0](https://github.com/PremoWeb/chadburn/compare/v1.5.1...v1.6.0) (2025-03-14)
 
 
+### Bug Fixes
+
+* avoid copying mutex in LifecycleJob.Run method ([aa52ac1](https://github.com/PremoWeb/chadburn/commit/aa52ac11890c932d8921813a3968e962566464b9))
+
+
 ### Features
 
 * migrate from fsouza/go-dockerclient to official Docker client library ([commit-hash](https://github.com/PremoWeb/chadburn/commit/commit-hash))
-
+* add support for container lifecycle jobs (issue [#68](https://github.com/PremoWeb/chadburn/issues/68)) ([defc60f](https://github.com/PremoWeb/chadburn/commit/defc60f9d087b15d368008f3ac321e71679c30cb))
 
 ## [1.5.1](https://github.com/PremoWeb/chadburn/compare/v1.5.0...v1.5.1) (2025-03-14)
 

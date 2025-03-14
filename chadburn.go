@@ -11,7 +11,7 @@ import (
 )
 
 var version = "1.6.0"
-var build = "2025-03-14T19:58:23Z"
+var build = "2025-03-14T20:15:58Z"
 
 const logFormat = "%{color}%{time:2006-01-02 15:04:05.000} %{shortfile} ▶ %{level}%{color:reset} %{message}"
 
