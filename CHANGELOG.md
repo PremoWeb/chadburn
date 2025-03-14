@@ -1,3 +1,10 @@
+## [1.3.4](https://github.com/PremoWeb/chadburn/compare/v1.3.3...v1.3.4) (2025-03-14)
+
+
+### Bug Fixes
+
+* add golangci-lint config to disable problematic linters ([f01cdcd](https://github.com/PremoWeb/chadburn/commit/f01cdcdb65d543c714a357c9bf96abe72e941f97))
+
 ## [1.3.3](https://github.com/PremoWeb/chadburn/compare/v1.3.2...v1.3.3) (2025-03-14)
 
 
