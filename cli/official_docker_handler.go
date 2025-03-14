@@ -25,6 +25,7 @@ func NewOfficialDockerHandler(notifier dockerLabelsUpdate, logger core.Logger) (
 
 	client, err := core.NewDockerClient()
 	if err != nil {
+		cancel() // Cancel the context if there's an error
 		return nil, err
 	}
 
