@@ -1,4 +1,4 @@
-FROM golang:1.23.2-alpine AS builder
+FROM golang:1.19-alpine AS builder
 
 LABEL org.opencontainers.image.description="Cron alternative for Docker Swarm enviornments."
 
