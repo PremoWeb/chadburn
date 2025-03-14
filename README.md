@@ -33,6 +33,8 @@ Various solutions exist, including containerized cron implementations and comman
 
 Chadburn's primary feature is its ability to execute commands directly within Docker containers. Utilizing Docker's API, Chadburn mimics the behavior of [`exec`](https://docs.docker.com/reference/commandline/exec/), enabling commands to run inside active containers. Additionally, it allows for command execution in new containers, which are destroyed after use.
 
+Chadburn also supports variable substitution in job commands, allowing you to reference container information dynamically using syntax like `{{.Container.Name}}` and `{{.Container.ID}}`. This makes it easier to create reusable job configurations that can interact with containers without hardcoding their names or IDs.
+
 ---
 
 ## Configuration

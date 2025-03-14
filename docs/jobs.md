@@ -4,6 +4,7 @@
 - [job-run](#job-run)
 - [job-local](#job-local)
 - [job-service-run](#job-service-run)
+- [Variable Substitution](#variable-substitution)
 
 ## Job-exec
 
@@ -209,3 +210,37 @@ image = ubuntu
 network = swarm_network
 command =  touch /tmp/example
 ```
+
+## Variable Substitution
+
+Chadburn supports variable substitution in job commands, allowing you to reference container information dynamically. This is particularly useful when you need to interact with containers without hardcoding their names or IDs.
+
+### Available Variables
+
+- **{{.Container.Name}}** - The name of the container
+- **{{.Container.ID}}** - The ID of the container
+
+### Examples
+
+```ini
+[job-exec "restart-container"]
+schedule = @daily
+container = my-container
+command = docker restart {{.Container.Name}}
+
+[job-local "log-container-id"]
+schedule = @hourly
+command = echo "Container ID is {{.Container.ID}}" >> /var/log/containers.log
+```
+
+With Docker labels:
+
+```sh
+docker run -it --rm \
+    --label chadburn.enabled=true \
+    --label chadburn.job-exec.restart-self.schedule="@daily" \
+    --label chadburn.job-exec.restart-self.command="docker restart {{.Container.Name}}" \
+        nginx
+```
+
+This feature allows for more flexible and reusable job configurations, especially when working with dynamic container environments where container names or IDs might change.

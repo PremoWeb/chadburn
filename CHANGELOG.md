@@ -4,6 +4,7 @@
 ### Features
 
 * add workdir parameter to job-exec ([7979d52](https://github.com/PremoWeb/chadburn/commit/7979d5202f17e399cbaf8379635b9278cc282180)), closes [#100](https://github.com/PremoWeb/chadburn/issues/100)
+* add support for variables in job commands ([8b392ea](https://github.com/PremoWeb/chadburn/commit/8b392ea)), closes [#66](https://github.com/PremoWeb/chadburn/issues/66)
 
 ## [1.3.8](https://github.com/PremoWeb/chadburn/compare/v1.3.7...v1.3.8) (2025-03-14)
 
