@@ -177,58 +177,8 @@ Chadburn offers three logging drivers that can be configured in the `[global]` s
 - `save` to save structured execution reports in a specified directory.
 - `slack` to send messages through a Slack webhook.
 
+All logs include timestamps in the format `YYYY-MM-DD HH:MM:SS.mmm`. You can also use Docker's built-in timestamp feature with `docker logs --timestamps chadburn` if you prefer Docker's timestamp format.
+
 #### Logging Options
 
-- `smtp-host`, `smtp-port`, `smtp-user`, `smtp-password`: SMTP server settings for email notifications.
-- `email-to`, `email-from`: Sender and receiver email addresses.
-- `mail-only-on-error`: Send email notifications only for failed executions.
-- `insecure-skip-verify`: Skip SSL verification for SMTP (available in version 1.0.2+).
-
-- `gotify-webhook`: URL for Gotify notifications.
-- `gotify-only-on-error`: Send Gotify messages only for failures.
-- `gotify-priority`: Priority level for Gotify messages.
-
-- `save-folder`: Directory for storing execution reports.
-- `save-only-on-error`: Save reports only for failed executions.
-
-- `slack-webhook`: URL for Slack notifications.
-- `slack-only-on-error`: Send Slack messages only for failures.
-
-### Overlap Prevention
-
-Chadburn prevents jobs from running concurrently if a previous execution has not yet completed. If a job has the `no-overlap` option enabled, it will not run multiple instances simultaneously.
-
----
-
-## Installation
-
-The simplest way to deploy **Chadburn** is using Docker, as outlined above.
-
-If you prefer not to use the provided Docker image, you can download a binary from the [releases](https://github.com/PremoWeb/Chadburn/releases) page.
-
----
-
-### Special Note for Caprover PaaS Users
-
-Chadburn is available as a One Click App in the official Caprover app repository. After deployment, you can configure the scheduler for your apps using the Service Override section in your app's configuration:
-
-```yaml
-TaskTemplate:
-  ContainerSpec:
-    Labels:
-      chadburn.enabled: "true"
-      chadburn.job-exec.rotate-puzzles.command: "php /var/www/rotate_games.php"
-      chadburn.job-exec.rotate-puzzles.schedule: "@every 10m"
-```
-
----
-
-### Acknowledgments
-
-We extend our gratitude to the Ofelia team and its contributors, particularly [@rdelcorro](https://github.com/rdelcorro) for addressing the issues highlighted in [this pull request](https://github.com/mcuadros/ofelia/pull/137).
-
-Thank you to the original authors and contributors of Ofelia for their foundational work.
-
---- 
-
-Feel free to modify or expand on any sections as needed!
+- `smtp-host`,
