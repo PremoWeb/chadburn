@@ -71,6 +71,7 @@ func (c *DockerHandler) watch() {
 }
 
 func (c *DockerHandler) GetDockerLabels() (map[string]map[string]string, error) {
+	// First, get containers with the required label
 	conts, err := c.dockerClient.ListContainers(docker.ListContainersOptions{
 		Filters: map[string][]string{
 			"label": {requiredLabelFilter},
@@ -80,24 +81,50 @@ func (c *DockerHandler) GetDockerLabels() (map[string]map[string]string, error) 
 		return nil, err
 	}
 
-	if len(conts) == 0 {
+	// Also get containers with job-run labels
+	jobRunConts, err := c.dockerClient.ListContainers(docker.ListContainersOptions{
+		Filters: map[string][]string{
+			"label": {labelPrefix + "." + jobRun},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Combine the two lists, avoiding duplicates
+	contMap := make(map[string]docker.APIContainers)
+	for _, cont := range conts {
+		if len(cont.Names) > 0 {
+			name := strings.TrimPrefix(cont.Names[0], "/")
+			contMap[name] = cont
+		}
+	}
+	for _, cont := range jobRunConts {
+		if len(cont.Names) > 0 {
+			name := strings.TrimPrefix(cont.Names[0], "/")
+			contMap[name] = cont
+		}
+	}
+
+	if len(contMap) == 0 {
 		return nil, ErrNoContainerWithChadburnEnabled
 	}
 
 	var labels = make(map[string]map[string]string)
 
-	for _, c := range conts {
-		if len(c.Names) > 0 && len(c.Labels) > 0 {
-			name := strings.TrimPrefix(c.Names[0], "/")
-			for k := range c.Labels {
-				// remove all not relevant labels
-				if !strings.HasPrefix(k, labelPrefix) {
-					delete(c.Labels, k)
-					continue
+	for name, c := range contMap {
+		if len(c.Labels) > 0 {
+			containerLabels := make(map[string]string)
+			for k, v := range c.Labels {
+				// only include relevant labels
+				if strings.HasPrefix(k, labelPrefix) {
+					containerLabels[k] = v
 				}
 			}
 
-			labels[name] = c.Labels
+			if len(containerLabels) > 0 {
+				labels[name] = containerLabels
+			}
 		}
 	}
 
