@@ -1,3 +1,16 @@
+# [1.7.0](https://github.com/PremoWeb/chadburn/compare/v1.6.0...v1.7.0) (2025-03-14)
+
+
+### Bug Fixes
+
+* prevent context leak in OfficialDockerHandler ([f1c83ff](https://github.com/PremoWeb/chadburn/commit/f1c83ff7b3ed3bb76eb0e566a62dbe0cf2cfff51))
+
+
+### Features
+
+* remove all references to the legacy polyfill dependency ([9792563](https://github.com/PremoWeb/chadburn/commit/97925638200cea0f9249dd26cb159e1ff664a4b9))
+* replace fsouza/go-dockerclient with official Docker client ([d607852](https://github.com/PremoWeb/chadburn/commit/d6078526a11913f00a5aa31d156783e05aef93dd))
+
 # [1.6.0](https://github.com/PremoWeb/chadburn/compare/v1.5.1...v1.6.0) (2025-03-14)
 
 
