@@ -1,3 +1,10 @@
+## [1.3.6](https://github.com/PremoWeb/chadburn/compare/v1.3.5...v1.3.6) (2025-03-14)
+
+
+### Bug Fixes
+
+* update publish_release workflow to properly handle tag-based releases ([4ad3071](https://github.com/PremoWeb/chadburn/commit/4ad3071e852b4e140fc8bc81841d56012b083c01))
+
 ## [1.3.5](https://github.com/PremoWeb/chadburn/compare/v1.3.4...v1.3.5) (2025-03-14)
 
 
