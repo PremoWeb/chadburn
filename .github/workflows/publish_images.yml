@@ -1,18 +1,13 @@
-name: Publish Releases
+name: Publish Docker Images
 
 on:
-  # Triggers on tag creation
-  create:
-    tags:
-      - v*
-  # Triggers on release creation
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
 
 jobs:
-  build-and-release:
+  docker:
     runs-on: ubuntu-latest
-
     steps:
       # Step 1: Checkout the repository
       - name: Checkout
@@ -24,15 +19,18 @@ jobs:
         run: |
           DOCKER_IMAGE=premoweb/${GITHUB_REPOSITORY#*/}
           SHORTREF=${GITHUB_SHA::8}
-          VERSION=${GITHUB_REF#refs/tags/v}
+          BRANCH_NAME=${GITHUB_REF#refs/heads/} # Extract branch name
           
+          # Replace slashes with hyphens for Docker tag compatibility
+          SAFE_BRANCH_NAME=$(echo "${BRANCH_NAME}" | sed 's/\//-/g')
+
           # Add tags for Docker Hub Container registry
-          TAGS="${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
-          
+          TAGS="${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${SAFE_BRANCH_NAME}"
+
           # Add tags for Github Container Registry
           DOCKER_IMAGE=ghcr.io/premoweb/${GITHUB_REPOSITORY#*/}
-          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest"
-          
+          TAGS="${TAGS},${DOCKER_IMAGE}:${SHORTREF},${DOCKER_IMAGE}:latest,${DOCKER_IMAGE}:${SAFE_BRANCH_NAME}"
+
           # Set output parameters.
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "docker_image=${DOCKER_IMAGE}" >> $GITHUB_OUTPUT
@@ -72,23 +70,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64,linux/ppc64le,linux/arm/v7,linux/arm/v6
           push: true
-          tags: ${{ steps.prep.outputs.tags }}
-
-      # Step 8: Set up Go environment for building binaries
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: 1.19
-
-      # Step 9: Build Go binary for linux/amd64 (add more builds if needed)
-      - name: Build Go Binary for linux/amd64
-        run: |
-          GOOS=linux GOARCH=amd64 go build -o myapp-linux-amd64
-
-      # Step 10: Attach Built Binary to Release
-      - name: Attach Go Binary to GitHub Release
-        uses: wangyoucao577/go-release-action@v1.32
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            myapp-linux-amd64
+          tags: ${{ steps.prep.outputs.tags }} 
