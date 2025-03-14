@@ -1,6 +1,10 @@
 # Chadburn: A Modern Job Scheduler
 
-[![GitHub version](https://badge.fury.io/gh/PremoWeb%2FChadburn.svg)](https://github.com/PremoWeb/Chadburn/releases) ![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)
+[![GitHub release](https://img.shields.io/github/v/release/PremoWeb/Chadburn)](https://github.com/PremoWeb/Chadburn/releases)
+[![Testing Status](https://github.com/PremoWeb/Chadburn/workflows/Testing%20Status/badge.svg)](https://github.com/PremoWeb/Chadburn/actions?query=workflow%3A%22Testing+Status%22)
+[![Docker Pulls](https://img.shields.io/docker/pulls/premoweb/chadburn)](https://hub.docker.com/r/premoweb/chadburn)
+[![Docker Image Size](https://img.shields.io/docker/image-size/premoweb/chadburn/latest)](https://hub.docker.com/r/premoweb/chadburn)
+[![License](https://img.shields.io/github/license/PremoWeb/Chadburn)](https://github.com/PremoWeb/Chadburn/blob/main/LICENSE)
 
 **Chadburn** is a lightweight job scheduler designed for __Docker__ environments, developed in Go. It serves as a contemporary replacement for the traditional [cron](https://en.wikipedia.org/wiki/Cron).
 
