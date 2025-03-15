@@ -13,5 +13,8 @@ services:
     restart: unless-stopped
     command: daemon --config=/etc/chadburn.conf
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro,z
       - "./test.conf:/etc/chadburn.conf"
+    user: "root"
+    environment:
+      - DOCKER_GID=${DOCKER_GID:-999}

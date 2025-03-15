@@ -108,6 +108,8 @@ docker run -it --rm \
     premoweb/chadburn:latest daemon
 ```
 
+> **Note**: If you encounter permission issues with the Docker socket, refer to our [Docker Socket Permissions Guide](docs/docker-socket-permissions.md) for solutions.
+
 The labels format is: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>`. This configuration method supports all capabilities provided by INI files.
 
 To execute `job-exec`, the target container must have the label `chadburn.enabled=true`.
