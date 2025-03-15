@@ -1,6 +1,9 @@
 package middlewares
 
-import . "gopkg.in/check.v1"
+import (
+	"github.com/PremoWeb/Chadburn/core"
+	. "gopkg.in/check.v1"
+)
 
 type SuiteOverlap struct {
 	BaseSuite
@@ -23,7 +26,7 @@ func (s *SuiteOverlap) TestRunOverlap(c *C) {
 	s.ctx.Job.NotifyStart()
 
 	m := NewOverlap(&OverlapConfig{NoOverlap: true})
-	c.Assert(m.Run(s.ctx), IsNil)
+	c.Assert(m.Run(s.ctx), Equals, core.ErrSkippedExecution)
 	c.Assert(s.ctx.Execution.IsRunning(), Equals, false)
 	c.Assert(s.ctx.Execution.Skipped(), Equals, true)
 }

@@ -51,7 +51,7 @@ func (s *SuiteGotify) TestRunSuccessFailed(c *C) {
 	s.ctx.Stop(errors.New("foo"))
 
 	m := NewGotify(&GotifyConfig{GotifyWebhook: ts.URL})
-	c.Assert(m.Run(s.ctx), IsNil)
+	c.Assert(m.Run(s.ctx), NotNil)
 }
 
 func (s *SuiteGotify) TestRunSuccessOnError(c *C) {

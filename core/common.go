@@ -82,7 +82,7 @@ func (c *Context) Run() error {
 
 	// Check if execution is still running
 	if c.Execution.Error() != nil {
-		return nil
+		return c.Execution.Error()
 	}
 
 	c.executed = true
@@ -131,6 +131,7 @@ type Execution struct {
 	current      int
 	start        time.Time
 	err          error
+	end          time.Time
 }
 
 func NewExecution() *Execution {
@@ -151,6 +152,7 @@ func (e *Execution) Start() {
 
 func (e *Execution) Stop(err error) {
 	e.err = err
+	e.end = time.Now()
 }
 
 func (e *Execution) Error() error {
@@ -295,5 +297,5 @@ func (c *Context) Next() error {
 
 // IsRunning returns true if the execution is running
 func (e *Execution) IsRunning() bool {
-	return e.start.IsZero() == false && e.err == nil
+	return e.start.IsZero() == false && e.end.IsZero() == true && e.err == nil
 }

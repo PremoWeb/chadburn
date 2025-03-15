@@ -40,8 +40,8 @@ func (s *SuiteTeams) TestRunTeamsSuccess(c *C) {
 func (s *SuiteTeams) TestRunTeamsSuccessFailed(c *C) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var m teamsMessage
-		b, _ := ioutil.ReadAll(r.Body)
-		_ = json.Unmarshal(b, &m)
+		err := json.NewDecoder(r.Body).Decode(&m)
+		c.Assert(err, Equals, nil)
 		c.Assert(m.Summary, Equals, "Execution failed")
 	}))
 
@@ -51,7 +51,7 @@ func (s *SuiteTeams) TestRunTeamsSuccessFailed(c *C) {
 	s.ctx.Stop(errors.New("foo"))
 
 	m := NewTeams(&TeamsConfig{TeamsWebhook: ts.URL})
-	c.Assert(m.Run(s.ctx), IsNil)
+	c.Assert(m.Run(s.ctx), NotNil)
 }
 
 func (s *SuiteTeams) TestRunTeamsSuccessOnError(c *C) {

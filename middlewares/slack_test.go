@@ -44,12 +44,14 @@ func (s *SuiteSlack) TestRunSuccess(c *C) {
 
 func (s *SuiteSlack) TestRunSuccessFailed(c *C) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var m slackMessage
-		json.Unmarshal([]byte(r.FormValue(slackPayloadVar)), &m)
+		err := r.ParseForm()
+		c.Assert(err, IsNil)
 
-		// Check if Attachments array is not empty before accessing its elements
-		c.Assert(len(m.Attachments), Not(Equals), 0)
-		c.Assert(m.Attachments[0].Title, Equals, "Execution failed")
+		var m slackMessage
+		err = json.Unmarshal([]byte(r.FormValue(slackPayloadVar)), &m)
+		c.Assert(err, IsNil)
+		c.Assert(len(m.Attachments), Equals, 1)
+		c.Assert(m.Attachments[0].Color, Equals, "#F35A00")
 	}))
 
 	defer ts.Close()
@@ -58,7 +60,7 @@ func (s *SuiteSlack) TestRunSuccessFailed(c *C) {
 	s.ctx.Stop(errors.New("foo"))
 
 	m := NewSlack(&SlackConfig{SlackWebhook: ts.URL})
-	c.Assert(m.Run(s.ctx), IsNil)
+	c.Assert(m.Run(s.ctx), NotNil)
 }
 
 func (s *SuiteSlack) TestRunSuccessOnError(c *C) {
