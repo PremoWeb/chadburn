@@ -1,0 +1,43 @@
+title: Chadburn Documentation
+description: Modern job scheduler for Docker environments
+theme: jekyll-theme-cayman
+baseurl: "/Chadburn"
+url: "https://premoweb.github.io"
+github:
+  repository_url: https://github.com/PremoWeb/Chadburn
+  is_project_page: true
+  owner_name: PremoWeb
+  owner_url: https://github.com/PremoWeb
+
+# Navigation
+header_pages:
+  - getting-started.md
+  - configuration.md
+  - jobs.md
+  - docker-integration.md
+  - troubleshooting.md
+  - advanced-topics.md
+  - deployment.md
+  - security.md
+  - examples.md
+  - faq.md
+  - contributing.md
+
+# Plugins
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Markdown processor
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Exclude files from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - .gitignore 
