@@ -21,7 +21,8 @@ const config = {
 			strict: true
 		}),
 		paths: {
-			base: '' // Use root path for all environments
+			base: '', // Use root path for all environments
+			relative: false // Use root-relative URLs for assets
 		}
 	}
 };
