@@ -1,3 +1,10 @@
+## [1.8.2](https://github.com/PremoWeb/chadburn/compare/v1.8.1...v1.8.2) (2025-03-15)
+
+
+### Bug Fixes
+
+* update GitHub Pages deployment workflow to use JamesIves action ([335f7e8](https://github.com/PremoWeb/chadburn/commit/335f7e84ef83e0e58e78064f1c72a6022752cd1a))
+
 ## [1.8.1](https://github.com/PremoWeb/chadburn/compare/v1.8.0...v1.8.1) (2025-03-15)
 
 
