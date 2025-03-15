@@ -6,6 +6,7 @@
 	// Get the current slug from the page store
 	$: slug = $page.params.slug;
 	$: title = formatTitle(slug);
+	$: markdownPath = `${base}/markdown/${slug}.md`;
 	
 	// Format the title from the slug
 	function formatTitle(slug: string): string {
@@ -23,7 +24,7 @@
 <div class="doc-page">
 	<h1>{title}</h1>
 	
-	<MarkdownContent path="{base}/markdown/{slug}.md" />
+	<MarkdownContent path={markdownPath} />
 </div>
 
 <style>

@@ -7,6 +7,9 @@ export function load({ params }) {
 // Prerender all documentation pages
 export const prerender = true;
 
+// Enable client-side routing
+export const csr = true;
+
 // Define the list of routes to prerender
 export const entries = () => [
   { slug: 'getting-started' },

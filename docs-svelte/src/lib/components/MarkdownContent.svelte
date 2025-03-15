@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate } from 'svelte';
 	import { renderMarkdown, fetchAndRenderMarkdown } from '$lib/markdown';
 	
 	export let content: string | undefined = undefined;
@@ -8,15 +8,18 @@
 	let html = '';
 	let loading = true;
 	let error: string | null = null;
+	let currentPath = path;
 	
-	onMount(async () => {
+	async function loadContent() {
 		try {
 			loading = true;
+			error = null;
 			
 			if (content) {
 				html = renderMarkdown(content);
 			} else if (path) {
 				html = await fetchAndRenderMarkdown(path);
+				currentPath = path;
 			} else {
 				error = 'No content or path provided';
 			}
@@ -25,6 +28,15 @@
 			console.error('Error rendering markdown:', e);
 		} finally {
 			loading = false;
+		}
+	}
+	
+	onMount(loadContent);
+	
+	// This will run whenever the component updates, including when props change
+	afterUpdate(() => {
+		if (path && path !== currentPath) {
+			loadContent();
 		}
 	});
 </script>
