@@ -22,8 +22,6 @@
 </svelte:head>
 
 <div class="doc-page">
-	<h1>{title}</h1>
-	
 	<MarkdownContent path={markdownPath} />
 </div>
 
