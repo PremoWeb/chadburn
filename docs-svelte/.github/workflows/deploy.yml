@@ -1,0 +1,33 @@
+name: Build and Deploy Svelte Docs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs-svelte/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+
+      - name: Setup Bun 🧶
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install and Build 🔧
+        working-directory: docs-svelte
+        run: |
+          bun install
+          bun run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs-svelte/build
+          branch: gh-pages
+          clean: true 
