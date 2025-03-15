@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import ParentNav from '$lib/components/ParentNav.svelte';
 	import SubNav from '$lib/components/SubNav.svelte';
+	import { version } from '$lib/stores/version';
 	import '../app.css';
 </script>
 
@@ -11,6 +12,9 @@
 			<div class="site-header">
 				<a href="{base}/">
 					<span class="site-title">Chadburn</span>
+					{#if !$version.loading && $version.version}
+						<span class="version-badge">v{$version.version}</span>
+					{/if}
 				</a>
 			</div>
 			<ParentNav />
@@ -28,7 +32,11 @@
 	<footer>
 		<div class="footer-content">
 			<p>
-				Chadburn is licensed under the <a
+				Chadburn
+				{#if !$version.loading && $version.version}
+					<span class="version">v{$version.version}</span>
+				{/if}
+				is licensed under the <a
 					href="https://github.com/PremoWeb/Chadburn/blob/main/LICENSE"
 					target="_blank"
 					rel="noopener noreferrer">MIT License</a
@@ -87,6 +95,15 @@
 		font-weight: bold;
 	}
 
+	.version-badge {
+		font-size: 0.8rem;
+		background-color: rgba(255, 255, 255, 0.2);
+		padding: 0.1rem 0.4rem;
+		border-radius: 0.25rem;
+		margin-left: 0.5rem;
+		font-weight: normal;
+	}
+
 	main {
 		flex-grow: 1;
 		padding: 2rem 0;
@@ -119,6 +136,11 @@
 
 	footer a:hover {
 		text-decoration: underline;
+	}
+
+	.version {
+		font-size: 0.8rem;
+		color: #888;
 	}
 
 	@media (max-width: 768px) {
