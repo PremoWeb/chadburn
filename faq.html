@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Frequently Asked Questions | Chadburn Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Frequently Asked Questions" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Modern job scheduler for Docker environments" />
+<meta property="og:description" content="Modern job scheduler for Docker environments" />
+<link rel="canonical" href="https://premoweb.github.io/Chadburn/faq.html" />
+<meta property="og:url" content="https://premoweb.github.io/Chadburn/faq.html" />
+<meta property="og:site_name" content="Chadburn Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Frequently Asked Questions" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Modern job scheduler for Docker environments","headline":"Frequently Asked Questions","url":"https://premoweb.github.io/Chadburn/faq.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Chadburn/assets/css/style.css?v=01407121e028b55899dce39b1f6366f362a03831">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+<!-- You can set your favicon here -->
+<link rel="shortcut icon" type="image/x-icon" href="/Chadburn/assets/images/favicon.ico">
+
+<!-- end custom head snippets --> 
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Frequently Asked Questions</h1>
+      <h2 class="project-tagline">Modern job scheduler for Docker environments</h2>
+      
+        <a href="https://github.com/PremoWeb/Chadburn" class="btn">View on GitHub</a>
+      
+      
+      <div class="header-links">
+        
+          
+          <a href="/Chadburn/getting-started.md.html" class="btn">Getting started.md</a>
+        
+          
+          <a href="/Chadburn/configuration.md.html" class="btn">Configuration.md</a>
+        
+          
+          <a href="/Chadburn/jobs.md.html" class="btn">Jobs.md</a>
+        
+          
+          <a href="/Chadburn/docker-integration.md.html" class="btn">Docker integration.md</a>
+        
+          
+          <a href="/Chadburn/troubleshooting.md.html" class="btn">Troubleshooting.md</a>
+        
+          
+          <a href="/Chadburn/advanced-topics.md.html" class="btn">Advanced topics.md</a>
+        
+          
+          <a href="/Chadburn/deployment.md.html" class="btn">Deployment.md</a>
+        
+          
+          <a href="/Chadburn/security.md.html" class="btn">Security.md</a>
+        
+          
+          <a href="/Chadburn/examples.md.html" class="btn">Examples.md</a>
+        
+          
+          <a href="/Chadburn/faq.md.html" class="btn">Faq.md</a>
+        
+          
+          <a href="/Chadburn/contributing.md.html" class="btn">Contributing.md</a>
+        
+      </div>
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
+
+<h2 id="general-questions">General Questions</h2>
+
+<h3 id="what-is-chadburn">What is Chadburn?</h3>
+
+<p>Chadburn is a lightweight job scheduler designed for Docker environments. It serves as a modern replacement for traditional cron, with enhanced features for container orchestration.</p>
+
+<h3 id="why-use-chadburn-instead-of-cron">Why use Chadburn instead of cron?</h3>
+
+<p>Chadburn offers several advantages over traditional cron:</p>
+<ul>
+  <li>Native Docker integration</li>
+  <li>Dynamic configuration through Docker labels</li>
+  <li>Ability to execute commands inside containers</li>
+  <li>Real-time updates without restarts</li>
+  <li>Container lifecycle event handling</li>
+  <li>Better logging and notification options</li>
+  <li>Metrics and monitoring capabilities</li>
+</ul>
+
+<h3 id="is-chadburn-production-ready">Is Chadburn production-ready?</h3>
+
+<p>Yes, Chadburn is used in production environments. It’s built on the robust Go implementation of cron and uses the official Docker client library.</p>
+
+<h3 id="how-does-chadburn-compare-to-other-schedulers">How does Chadburn compare to other schedulers?</h3>
+
+<ul>
+  <li><strong>vs. Cron</strong>: Chadburn adds Docker integration and dynamic configuration</li>
+  <li><strong>vs. Ofelia</strong>: Chadburn is a fork of Ofelia with additional features and improvements</li>
+  <li><strong>vs. Kubernetes CronJobs</strong>: Chadburn works in any Docker environment, not just Kubernetes</li>
+</ul>
+
+<h2 id="configuration-questions">Configuration Questions</h2>
+
+<h3 id="can-i-use-both-ini-files-and-docker-labels">Can I use both INI files and Docker labels?</h3>
+
+<p>Yes, Chadburn supports hybrid configuration. You can define global settings and some jobs in the INI file, while using Docker labels for dynamic job configuration.</p>
+
+<h3 id="how-do-i-specify-the-schedule">How do I specify the schedule?</h3>
+
+<p>Chadburn uses the Go implementation of cron for scheduling. Examples include:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">@every 1h30m</code>: Run every hour and thirty minutes</li>
+  <li><code class="language-plaintext highlighter-rouge">0 30 * * * *</code>: Run at 30 minutes past every hour</li>
+  <li><code class="language-plaintext highlighter-rouge">@hourly</code>: Run once an hour</li>
+  <li><code class="language-plaintext highlighter-rouge">@daily</code>: Run once a day</li>
+</ul>
+
+<h3 id="can-i-use-environment-variables-in-commands">Can I use environment variables in commands?</h3>
+
+<p>Yes, you can use environment variables in your commands:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">command</span> <span class="p">=</span> <span class="s">/bin/bash -c "export DB_HOST=${DB_HOST:-localhost} &amp;&amp; /app/backup-db.sh"</span>
+</code></pre></div></div>
+
+<p>You can also use Chadburn’s variable substitution:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="py">command</span> <span class="p">=</span> <span class="s">echo "Running in container "</span>
+</code></pre></div></div>
+
+<h3 id="how-do-i-validate-my-configuration">How do I validate my configuration?</h3>
+
+<p>You can validate your configuration without starting the daemon:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn validate <span class="nt">--config</span><span class="o">=</span>/path/to/config.ini
+</code></pre></div></div>
+
+<h2 id="docker-integration-questions">Docker Integration Questions</h2>
+
+<h3 id="how-does-chadburn-access-docker">How does Chadburn access Docker?</h3>
+
+<p>Chadburn accesses Docker through the Docker socket (<code class="language-plaintext highlighter-rouge">/var/run/docker.sock</code>). When running Chadburn in a container, you need to mount this socket:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">-v</span> /var/run/docker.sock:/var/run/docker.sock:ro,z
+</code></pre></div></div>
+
+<h3 id="im-getting-permission-denied-errors-with-the-docker-socket-how-do-i-fix-this">I’m getting “permission denied” errors with the Docker socket. How do I fix this?</h3>
+
+<p>See the <a href="/Chadburn/docker-socket-permissions.html">Docker Socket Permissions Guide</a> for detailed solutions. Common fixes include:</p>
+<ol>
+  <li>Adding the <code class="language-plaintext highlighter-rouge">:z</code> suffix to the volume mount</li>
+  <li>Running the container with the correct Docker group ID</li>
+  <li>Running the container as root</li>
+</ol>
+
+<h3 id="can-chadburn-work-with-docker-swarm">Can Chadburn work with Docker Swarm?</h3>
+
+<p>Yes, Chadburn works well with Docker Swarm. It includes a special job type, <code class="language-plaintext highlighter-rouge">job-service-run</code>, designed specifically for Swarm environments.</p>
+
+<h3 id="can-chadburn-work-with-kubernetes">Can Chadburn work with Kubernetes?</h3>
+
+<p>Chadburn can work in Kubernetes, but with some limitations:</p>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">job-exec</code> can only access containers on the same node</li>
+  <li><code class="language-plaintext highlighter-rouge">job-local</code> runs on the node, not in the Kubernetes context</li>
+  <li><code class="language-plaintext highlighter-rouge">job-service-run</code> is not applicable (use Kubernetes Jobs instead)</li>
+</ol>
+
+<h2 id="job-types-questions">Job Types Questions</h2>
+
+<h3 id="what-job-types-does-chadburn-support">What job types does Chadburn support?</h3>
+
+<p>Chadburn supports five job types:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">job-local</code>: Executes commands on the host machine</li>
+  <li><code class="language-plaintext highlighter-rouge">job-exec</code>: Executes commands inside a running container</li>
+  <li><code class="language-plaintext highlighter-rouge">job-run</code>: Creates a new container to execute commands</li>
+  <li><code class="language-plaintext highlighter-rouge">job-service-run</code>: Creates a service to execute commands (for Swarm)</li>
+  <li><code class="language-plaintext highlighter-rouge">job-lifecycle</code>: Executes commands on container lifecycle events</li>
+</ul>
+
+<h3 id="how-do-i-run-a-command-inside-a-container">How do I run a command inside a container?</h3>
+
+<p>Use the <code class="language-plaintext highlighter-rouge">job-exec</code> type:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "my-job"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Hello from inside the container"</span>
+</code></pre></div></div>
+
+<h3 id="how-do-i-start-a-container-on-a-schedule">How do I start a container on a schedule?</h3>
+
+<p>Use the <code class="language-plaintext highlighter-rouge">job-run</code> type:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-run "my-job"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">image</span> <span class="p">=</span> <span class="s">ubuntu:latest</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Hello from a new container"</span>
+</code></pre></div></div>
+
+<h3 id="how-do-i-execute-a-command-when-a-container-starts-or-stops">How do I execute a command when a container starts or stops?</h3>
+
+<p>Use the <code class="language-plaintext highlighter-rouge">job-lifecycle</code> type:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-lifecycle "notify-on-start"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">start</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Container started"</span>
+</code></pre></div></div>
+
+<h2 id="operational-questions">Operational Questions</h2>
+
+<h3 id="how-do-i-check-if-chadburn-is-running-correctly">How do I check if Chadburn is running correctly?</h3>
+
+<p>Check the logs:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs chadburn
+</code></pre></div></div>
+
+<p>If you’ve enabled metrics, you can also check the metrics endpoint:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/metrics
+</code></pre></div></div>
+
+<h3 id="how-do-i-debug-issues-with-chadburn">How do I debug issues with Chadburn?</h3>
+
+<p>Enable debug logging:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> chadburn <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">CHADBURN_LOG_LEVEL</span><span class="o">=</span>debug <span class="se">\</span>
+  <span class="nt">-v</span> /var/run/docker.sock:/var/run/docker.sock:ro,z <span class="se">\</span>
+  <span class="nt">-v</span> /path/to/config.ini:/etc/chadburn.conf <span class="se">\</span>
+  premoweb/chadburn:latest daemon
+</code></pre></div></div>
+
+<h3 id="how-do-i-upgrade-chadburn">How do I upgrade Chadburn?</h3>
+
+<p>Pull the latest image and restart:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker pull premoweb/chadburn:latest
+docker-compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<h3 id="can-i-run-multiple-instances-of-chadburn">Can I run multiple instances of Chadburn?</h3>
+
+<p>Yes, but you should ensure they don’t have overlapping job configurations to avoid duplicate job executions.</p>
+
+<h2 id="advanced-questions">Advanced Questions</h2>
+
+<h3 id="how-do-i-set-up-notifications-for-job-failures">How do I set up notifications for job failures?</h3>
+
+<p>Chadburn supports several notification methods:</p>
+
+<p><strong>Slack</strong>:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">slack-webhook</span> <span class="p">=</span> <span class="s">https://hooks.slack.com/services/XXX/YYY/ZZZ</span>
+<span class="py">slack-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+</code></pre></div></div>
+
+<p><strong>Email</strong>:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">smtp-host</span> <span class="p">=</span> <span class="s">smtp.example.com</span>
+<span class="py">smtp-port</span> <span class="p">=</span> <span class="s">587</span>
+<span class="py">smtp-user</span> <span class="p">=</span> <span class="s">user</span>
+<span class="py">smtp-password</span> <span class="p">=</span> <span class="s">password</span>
+<span class="py">email-to</span> <span class="p">=</span> <span class="s">alerts@example.com</span>
+<span class="py">email-from</span> <span class="p">=</span> <span class="s">chadburn@example.com</span>
+<span class="py">mail-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+</code></pre></div></div>
+
+<p><strong>Gotify</strong>:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">gotify-url</span> <span class="p">=</span> <span class="s">https://gotify.example.com</span>
+<span class="py">gotify-token</span> <span class="p">=</span> <span class="s">YourGotifyToken</span>
+<span class="py">gotify-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+</code></pre></div></div>
+
+<h3 id="how-do-i-set-a-timeout-for-long-running-jobs">How do I set a timeout for long-running jobs?</h3>
+
+<p>Add a timeout parameter to your job:</p>
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "long-running-job"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/app/long-process.sh</span>
+<span class="py">timeout</span> <span class="p">=</span> <span class="s">1h</span>
+</code></pre></div></div>
+
+<h3 id="can-i-use-chadburn-for-high-availability-setups">Can I use Chadburn for high-availability setups?</h3>
+
+<p>Yes, but you need to consider:</p>
+<ol>
+  <li>Running Chadburn on a manager node in Swarm mode</li>
+  <li>Using a shared volume for configuration and logs</li>
+  <li>Setting up monitoring for the Chadburn container</li>
+</ol>
+
+<h3 id="how-do-i-contribute-to-chadburn">How do I contribute to Chadburn?</h3>
+
+<p>Contributions are welcome! Check out the <a href="https://github.com/PremoWeb/Chadburn">GitHub repository</a> and the <a href="/Chadburn/contributing.md">Contributing Guide</a> for more information.</p>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/PremoWeb/Chadburn">chadburn</a> is maintained by <a href="https://github.com/PremoWeb">PremoWeb</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html> 

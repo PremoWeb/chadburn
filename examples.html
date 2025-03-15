@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Chadburn Examples | Chadburn Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Chadburn Examples" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Modern job scheduler for Docker environments" />
+<meta property="og:description" content="Modern job scheduler for Docker environments" />
+<link rel="canonical" href="https://premoweb.github.io/Chadburn/examples.html" />
+<meta property="og:url" content="https://premoweb.github.io/Chadburn/examples.html" />
+<meta property="og:site_name" content="Chadburn Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Chadburn Examples" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Modern job scheduler for Docker environments","headline":"Chadburn Examples","url":"https://premoweb.github.io/Chadburn/examples.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Chadburn/assets/css/style.css?v=01407121e028b55899dce39b1f6366f362a03831">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+<!-- You can set your favicon here -->
+<link rel="shortcut icon" type="image/x-icon" href="/Chadburn/assets/images/favicon.ico">
+
+<!-- end custom head snippets --> 
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Chadburn Examples</h1>
+      <h2 class="project-tagline">Modern job scheduler for Docker environments</h2>
+      
+        <a href="https://github.com/PremoWeb/Chadburn" class="btn">View on GitHub</a>
+      
+      
+      <div class="header-links">
+        
+          
+          <a href="/Chadburn/getting-started.md.html" class="btn">Getting started.md</a>
+        
+          
+          <a href="/Chadburn/configuration.md.html" class="btn">Configuration.md</a>
+        
+          
+          <a href="/Chadburn/jobs.md.html" class="btn">Jobs.md</a>
+        
+          
+          <a href="/Chadburn/docker-integration.md.html" class="btn">Docker integration.md</a>
+        
+          
+          <a href="/Chadburn/troubleshooting.md.html" class="btn">Troubleshooting.md</a>
+        
+          
+          <a href="/Chadburn/advanced-topics.md.html" class="btn">Advanced topics.md</a>
+        
+          
+          <a href="/Chadburn/deployment.md.html" class="btn">Deployment.md</a>
+        
+          
+          <a href="/Chadburn/security.md.html" class="btn">Security.md</a>
+        
+          
+          <a href="/Chadburn/examples.md.html" class="btn">Examples.md</a>
+        
+          
+          <a href="/Chadburn/faq.md.html" class="btn">Faq.md</a>
+        
+          
+          <a href="/Chadburn/contributing.md.html" class="btn">Contributing.md</a>
+        
+      </div>
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="chadburn-examples">Chadburn Examples</h1>
+
+<p>This document provides practical examples of using Chadburn for various common scenarios.</p>
+
+<h2 id="database-backup-examples">Database Backup Examples</h2>
+
+<h3 id="postgresql-backup">PostgreSQL Backup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "postgres-backup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">postgres</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">pg_dump -U postgres -d mydb &gt; /backups/mydb-$(date +%Y%m%d).sql</span>
+</code></pre></div></div>
+
+<p>Using Docker labels:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> postgres <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.postgres-backup.schedule<span class="o">=</span><span class="s2">"@daily"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.postgres-backup.command<span class="o">=</span><span class="s2">"pg_dump -U postgres -d mydb &gt; /backups/mydb-</span><span class="si">$(</span><span class="nb">date</span> +%Y%m%d<span class="si">)</span><span class="s2">.sql"</span> <span class="se">\</span>
+  <span class="nt">-v</span> backups:/backups <span class="se">\</span>
+  postgres:latest
+</code></pre></div></div>
+
+<h3 id="mysqlmariadb-backup">MySQL/MariaDB Backup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "mysql-backup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">mysql</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">mysqldump -u root -p"${MYSQL_ROOT_PASSWORD}" --all-databases &gt; /backups/mysql-$(date +%Y%m%d).sql</span>
+</code></pre></div></div>
+
+<p>Using Docker labels:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> mysql <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.mysql-backup.schedule<span class="o">=</span><span class="s2">"@daily"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.mysql-backup.command<span class="o">=</span><span class="s2">"mysqldump -u root -p</span><span class="se">\"</span><span class="k">${</span><span class="nv">MYSQL_ROOT_PASSWORD</span><span class="k">}</span><span class="se">\"</span><span class="s2"> --all-databases &gt; /backups/mysql-</span><span class="si">$(</span><span class="nb">date</span> +%Y%m%d<span class="si">)</span><span class="s2">.sql"</span> <span class="se">\</span>
+  <span class="nt">-v</span> backups:/backups <span class="se">\</span>
+  <span class="nt">-e</span> <span class="nv">MYSQL_ROOT_PASSWORD</span><span class="o">=</span>secret <span class="se">\</span>
+  mysql:latest
+</code></pre></div></div>
+
+<h3 id="mongodb-backup">MongoDB Backup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "mongodb-backup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">mongodb</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">mongodump --out=/backups/mongodb-$(date +%Y%m%d)</span>
+</code></pre></div></div>
+
+<h2 id="file-backup-examples">File Backup Examples</h2>
+
+<h3 id="simple-directory-backup">Simple Directory Backup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "app-data-backup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">tar -czf /backups/app-data-$(date +%Y%m%d).tar.gz /app/data</span>
+</code></pre></div></div>
+
+<h3 id="backup-with-rotation">Backup with Rotation</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "backup-with-rotation"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">tar -czf /backups/app-data-$(date +%Y%m%d).tar.gz /app/data &amp;&amp; find /backups -name "app-data-*.tar.gz" -mtime +7 -delete</span>
+</code></pre></div></div>
+
+<p>This creates a daily backup and deletes backups older than 7 days.</p>
+
+<h2 id="cleanup-examples">Cleanup Examples</h2>
+
+<h3 id="docker-cleanup">Docker Cleanup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-local "docker-cleanup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@weekly</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">docker system prune -f</span>
+</code></pre></div></div>
+
+<h3 id="log-rotation">Log Rotation</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "log-rotation"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">find /app/logs -name "*.log" -mtime +30 -delete</span>
+</code></pre></div></div>
+
+<h2 id="monitoring-examples">Monitoring Examples</h2>
+
+<h3 id="health-check">Health Check</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "health-check"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@every 5m</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">curl -f http://localhost:8080/health || echo "Health check failed" | mail -s "Health Check Alert" admin@example.com</span>
+</code></pre></div></div>
+
+<h3 id="disk-space-check">Disk Space Check</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-local "disk-space-check"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">df -h | grep -E "([8-9][0-9]|100)%" &amp;&amp; echo "Disk space critical" | mail -s "Disk Space Alert" admin@example.com</span>
+</code></pre></div></div>
+
+<h2 id="notification-examples">Notification Examples</h2>
+
+<h3 id="slack-notification">Slack Notification</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">slack-webhook</span> <span class="p">=</span> <span class="s">https://hooks.slack.com/services/XXX/YYY/ZZZ</span>
+
+<span class="nn">[job-local "notify-deployment"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Daily deployment starting"</span>
+</code></pre></div></div>
+
+<h3 id="email-report">Email Report</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">smtp-host</span> <span class="p">=</span> <span class="s">smtp.example.com</span>
+<span class="py">smtp-port</span> <span class="p">=</span> <span class="s">587</span>
+<span class="py">smtp-user</span> <span class="p">=</span> <span class="s">user</span>
+<span class="py">smtp-password</span> <span class="p">=</span> <span class="s">password</span>
+<span class="py">email-to</span> <span class="p">=</span> <span class="s">reports@example.com</span>
+<span class="py">email-from</span> <span class="p">=</span> <span class="s">chadburn@example.com</span>
+
+<span class="nn">[job-exec "daily-report"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/app/generate-report.sh</span>
+</code></pre></div></div>
+
+<h2 id="web-application-examples">Web Application Examples</h2>
+
+<h3 id="cache-clearing">Cache Clearing</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "clear-cache"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">webapp</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">rm -rf /app/cache/*</span>
+</code></pre></div></div>
+
+<h3 id="session-cleanup">Session Cleanup</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "session-cleanup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">webapp</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">find /app/sessions -type f -mtime +7 -delete</span>
+</code></pre></div></div>
+
+<h2 id="data-processing-examples">Data Processing Examples</h2>
+
+<h3 id="etl-job">ETL Job</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "etl-process"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">0 2 * * *</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">etl</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/app/run-etl.sh</span>
+</code></pre></div></div>
+
+<h3 id="data-export">Data Export</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "data-export"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@weekly</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/app/export-data.sh</span>
+</code></pre></div></div>
+
+<h2 id="container-lifecycle-examples">Container Lifecycle Examples</h2>
+
+<h3 id="notification-on-container-start">Notification on Container Start</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-lifecycle "notify-on-start"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">critical-app</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">start</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Container critical-app started at $(date)" | mail -s "Container Started" admin@example.com</span>
+</code></pre></div></div>
+
+<h3 id="cleanup-on-container-stop">Cleanup on Container Stop</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-lifecycle "cleanup-on-stop"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">stop</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">rm -rf /tmp/app-cache</span>
+</code></pre></div></div>
+
+<h2 id="advanced-examples">Advanced Examples</h2>
+
+<h3 id="running-multiple-commands">Running Multiple Commands</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "multiple-commands"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/bin/bash -c "echo 'Starting backup' &amp;&amp; tar -czf /backups/data.tar.gz /data &amp;&amp; echo 'Backup completed'"</span>
+</code></pre></div></div>
+
+<h3 id="using-environment-variables">Using Environment Variables</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "env-example"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/bin/bash -c "export DB_HOST=${DB_HOST:-localhost} &amp;&amp; /app/backup-db.sh"</span>
+</code></pre></div></div>
+
+<h3 id="conditional-execution">Conditional Execution</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "conditional-job"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/bin/bash -c "[ -f /app/needs-processing ] &amp;&amp; /app/process.sh || echo 'Nothing to process'"</span>
+</code></pre></div></div>
+
+<h3 id="job-with-timeout">Job with Timeout</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "long-running-job"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">/app/long-process.sh</span>
+<span class="py">timeout</span> <span class="p">=</span> <span class="s">1h</span>
+</code></pre></div></div>
+
+<h3 id="variable-substitution">Variable Substitution</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "variable-example"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">app</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Running in container  at "</span>
+</code></pre></div></div>
+
+<h2 id="docker-compose-examples">Docker Compose Examples</h2>
+
+<h3 id="complete-application-stack">Complete Application Stack</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s2">"</span><span class="s">3"</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">chadburn</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">premoweb/chadburn:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">chadburn</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">daemon --config=/etc/chadburn.conf</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock:ro,z</span>
+      <span class="pi">-</span> <span class="s">./chadburn.conf:/etc/chadburn.conf</span>
+      <span class="pi">-</span> <span class="s">backups:/backups</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">app</span>
+      <span class="pi">-</span> <span class="s">db</span>
+
+  <span class="na">app</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">your-app:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">app</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="na">chadburn.enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">chadburn.job-exec.app-backup.schedule</span><span class="pi">:</span> <span class="s2">"</span><span class="s">@daily"</span>
+      <span class="na">chadburn.job-exec.app-backup.command</span><span class="pi">:</span> <span class="s2">"</span><span class="s">tar</span><span class="nv"> </span><span class="s">-czf</span><span class="nv"> </span><span class="s">/backups/app-data.tar.gz</span><span class="nv"> </span><span class="s">/app/data"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">app-data:/app/data</span>
+      <span class="pi">-</span> <span class="s">backups:/backups</span>
+
+  <span class="na">db</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">postgres:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">db</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="na">chadburn.enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">chadburn.job-exec.db-backup.schedule</span><span class="pi">:</span> <span class="s2">"</span><span class="s">@daily"</span>
+      <span class="na">chadburn.job-exec.db-backup.command</span><span class="pi">:</span> <span class="s2">"</span><span class="s">pg_dump</span><span class="nv"> </span><span class="s">-U</span><span class="nv"> </span><span class="s">postgres</span><span class="nv"> </span><span class="s">-d</span><span class="nv"> </span><span class="s">mydb</span><span class="nv"> </span><span class="s">&gt;</span><span class="nv"> </span><span class="s">/backups/db-backup.sql"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">db-data:/var/lib/postgresql/data</span>
+      <span class="pi">-</span> <span class="s">backups:/backups</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">POSTGRES_PASSWORD=secret</span>
+
+<span class="na">volumes</span><span class="pi">:</span>
+  <span class="na">app-data</span><span class="pi">:</span>
+  <span class="na">db-data</span><span class="pi">:</span>
+  <span class="na">backups</span><span class="pi">:</span>
+</code></pre></div></div>
+
+<p>With <code class="language-plaintext highlighter-rouge">chadburn.conf</code>:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="py">slack-webhook</span> <span class="p">=</span> <span class="s">https://hooks.slack.com/services/XXX/YYY/ZZZ</span>
+<span class="py">slack-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+
+<span class="nn">[job-local "system-check"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">df -h | grep -E "([8-9][0-9]|100)%" &amp;&amp; echo "Disk space critical" || echo "Disk space OK"</span>
+</code></pre></div></div>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/PremoWeb/Chadburn">chadburn</a> is maintained by <a href="https://github.com/PremoWeb">PremoWeb</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html> 

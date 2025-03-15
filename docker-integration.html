@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Docker Integration | Chadburn Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Docker Integration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Modern job scheduler for Docker environments" />
+<meta property="og:description" content="Modern job scheduler for Docker environments" />
+<link rel="canonical" href="https://premoweb.github.io/Chadburn/docker-integration.html" />
+<meta property="og:url" content="https://premoweb.github.io/Chadburn/docker-integration.html" />
+<meta property="og:site_name" content="Chadburn Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Docker Integration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Modern job scheduler for Docker environments","headline":"Docker Integration","url":"https://premoweb.github.io/Chadburn/docker-integration.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Chadburn/assets/css/style.css?v=01407121e028b55899dce39b1f6366f362a03831">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+<!-- You can set your favicon here -->
+<link rel="shortcut icon" type="image/x-icon" href="/Chadburn/assets/images/favicon.ico">
+
+<!-- end custom head snippets --> 
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Docker Integration</h1>
+      <h2 class="project-tagline">Modern job scheduler for Docker environments</h2>
+      
+        <a href="https://github.com/PremoWeb/Chadburn" class="btn">View on GitHub</a>
+      
+      
+      <div class="header-links">
+        
+          
+          <a href="/Chadburn/getting-started.md.html" class="btn">Getting started.md</a>
+        
+          
+          <a href="/Chadburn/configuration.md.html" class="btn">Configuration.md</a>
+        
+          
+          <a href="/Chadburn/jobs.md.html" class="btn">Jobs.md</a>
+        
+          
+          <a href="/Chadburn/docker-integration.md.html" class="btn">Docker integration.md</a>
+        
+          
+          <a href="/Chadburn/troubleshooting.md.html" class="btn">Troubleshooting.md</a>
+        
+          
+          <a href="/Chadburn/advanced-topics.md.html" class="btn">Advanced topics.md</a>
+        
+          
+          <a href="/Chadburn/deployment.md.html" class="btn">Deployment.md</a>
+        
+          
+          <a href="/Chadburn/security.md.html" class="btn">Security.md</a>
+        
+          
+          <a href="/Chadburn/examples.md.html" class="btn">Examples.md</a>
+        
+          
+          <a href="/Chadburn/faq.md.html" class="btn">Faq.md</a>
+        
+          
+          <a href="/Chadburn/contributing.md.html" class="btn">Contributing.md</a>
+        
+      </div>
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="docker-integration">Docker Integration</h1>
+
+<p>Chadburn is designed to work seamlessly with Docker, providing advanced scheduling capabilities for containerized environments. This document explains how Chadburn integrates with Docker and how to use its Docker-specific features.</p>
+
+<h2 id="docker-socket-access">Docker Socket Access</h2>
+
+<p>Chadburn needs access to the Docker socket (<code class="language-plaintext highlighter-rouge">/var/run/docker.sock</code>) to interact with Docker containers. When running Chadburn in a container, you need to mount the Docker socket:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> chadburn <span class="se">\</span>
+  <span class="nt">-v</span> /var/run/docker.sock:/var/run/docker.sock:ro,z <span class="se">\</span>
+  <span class="nt">-v</span> /path/to/config.ini:/etc/chadburn.conf <span class="se">\</span>
+  premoweb/chadburn:latest daemon
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Note</strong>: If you encounter permission issues with the Docker socket, refer to our <a href="/Chadburn/docker-socket-permissions.html">Docker Socket Permissions Guide</a> for solutions.</p>
+</blockquote>
+
+<h2 id="docker-labels">Docker Labels</h2>
+
+<p>Chadburn can be configured using Docker labels, allowing for dynamic configuration without modifying the Chadburn configuration file.</p>
+
+<h3 id="label-format">Label Format</h3>
+
+<p>The label format is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn.&lt;JOB_TYPE&gt;.&lt;JOB_NAME&gt;.&lt;JOB_PARAMETER&gt;=&lt;PARAMETER_VALUE&gt;
+</code></pre></div></div>
+
+<h3 id="required-labels">Required Labels</h3>
+
+<p>For <code class="language-plaintext highlighter-rouge">job-exec</code> jobs, the target container must have the label <code class="language-plaintext highlighter-rouge">chadburn.enabled=true</code>.</p>
+
+<h3 id="example-running-commands-in-an-existing-container">Example: Running Commands in an Existing Container</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> nginx <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.print-date.schedule<span class="o">=</span><span class="s2">"@every 5m"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.print-date.command<span class="o">=</span><span class="s2">"date"</span> <span class="se">\</span>
+  nginx
+</code></pre></div></div>
+
+<h3 id="example-starting-a-container-on-schedule">Example: Starting a Container on Schedule</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> backup-container <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-run.schedule<span class="o">=</span><span class="s2">"@daily"</span> <span class="se">\</span>
+  <span class="nt">-v</span> /data:/data <span class="se">\</span>
+  backup-image
+</code></pre></div></div>
+
+<p>This will create a job that starts the <code class="language-plaintext highlighter-rouge">backup-container</code> container once a day.</p>
+
+<h3 id="example-docker-compose">Example: Docker Compose</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s2">"</span><span class="s">3"</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">chadburn</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">premoweb/chadburn:latest</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">daemon</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">/var/run/docker.sock:/var/run/docker.sock:ro,z</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">app</span>
+
+  <span class="na">app</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">myapp:latest</span>
+    <span class="na">labels</span><span class="pi">:</span>
+      <span class="na">chadburn.enabled</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">chadburn.job-exec.backup.schedule</span><span class="pi">:</span> <span class="s2">"</span><span class="s">@daily"</span>
+      <span class="na">chadburn.job-exec.backup.command</span><span class="pi">:</span> <span class="s2">"</span><span class="s">tar</span><span class="nv"> </span><span class="s">-czf</span><span class="nv"> </span><span class="s">/backup/data.tar.gz</span><span class="nv"> </span><span class="s">/app/data"</span>
+</code></pre></div></div>
+
+<h2 id="container-lifecycle-events">Container Lifecycle Events</h2>
+
+<p>Chadburn can execute commands when containers start or stop using the <code class="language-plaintext highlighter-rouge">job-lifecycle</code> type.</p>
+
+<h3 id="configuration">Configuration</h3>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-lifecycle "notify-on-start"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">start</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Container started" | mail -s "Container Event" admin@example.com</span>
+
+<span class="nn">[job-lifecycle "cleanup-on-stop"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">stop</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">rm -rf /tmp/cache</span>
+</code></pre></div></div>
+
+<h3 id="using-docker-labels">Using Docker Labels</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> app <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-lifecycle.notify.event-type<span class="o">=</span><span class="s2">"start"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-lifecycle.notify.command<span class="o">=</span><span class="s2">"echo 'Container started'"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-lifecycle.cleanup.event-type<span class="o">=</span><span class="s2">"stop"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-lifecycle.cleanup.command<span class="o">=</span><span class="s2">"echo 'Container stopped'"</span> <span class="se">\</span>
+  myapp:latest
+</code></pre></div></div>
+
+<h2 id="dynamic-configuration">Dynamic Configuration</h2>
+
+<p>One of Chadburn’s key features is its ability to detect changes in Docker containers and update its configuration dynamically.</p>
+
+<h3 id="container-changes">Container Changes</h3>
+
+<p>When containers are started, stopped, or modified, Chadburn automatically:</p>
+
+<ol>
+  <li>Detects new containers with Chadburn labels</li>
+  <li>Updates existing job configurations if labels change</li>
+  <li>Removes jobs for containers that are stopped or removed</li>
+</ol>
+
+<h3 id="no-restart-required">No Restart Required</h3>
+
+<p>Unlike traditional cron, Chadburn doesn’t require a restart when configuration changes. It continuously monitors Docker events and updates its job schedule accordingly.</p>
+
+<h3 id="example-workflow">Example Workflow</h3>
+
+<ol>
+  <li>Start Chadburn:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> chadburn <span class="nt">-v</span> /var/run/docker.sock:/var/run/docker.sock:ro,z premoweb/chadburn:latest daemon
+</code></pre></div>    </div>
+  </li>
+  <li>Start a container with Chadburn labels:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> app1 <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.task1.schedule<span class="o">=</span><span class="s2">"@every 5m"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.task1.command<span class="o">=</span><span class="s2">"echo 'Task 1'"</span> <span class="se">\</span>
+  myapp:latest
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Chadburn automatically detects the new container and schedules the job.</p>
+  </li>
+  <li>Start another container:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> app2 <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.task2.schedule<span class="o">=</span><span class="s2">"@hourly"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.task2.command<span class="o">=</span><span class="s2">"echo 'Task 2'"</span> <span class="se">\</span>
+  myapp:latest
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Chadburn automatically detects the new container and schedules the job.</p>
+  </li>
+  <li>Stop a container:
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker stop app1
+</code></pre></div>    </div>
+  </li>
+  <li>Chadburn automatically removes the jobs for the stopped container.</li>
+</ol>
+
+<h2 id="variable-substitution">Variable Substitution</h2>
+
+<p>Chadburn supports variable substitution in job commands, allowing you to reference container information dynamically:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> app <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.enabled<span class="o">=</span><span class="nb">true</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.log-info.schedule<span class="o">=</span><span class="s2">"@hourly"</span> <span class="se">\</span>
+  <span class="nt">--label</span> chadburn.job-exec.log-info.command<span class="o">=</span><span class="s2">"echo 'Container  () is running'"</span> <span class="se">\</span>
+  myapp:latest
+</code></pre></div></div>
+
+<p>Available variables:</p>
+
+<ul>
+  <li>``: Container name</li>
+  <li>``: Container ID</li>
+  <li>``: Container image name</li>
+  <li>``: Container state</li>
+  <li>``: Current time</li>
+</ul>
+
+<h2 id="official-docker-client">Official Docker Client</h2>
+
+<p>Chadburn uses the official Docker client library for Docker integration, providing improved compatibility with the latest Docker features and better long-term maintainability.</p>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/PremoWeb/Chadburn">chadburn</a> is maintained by <a href="https://github.com/PremoWeb">PremoWeb</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html> 

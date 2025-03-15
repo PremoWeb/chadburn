@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Chadburn Configuration | Chadburn Documentation</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Chadburn Configuration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Modern job scheduler for Docker environments" />
+<meta property="og:description" content="Modern job scheduler for Docker environments" />
+<link rel="canonical" href="https://premoweb.github.io/Chadburn/configuration.html" />
+<meta property="og:url" content="https://premoweb.github.io/Chadburn/configuration.html" />
+<meta property="og:site_name" content="Chadburn Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Chadburn Configuration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Modern job scheduler for Docker environments","headline":"Chadburn Configuration","url":"https://premoweb.github.io/Chadburn/configuration.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/Chadburn/assets/css/style.css?v=01407121e028b55899dce39b1f6366f362a03831">
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+
+<!-- You can set your favicon here -->
+<link rel="shortcut icon" type="image/x-icon" href="/Chadburn/assets/images/favicon.ico">
+
+<!-- end custom head snippets --> 
+  </head>
+  <body>
+    <a id="skip-to-content" href="#content">Skip to the content.</a>
+
+    <header class="page-header" role="banner">
+      <h1 class="project-name">Chadburn Configuration</h1>
+      <h2 class="project-tagline">Modern job scheduler for Docker environments</h2>
+      
+        <a href="https://github.com/PremoWeb/Chadburn" class="btn">View on GitHub</a>
+      
+      
+      <div class="header-links">
+        
+          
+          <a href="/Chadburn/getting-started.md.html" class="btn">Getting started.md</a>
+        
+          
+          <a href="/Chadburn/configuration.md.html" class="btn">Configuration.md</a>
+        
+          
+          <a href="/Chadburn/jobs.md.html" class="btn">Jobs.md</a>
+        
+          
+          <a href="/Chadburn/docker-integration.md.html" class="btn">Docker integration.md</a>
+        
+          
+          <a href="/Chadburn/troubleshooting.md.html" class="btn">Troubleshooting.md</a>
+        
+          
+          <a href="/Chadburn/advanced-topics.md.html" class="btn">Advanced topics.md</a>
+        
+          
+          <a href="/Chadburn/deployment.md.html" class="btn">Deployment.md</a>
+        
+          
+          <a href="/Chadburn/security.md.html" class="btn">Security.md</a>
+        
+          
+          <a href="/Chadburn/examples.md.html" class="btn">Examples.md</a>
+        
+          
+          <a href="/Chadburn/faq.md.html" class="btn">Faq.md</a>
+        
+          
+          <a href="/Chadburn/contributing.md.html" class="btn">Contributing.md</a>
+        
+      </div>
+    </header>
+
+    <main id="content" class="main-content" role="main">
+      <h1 id="chadburn-configuration">Chadburn Configuration</h1>
+
+<p>This document describes the various ways to configure Chadburn, including the configuration file format, environment variables, and command line options.</p>
+
+<h2 id="configuration-file-format">Configuration File Format</h2>
+
+<p>Chadburn uses the INI file format for its configuration. The default location is <code class="language-plaintext highlighter-rouge">/etc/chadburn.conf</code>, but you can specify a different location using the <code class="language-plaintext highlighter-rouge">--config</code> flag.</p>
+
+<h3 id="global-section">Global Section</h3>
+
+<p>The <code class="language-plaintext highlighter-rouge">[global]</code> section contains settings that apply to all jobs:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[global]</span>
+<span class="c"># Slack integration
+</span><span class="py">slack-webhook</span> <span class="p">=</span> <span class="s">https://hooks.slack.com/services/XXX/YYY/ZZZ</span>
+<span class="py">slack-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+
+<span class="c"># Email notifications
+</span><span class="py">smtp-host</span> <span class="p">=</span> <span class="s">smtp.example.com</span>
+<span class="py">smtp-port</span> <span class="p">=</span> <span class="s">587</span>
+<span class="py">smtp-user</span> <span class="p">=</span> <span class="s">user</span>
+<span class="py">smtp-password</span> <span class="p">=</span> <span class="s">password</span>
+<span class="py">email-to</span> <span class="p">=</span> <span class="s">alerts@example.com</span>
+<span class="py">email-from</span> <span class="p">=</span> <span class="s">chadburn@example.com</span>
+<span class="py">mail-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+
+<span class="c"># Log saving
+</span><span class="py">save-folder</span> <span class="p">=</span> <span class="s">/var/log/chadburn</span>
+<span class="py">save-only-on-error</span> <span class="p">=</span> <span class="s">false</span>
+
+<span class="c"># Gotify notifications
+</span><span class="py">gotify-url</span> <span class="p">=</span> <span class="s">https://gotify.example.com</span>
+<span class="py">gotify-token</span> <span class="p">=</span> <span class="s">YourGotifyToken</span>
+<span class="py">gotify-only-on-error</span> <span class="p">=</span> <span class="s">true</span>
+</code></pre></div></div>
+
+<h3 id="job-sections">Job Sections</h3>
+
+<p>Each job type has its own section format:</p>
+
+<h4 id="job-exec">job-exec</h4>
+
+<p>Executes a command inside a running container:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-exec "job-name"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">touch /tmp/example</span>
+</code></pre></div></div>
+
+<h4 id="job-run">job-run</h4>
+
+<p>Runs a command in a new container:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-run "job-name"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">image</span> <span class="p">=</span> <span class="s">ubuntu:latest</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">touch /tmp/example</span>
+</code></pre></div></div>
+
+<h4 id="job-local">job-local</h4>
+
+<p>Executes a command on the host running Chadburn:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-local "job-name"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@hourly</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">touch /tmp/example</span>
+</code></pre></div></div>
+
+<h4 id="job-service-run">job-service-run</h4>
+
+<p>Runs a command inside a new “run-once” service (for Swarm environments):</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-service-run "job-name"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">0,20,40 * * * *</span>
+<span class="py">image</span> <span class="p">=</span> <span class="s">ubuntu</span>
+<span class="py">network</span> <span class="p">=</span> <span class="s">swarm_network</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">touch /tmp/example</span>
+</code></pre></div></div>
+
+<h4 id="job-lifecycle">job-lifecycle</h4>
+
+<p>Executes commands when a container starts or stops:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[job-lifecycle "notify-on-start"]</span>
+<span class="py">container</span> <span class="p">=</span> <span class="s">my-container</span>
+<span class="py">event-type</span> <span class="p">=</span> <span class="s">start</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">echo "Container started" | mail -s "Container Event" admin@example.com</span>
+</code></pre></div></div>
+
+<h2 id="environment-variables">Environment Variables</h2>
+
+<p>Chadburn supports the following environment variables:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CHADBURN_LOG_LEVEL</code></td>
+      <td>Log level (debug, info, notice, warning, error, critical)</td>
+      <td><code class="language-plaintext highlighter-rouge">info</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">DOCKER_GID</code></td>
+      <td>Docker group ID for socket access</td>
+      <td><code class="language-plaintext highlighter-rouge">999</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="command-line-options">Command Line Options</h2>
+
+<p>Chadburn supports the following command line options:</p>
+
+<h3 id="global-options">Global Options</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--help, -h             Show help
+--version, -v          Show version
+</code></pre></div></div>
+
+<h3 id="daemon-command">Daemon Command</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn daemon [options]
+</code></pre></div></div>
+
+<p>Options:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--config=FILE          Configuration file (default: /etc/chadburn.conf)
+--metrics              Enable Prometheus compatible metrics endpoint
+--listen-address=ADDR  Metrics endpoint listen address (default: :8080)
+--disable-docker       Disable docker integration (only job-local will work)
+</code></pre></div></div>
+
+<h3 id="validate-command">Validate Command</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn validate [options]
+</code></pre></div></div>
+
+<p>Options:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>--config=FILE          Configuration file to validate (default: /etc/chadburn.conf)
+</code></pre></div></div>
+
+<h2 id="docker-labels-configuration">Docker Labels Configuration</h2>
+
+<p>When using Docker labels, the format is:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn.&lt;JOB_TYPE&gt;.&lt;JOB_NAME&gt;.&lt;JOB_PARAMETER&gt;=&lt;PARAMETER_VALUE&gt;
+</code></pre></div></div>
+
+<p>For example:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn.enabled=true
+chadburn.job-exec.backup.schedule=@daily
+chadburn.job-exec.backup.command=tar -czf /backup/data.tar.gz /data
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">chadburn.enabled=true</code> label is required for containers that will have <code class="language-plaintext highlighter-rouge">job-exec</code> tasks executed on them.</p>
+
+<h2 id="configuration-precedence">Configuration Precedence</h2>
+
+<p>When both INI file and Docker labels are used, they are merged with the following rules:</p>
+
+<ol>
+  <li>Jobs from the INI file are loaded first</li>
+  <li>Jobs from Docker labels are added or update existing jobs</li>
+  <li>If a job from Docker labels has the same name as a job from the INI file, the Docker label version takes precedence</li>
+</ol>
+
+<h2 id="hybrid-configuration">Hybrid Configuration</h2>
+
+<p>You can use both INI files and Docker labels together:</p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># config.ini
+</span><span class="nn">[global]</span>
+<span class="py">slack-webhook</span> <span class="p">=</span> <span class="s">https://hooks.slack.com/services/XXX/YYY/ZZZ</span>
+
+<span class="nn">[job-local "system-backup"]</span>
+<span class="py">schedule</span> <span class="p">=</span> <span class="s">@daily</span>
+<span class="py">command</span> <span class="p">=</span> <span class="s">tar -czf /backup/system.tar.gz /etc</span>
+</code></pre></div></div>
+
+<p>Combined with Docker labels:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>chadburn.enabled=true
+chadburn.job-exec.app-backup.schedule=@daily
+chadburn.job-exec.app-backup.command=tar -czf /backup/app.tar.gz /app/data
+</code></pre></div></div>
+
+<p>This approach allows for a mix of static and dynamic configuration.</p>
+
+
+      <footer class="site-footer">
+        
+          <span class="site-footer-owner"><a href="https://github.com/PremoWeb/Chadburn">chadburn</a> is maintained by <a href="https://github.com/PremoWeb">PremoWeb</a>.</span>
+        
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
+      </footer>
+    </main>
+  </body>
+</html> 
