@@ -13,7 +13,17 @@ FROM alpine:3.20.3
 
 RUN apk --update --no-cache add ca-certificates tzdata
 
+# Add docker group with same GID as host
+RUN addgroup -S -g 969 docker && \
+    adduser -S -D -H -h /app -s /sbin/nologin -G docker -u 1000 appuser
+
 COPY --from=builder /go/bin/chadburn /usr/bin/chadburn
+
+# Set permissions
+RUN chmod +x /usr/bin/chadburn
+
+# Use the appuser
+USER appuser
 
 ENTRYPOINT ["/usr/bin/chadburn"]
 
