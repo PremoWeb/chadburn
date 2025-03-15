@@ -1,5 +1,20 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { onMount } from 'svelte';
+	import Contributors from '$lib/components/Contributors.svelte';
+	import { loadContributors } from '$lib/contributors';
+	import type { Contributor } from '$lib/types';
+	
+	let contributors: Contributor[] = [];
+	let loading = true;
+	let error: string | null = null;
+	
+	onMount(async () => {
+		const result = await loadContributors();
+		contributors = result.contributors;
+		error = result.error;
+		loading = false;
+	});
 </script>
 
 <svelte:head>
@@ -46,6 +61,8 @@
 			</div>
 		</div>
 	</section>
+
+	<Contributors {contributors} {loading} {error} />
 
 	<section class="quick-start">
 		<h2>Quick Start</h2>
