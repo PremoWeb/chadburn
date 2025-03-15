@@ -9,7 +9,6 @@
 
 <div class="home-container">
 	<section class="hero">
-		<img src="{base}/images/chadburn-logo.svg" alt="Chadburn Logo" class="logo" />
 		<h1>Chadburn</h1>
 		<p class="tagline">Modern job scheduler for Docker environments</p>
 		<div class="cta-buttons">
@@ -100,12 +99,6 @@
 	.hero {
 		text-align: center;
 		padding: 3rem 0;
-	}
-
-	.logo {
-		width: 150px;
-		height: 150px;
-		margin: 0 auto 1rem;
 	}
 
 	.hero h1 {

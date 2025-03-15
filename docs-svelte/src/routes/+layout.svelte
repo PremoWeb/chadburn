@@ -8,9 +8,8 @@
 <div class="app">
 	<header>
 		<div class="header-content">
-			<div class="logo">
+			<div class="site-header">
 				<a href="{base}/">
-					<img src="{base}/images/chadburn-logo.svg" alt="Chadburn Logo" />
 					<span class="site-title">Chadburn</span>
 				</a>
 			</div>
@@ -71,21 +70,16 @@
 		flex-wrap: wrap;
 	}
 
-	.logo {
+	.site-header {
 		display: flex;
 		align-items: center;
 	}
 
-	.logo a {
+	.site-header a {
 		display: flex;
 		align-items: center;
 		text-decoration: none;
 		color: white;
-	}
-
-	.logo img {
-		height: 40px;
-		margin-right: 0.5rem;
 	}
 
 	.site-title {
@@ -133,7 +127,7 @@
 			align-items: center;
 		}
 
-		.logo {
+		.site-header {
 			margin-bottom: 1rem;
 		}
 	}
