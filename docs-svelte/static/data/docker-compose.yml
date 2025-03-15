@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  chadburn:
+    image: premoweb/chadburn:latest
+    container_name: chadburn
+    volumes:
+      - ./example-config.ini:/etc/chadburn.conf
+      - /var/run/docker.sock:/var/run/docker.sock:ro,z
+      - /var/log/chadburn:/var/log/chadburn
+    ports:
+      - "8080:8080"  # Expose the metrics endpoint
+    command: daemon --config=/etc/chadburn.conf --metrics --listen-address=:8080
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - chadburn
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  grafana-storage: 

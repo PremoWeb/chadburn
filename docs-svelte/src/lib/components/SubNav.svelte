@@ -8,6 +8,7 @@
 		{ name: 'Configuration', path: '/configuration' },
 		{ name: 'Job Types', path: '/jobs' },
 		{ name: 'Docker Integration', path: '/docker-integration' },
+		{ name: 'Metrics Setup', path: '/metrics-setup' },
 		{ name: 'Troubleshooting', path: '/troubleshooting' },
 		{ name: 'Advanced Topics', path: '/advanced-topics' },
 		{ name: 'Deployment', path: '/deployment' },
