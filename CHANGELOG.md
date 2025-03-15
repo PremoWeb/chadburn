@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/PremoWeb/chadburn/compare/v1.8.0...v1.8.1) (2025-03-15)
+
+
+### Bug Fixes
+
+* update GitHub Pages deployment workflow ([8e62de3](https://github.com/PremoWeb/chadburn/commit/8e62de3d40584d73b5fde16544531453808d293b))
+
 # [1.8.0](https://github.com/PremoWeb/chadburn/compare/v1.7.4...v1.8.0) (2025-03-15)
 
 
