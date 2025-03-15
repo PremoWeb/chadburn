@@ -1,314 +1,50 @@
-<!DOCTYPE html>
-<html lang="en-US">
-  <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Troubleshooting Chadburn | Chadburn Documentation</title>
-<meta name="generator" content="Jekyll v3.10.0" />
-<meta property="og:title" content="Troubleshooting Chadburn" />
-<meta property="og:locale" content="en_US" />
-<meta name="description" content="Modern job scheduler for Docker environments" />
-<meta property="og:description" content="Modern job scheduler for Docker environments" />
-<link rel="canonical" href="https://premoweb.github.io/Chadburn/troubleshooting.html" />
-<meta property="og:url" content="https://premoweb.github.io/Chadburn/troubleshooting.html" />
-<meta property="og:site_name" content="Chadburn Documentation" />
-<meta property="og:type" content="website" />
-<meta name="twitter:card" content="summary" />
-<meta property="twitter:title" content="Troubleshooting Chadburn" />
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"Modern job scheduler for Docker environments","headline":"Troubleshooting Chadburn","url":"https://premoweb.github.io/Chadburn/troubleshooting.html"}</script>
-<!-- End Jekyll SEO tag -->
-
-    <link rel="stylesheet" href="/Chadburn/assets/css/style.css?v=01407121e028b55899dce39b1f6366f362a03831">
-    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
-
-<!-- Setup Google Analytics -->
-
-
-<!-- You can set your favicon here -->
-<link rel="shortcut icon" type="image/x-icon" href="/Chadburn/assets/images/favicon.ico">
-
-<!-- end custom head snippets --> 
-  </head>
-  <body>
-    <a id="skip-to-content" href="#content">Skip to the content.</a>
-
-    <header class="page-header" role="banner">
-      <h1 class="project-name">Troubleshooting Chadburn</h1>
-      <h2 class="project-tagline">Modern job scheduler for Docker environments</h2>
-      
-        <a href="https://github.com/PremoWeb/Chadburn" class="btn">View on GitHub</a>
-      
-      
-      <div class="header-links">
-        
-          
-          <a href="/Chadburn/getting-started.md.html" class="btn">Getting started.md</a>
-        
-          
-          <a href="/Chadburn/configuration.md.html" class="btn">Configuration.md</a>
-        
-          
-          <a href="/Chadburn/jobs.md.html" class="btn">Jobs.md</a>
-        
-          
-          <a href="/Chadburn/docker-integration.md.html" class="btn">Docker integration.md</a>
-        
-          
-          <a href="/Chadburn/troubleshooting.md.html" class="btn">Troubleshooting.md</a>
-        
-          
-          <a href="/Chadburn/advanced-topics.md.html" class="btn">Advanced topics.md</a>
-        
-          
-          <a href="/Chadburn/deployment.md.html" class="btn">Deployment.md</a>
-        
-          
-          <a href="/Chadburn/security.md.html" class="btn">Security.md</a>
-        
-          
-          <a href="/Chadburn/examples.md.html" class="btn">Examples.md</a>
-        
-          
-          <a href="/Chadburn/faq.md.html" class="btn">Faq.md</a>
-        
-          
-          <a href="/Chadburn/contributing.md.html" class="btn">Contributing.md</a>
-        
-      </div>
-    </header>
-
-    <main id="content" class="main-content" role="main">
-      <h1 id="troubleshooting-chadburn">Troubleshooting Chadburn</h1>
-
-<p>This guide provides solutions for common issues you might encounter when using Chadburn.</p>
-
-<h2 id="common-issues">Common Issues</h2>
-
-<h3 id="docker-socket-permission-denied">Docker Socket Permission Denied</h3>
-
-<p><strong>Problem</strong>: When running Chadburn in a container, you see errors like:</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR Docker events error: permission denied while trying to connect to the Docker daemon socket
-</code></pre></div></div>
-
-<p><strong>Solution</strong>: This is a common issue related to Docker socket permissions. See the <a href="/Chadburn/docker-socket-permissions.html">Docker Socket Permissions Guide</a> for detailed solutions.</p>
-
-<p>Quick fixes:</p>
-<ol>
-  <li>Add the <code class="language-plaintext highlighter-rouge">:z</code> suffix to the volume mount: <code class="language-plaintext highlighter-rouge">-v /var/run/docker.sock:/var/run/docker.sock:ro,z</code></li>
-  <li>Run the container with the correct Docker group ID: <code class="language-plaintext highlighter-rouge">-e DOCKER_GID=$(getent group docker | cut -d: -f3)</code></li>
-  <li>Run the container as root: <code class="language-plaintext highlighter-rouge">--user root</code></li>
-</ol>
-
-<h3 id="jobs-not-running">Jobs Not Running</h3>
-
-<p><strong>Problem</strong>: Jobs are configured but not running.</p>
-
-<p><strong>Solutions</strong>:</p>
-
-<ol>
-  <li><strong>Check the schedule format</strong>:
-    <ul>
-      <li>Ensure the schedule format is correct</li>
-      <li>For <code class="language-plaintext highlighter-rouge">@every</code> format, make sure there’s a space between <code class="language-plaintext highlighter-rouge">@every</code> and the duration</li>
-    </ul>
-  </li>
-  <li><strong>Check container labels</strong>:
-    <ul>
-      <li>For <code class="language-plaintext highlighter-rouge">job-exec</code>, ensure the target container has <code class="language-plaintext highlighter-rouge">chadburn.enabled=true</code></li>
-      <li>Verify label syntax: <code class="language-plaintext highlighter-rouge">chadburn.&lt;JOB_TYPE&gt;.&lt;JOB_NAME&gt;.&lt;PARAMETER&gt;=&lt;VALUE&gt;</code></li>
-    </ul>
-  </li>
-  <li><strong>Check container status</strong>:
-    <ul>
-      <li>For <code class="language-plaintext highlighter-rouge">job-exec</code>, ensure the target container is running</li>
-      <li>For <code class="language-plaintext highlighter-rouge">job-run</code>, ensure the image exists and is accessible</li>
-    </ul>
-  </li>
-  <li><strong>Check logs</strong>:
-    <ul>
-      <li>Run <code class="language-plaintext highlighter-rouge">docker logs chadburn</code> to see if there are any error messages</li>
-    </ul>
-  </li>
-</ol>
-
-<h3 id="container-not-found">Container Not Found</h3>
-
-<p><strong>Problem</strong>: You see errors like <code class="language-plaintext highlighter-rouge">container not found</code> when using <code class="language-plaintext highlighter-rouge">job-exec</code>.</p>
-
-<p><strong>Solutions</strong>:</p>
-
-<ol>
-  <li>Ensure the container name in the configuration matches exactly</li>
-  <li>Check if the container is running: <code class="language-plaintext highlighter-rouge">docker ps | grep &lt;container-name&gt;</code></li>
-  <li>If using Docker Compose, ensure the container name isn’t prefixed with the project name</li>
-</ol>
-
-<h3 id="command-execution-failures">Command Execution Failures</h3>
-
-<p><strong>Problem</strong>: Jobs run but the commands fail.</p>
-
-<p><strong>Solutions</strong>:</p>
-
-<ol>
-  <li><strong>Check command syntax</strong>:
-    <ul>
-      <li>Ensure the command is valid for the container’s environment</li>
-      <li>For complex commands, consider using a shell script inside the container</li>
-    </ul>
-  </li>
-  <li><strong>Check permissions</strong>:
-    <ul>
-      <li>Ensure the user running the command has the necessary permissions</li>
-      <li>For <code class="language-plaintext highlighter-rouge">job-exec</code>, consider specifying a user: <code class="language-plaintext highlighter-rouge">user = root</code></li>
-    </ul>
-  </li>
-  <li><strong>Check environment</strong>:
-    <ul>
-      <li>Ensure any required environment variables are set</li>
-      <li>For <code class="language-plaintext highlighter-rouge">job-run</code>, specify environment variables: <code class="language-plaintext highlighter-rouge">environment = ["VAR1=value1", "VAR2=value2"]</code></li>
-    </ul>
-  </li>
-</ol>
-
-<h3 id="scheduling-issues">Scheduling Issues</h3>
-
-<p><strong>Problem</strong>: Jobs don’t run at the expected times.</p>
-
-<p><strong>Solutions</strong>:</p>
-
-<ol>
-  <li><strong>Check timezone</strong>:
-    <ul>
-      <li>Chadburn uses the container’s timezone</li>
-      <li>Mount the host’s timezone: <code class="language-plaintext highlighter-rouge">-v /etc/timezone:/etc/timezone:ro -v /etc/localtime:/etc/localtime:ro</code></li>
-    </ul>
-  </li>
-  <li><strong>Check schedule format</strong>:
-    <ul>
-      <li>Ensure the cron expression is correct</li>
-      <li>For complex schedules, test with tools like <a href="https://crontab.guru/">crontab.guru</a></li>
-    </ul>
-  </li>
-  <li><strong>Check for overlapping jobs</strong>:
-    <ul>
-      <li>If a job takes longer than its schedule interval, it might appear to skip executions</li>
-      <li>Consider adding a timeout to prevent long-running jobs</li>
-    </ul>
-  </li>
-</ol>
-
-<h2 id="logging-and-debugging">Logging and Debugging</h2>
-
-<h3 id="enabling-debug-logging">Enabling Debug Logging</h3>
-
-<p>To enable debug logging, set the <code class="language-plaintext highlighter-rouge">CHADBURN_LOG_LEVEL</code> environment variable:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">--name</span> chadburn <span class="se">\</span>
-  <span class="nt">-e</span> <span class="nv">CHADBURN_LOG_LEVEL</span><span class="o">=</span>debug <span class="se">\</span>
-  <span class="nt">-v</span> /var/run/docker.sock:/var/run/docker.sock:ro,z <span class="se">\</span>
-  <span class="nt">-v</span> /path/to/config.ini:/etc/chadburn.conf <span class="se">\</span>
-  premoweb/chadburn:latest daemon
-</code></pre></div></div>
-
-<p>Available log levels:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">debug</code>: Most verbose, shows all details</li>
-  <li><code class="language-plaintext highlighter-rouge">info</code>: Shows informational messages</li>
-  <li><code class="language-plaintext highlighter-rouge">notice</code>: Shows important notices</li>
-  <li><code class="language-plaintext highlighter-rouge">warning</code>: Shows warnings</li>
-  <li><code class="language-plaintext highlighter-rouge">error</code>: Shows errors only</li>
-  <li><code class="language-plaintext highlighter-rouge">critical</code>: Shows critical errors only</li>
-</ul>
-
-<h3 id="viewing-logs">Viewing Logs</h3>
-
-<p>To view Chadburn logs:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs chadburn
-</code></pre></div></div>
-
-<p>To follow logs in real-time:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs <span class="nt">-f</span> chadburn
-</code></pre></div></div>
-
-<p>To see only error logs:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs chadburn 2&gt;&amp;1 | <span class="nb">grep </span>ERROR
-</code></pre></div></div>
-
-<h3 id="validating-configuration">Validating Configuration</h3>
-
-<p>To validate your configuration file without starting the daemon:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">--rm</span> <span class="se">\</span>
-  <span class="nt">-v</span> /path/to/config.ini:/etc/chadburn.conf <span class="se">\</span>
-  premoweb/chadburn:latest validate
-</code></pre></div></div>
-
-<h3 id="metrics-endpoint">Metrics Endpoint</h3>
-
-<p>If you’ve enabled the metrics endpoint, you can check job statistics:</p>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/metrics
-</code></pre></div></div>
-
-<p>This provides Prometheus-compatible metrics about job executions, errors, and durations.</p>
-
-<h2 id="common-error-messages">Common Error Messages</h2>
-
-<h3 id="unable-to-start-a-empty-scheduler">“unable to start a empty scheduler”</h3>
-
-<p><strong>Cause</strong>: No valid jobs were found in the configuration.</p>
-
-<p><strong>Solution</strong>: Check your configuration file or Docker labels to ensure at least one valid job is defined.</p>
-
-<h3 id="unable-to-add-a-job-with-a-empty-schedule">“unable to add a job with a empty schedule”</h3>
-
-<p><strong>Cause</strong>: A job was defined without a schedule.</p>
-
-<p><strong>Solution</strong>: Add a valid schedule to the job configuration.</p>
-
-<h3 id="error-non-zero-exit-code">“error non-zero exit code”</h3>
-
-<p><strong>Cause</strong>: The command executed by the job returned a non-zero exit code.</p>
-
-<p><strong>Solution</strong>: Check the command for errors, or modify it to always return 0 if the exit code isn’t important.</p>
-
-<h3 id="the-job-has-exceed-the-maximum-allowed-time-running">“the job has exceed the maximum allowed time running”</h3>
-
-<p><strong>Cause</strong>: The job ran longer than the configured timeout.</p>
-
-<p><strong>Solution</strong>: Increase the timeout value or optimize the job to run faster.</p>
-
-<h2 id="getting-help">Getting Help</h2>
-
-<p>If you’re still experiencing issues:</p>
-
-<ol>
-  <li>Check the <a href="https://github.com/PremoWeb/Chadburn/issues">GitHub Issues</a> to see if others have encountered the same problem</li>
-  <li>Open a new issue with:
-    <ul>
-      <li>Your Chadburn version</li>
-      <li>Your configuration</li>
-      <li>Complete error logs</li>
-      <li>Steps to reproduce the issue</li>
-    </ul>
-  </li>
-</ol>
-
-
-      <footer class="site-footer">
-        
-          <span class="site-footer-owner"><a href="https://github.com/PremoWeb/Chadburn">chadburn</a> is maintained by <a href="https://github.com/PremoWeb">PremoWeb</a>.</span>
-        
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a>.</span>
-      </footer>
-    </main>
-  </body>
-</html> 
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<link href="./_app/immutable/assets/0.CRAijsla.css" rel="stylesheet">
+		<link href="./_app/immutable/assets/3.BFG4CMZk.css" rel="stylesheet">
+		<link rel="modulepreload" href="./_app/immutable/entry/start.-dn8672f.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/DPItYgEV.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/D_t2Yjvp.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/dah60P-K.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.if47c9Yz.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CUQMZ5_8.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CSzqSblw.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CYQNJalw.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/0.pGweRB6e.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/DF_nmtWG.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CvKggbUY.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/CbsHnz7Z.js">
+		<link rel="modulepreload" href="./_app/immutable/nodes/3.G04V8moR.js"><!--[--><!--]--><title>Troubleshooting - Chadburn Documentation</title>
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents"><!--[--><!--[--><!----><div class="app svelte-14w3w6f"><header class="svelte-14w3w6f"><div class="header-content svelte-14w3w6f"><div class="site-header svelte-14w3w6f"><a href="./" class="svelte-14w3w6f"><span class="site-title svelte-14w3w6f">Chadburn</span></a></div> <nav class="parent-nav svelte-17ect4i"><ul class="svelte-17ect4i"><!--[--><!--[!--><li class="svelte-17ect4i"><a href="./" class="svelte-17ect4i">Home</a></li><!--]--><!--[!--><li class="svelte-17ect4i"><a href="./getting-started" class="svelte-17ect4i">Documentation</a></li><!--]--><!--[--><li class="svelte-17ect4i"><a href="https://github.com/PremoWeb/Chadburn" target="_blank" rel="noopener noreferrer" class="svelte-17ect4i">GitHub <!--[--><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="svelte-17ect4i"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg><!--]--></a></li><!--]--><!--]--></ul></nav><!----></div></header> <!--[--><nav class="sub-nav svelte-sno2rq"><ul class="svelte-sno2rq"><!--[--><li class="svelte-sno2rq"><a href="./getting-started" class="svelte-sno2rq">Getting Started</a></li><li class="svelte-sno2rq"><a href="./configuration" class="svelte-sno2rq">Configuration</a></li><li class="svelte-sno2rq"><a href="./jobs" class="svelte-sno2rq">Job Types</a></li><li class="svelte-sno2rq"><a href="./docker-integration" class="svelte-sno2rq">Docker Integration</a></li><li class="svelte-sno2rq"><a href="./troubleshooting" class="svelte-sno2rq">Troubleshooting</a></li><li class="svelte-sno2rq"><a href="./advanced-topics" class="svelte-sno2rq">Advanced Topics</a></li><li class="svelte-sno2rq"><a href="./deployment" class="svelte-sno2rq">Deployment</a></li><li class="svelte-sno2rq"><a href="./examples" class="svelte-sno2rq">Examples</a></li><li class="svelte-sno2rq"><a href="./faq" class="svelte-sno2rq">FAQ</a></li><li class="svelte-sno2rq"><a href="./contributing" class="svelte-sno2rq">Contributing</a></li><!--]--></ul></nav><!--]--><!----> <main class="svelte-14w3w6f"><div class="content svelte-14w3w6f"><!----><!----><div class="doc-page svelte-1res8mc"><!--[--><div class="loading svelte-9493h9">Loading content...</div><!--]--><!----></div><!----><!----></div></main> <footer class="svelte-14w3w6f"><div class="footer-content svelte-14w3w6f"><p>Chadburn is licensed under the <a href="https://github.com/PremoWeb/Chadburn/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" class="svelte-14w3w6f">MIT License</a>.</p> <p>Documentation built with <a href="https://kit.svelte.dev/" target="_blank" rel="noopener noreferrer" class="svelte-14w3w6f">SvelteKit</a>.</p></div></footer></div><!----><!--]--> <!--[!--><!--]--><!--]-->
+			
+			<script>
+				{
+					__sveltekit_19iwqhn = {
+						base: new URL(".", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("./_app/immutable/entry/start.-dn8672f.js"),
+						import("./_app/immutable/entry/app.if47c9Yz.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element, {
+							node_ids: [0, 3],
+							data: [null,null],
+							form: null,
+							error: null
+						});
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
