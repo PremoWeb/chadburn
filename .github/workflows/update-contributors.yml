@@ -2,15 +2,18 @@ name: Update Contributors
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Run weekly on Sunday at midnight
 
 jobs:
   update-contributors:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -23,17 +26,18 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies
-        run: cd docs-svelte && bun install
-
       - name: Fetch contributors
-        run: cd docs-svelte && node scripts/fetch-contributors.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd docs-svelte
+          chmod +x scripts/fetch-contributors.js
+          node scripts/fetch-contributors.js
 
-      - name: Build site
-        run: cd docs-svelte && bun run build
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: docs-svelte/build
-          branch: gh-pages 
+      - name: Commit changes if any
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs-svelte/static/data/contributors.json
+          git diff --staged --quiet || git commit -m "chore: update contributors list"
+          git push 
