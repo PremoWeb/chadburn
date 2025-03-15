@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/PremoWeb/chadburn/compare/v1.7.4...v1.8.0) (2025-03-15)
+
+
+### Features
+
+* configure GitHub Pages with custom domain chadburn.dev ([9dd358c](https://github.com/PremoWeb/chadburn/commit/9dd358c56568dce3f72a25c7ca099219bde8ddd4))
+
 ## [1.7.4](https://github.com/PremoWeb/chadburn/compare/v1.7.3...v1.7.4) (2025-03-15)
 
 
