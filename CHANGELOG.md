@@ -1,3 +1,10 @@
+## [1.7.4](https://github.com/PremoWeb/chadburn/compare/v1.7.3...v1.7.4) (2025-03-15)
+
+
+### Bug Fixes
+
+* remove redundant header from documentation pages ([ecf0a44](https://github.com/PremoWeb/chadburn/commit/ecf0a44cd76b8230a6760c297d528e3660ba5dd9))
+
 ## [1.7.3](https://github.com/PremoWeb/chadburn/compare/v1.7.2...v1.7.3) (2025-03-15)
 
 
