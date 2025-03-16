@@ -43,8 +43,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			// Try each pattern
 			for (const pattern of patterns) {
 				if (markdownModules[pattern]) {
-					console.log('Found API file at path:', pattern);
-					return markdownModules[pattern];
+					console.log('Found file at path:', pattern);
+					return markdownModules[pattern] as string;
 				}
 			}
 			
@@ -56,8 +56,8 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				
 				const nestedPattern = `/static/markdown/api/${parentPath}/${lastSegment}.md`;
 				if (markdownModules[nestedPattern]) {
-					console.log('Found API file at nested path:', nestedPattern);
-					return markdownModules[nestedPattern];
+					console.log('Found file at nested path:', nestedPattern);
+					return markdownModules[nestedPattern] as string;
 				}
 			}
 			

@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			for (const pattern of patterns) {
 				if (markdownModules[pattern]) {
 					console.log('Found file at path:', pattern);
-					return markdownModules[pattern];
+					return markdownModules[pattern] as string;
 				}
 			}
 			
@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				const nestedPattern = `/static/markdown/${parentPath}/${lastSegment}.md`;
 				if (markdownModules[nestedPattern]) {
 					console.log('Found file at nested path:', nestedPattern);
-					return markdownModules[nestedPattern];
+					return markdownModules[nestedPattern] as string;
 				}
 			}
 			
