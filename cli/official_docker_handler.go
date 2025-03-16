@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"io"
 	"strings"
 	"time"
 
@@ -81,45 +82,73 @@ func (c *OfficialDockerHandler) watch() {
 
 // watchEvents watches Docker events
 func (c *OfficialDockerHandler) watchEvents() {
-	eventCh := make(chan *core.DockerEvent)
-	errCh := make(chan error)
+	// Add a backoff mechanism to prevent rapid restarts
+	backoff := 100 * time.Millisecond
+	maxBackoff := 5 * time.Second
 
-	// Start watching events
-	c.dockerClient.WatchEvents(c.ctx, eventCh, errCh)
-
-	c.logger.Noticef("Started watching Docker events")
-
-	// Process events
 	for {
-		select {
-		case err := <-errCh:
-			if err != nil {
-				c.logger.Errorf("Docker events error: %v", err)
-				if err == context.Canceled {
-					return
-				}
-			}
-		case event := <-eventCh:
-			// Process container events
-			if event.Type == "container" {
-				// Get container name from attributes
-				containerName, ok := event.Attributes["name"]
-				if !ok {
-					continue
-				}
+		eventCh := make(chan *core.DockerEvent)
+		errCh := make(chan error)
 
-				// Process the event
-				switch event.Action {
-				case "start":
-					c.logger.Debugf("Container %s started", containerName)
-					c.processLifecycleEvent(containerName, event.ID, core.ContainerStart)
-				case "die", "stop":
-					c.logger.Debugf("Container %s stopped", containerName)
-					c.processLifecycleEvent(containerName, event.ID, core.ContainerStop)
-				}
-			}
+		// Start watching events
+		c.dockerClient.WatchEvents(c.ctx, eventCh, errCh)
+
+		c.logger.Noticef("Started watching Docker events")
+
+		// Process events
+		shouldReconnect := false
+		select {
 		case <-c.ctx.Done():
 			return
+		default:
+			// Continue processing events
+		}
+
+		// Process events
+		for !shouldReconnect {
+			select {
+			case err := <-errCh:
+				if err != nil {
+					c.logger.Errorf("Docker events error: %v", err)
+					if err == context.Canceled {
+						return
+					}
+					if err == io.EOF {
+						// Handle EOF by reconnecting after a delay
+						shouldReconnect = true
+						// Apply exponential backoff with a maximum limit
+						if backoff < maxBackoff {
+							backoff *= 2
+						}
+						c.logger.Noticef("Docker events connection closed (EOF). Reconnecting in %v...", backoff)
+						time.Sleep(backoff)
+					}
+				}
+			case event := <-eventCh:
+				// Successfully received an event, reset backoff
+				backoff = 100 * time.Millisecond
+
+				// Process container events
+				if event.Type == "container" {
+					// Get container name from attributes
+					containerName, ok := event.Attributes["name"]
+					if !ok {
+						continue
+					}
+
+					// Process the event
+					switch event.Action {
+					case "start":
+						c.logger.Debugf("Container %s started", containerName)
+						c.processLifecycleEvent(containerName, event.ID, core.ContainerStart)
+					case "die", "stop":
+						c.logger.Debugf("Container %s stopped", containerName)
+						c.processLifecycleEvent(containerName, event.ID, core.ContainerStop)
+					}
+				}
+			case <-c.ctx.Done():
+				return
+			}
 		}
 	}
 }
