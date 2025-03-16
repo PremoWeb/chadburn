@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"io"
 	"strings"
 	"time"
 
@@ -83,44 +84,72 @@ func (c *DockerHandler) watch() {
 
 // watchEvents listens for Docker events and triggers lifecycle jobs
 func (c *DockerHandler) watchEvents() {
-	// Create channels to receive Docker events and errors
-	eventCh := make(chan *core.DockerEvent)
-	errCh := make(chan error)
+	// Add a backoff mechanism to prevent rapid restarts
+	backoff := 100 * time.Millisecond
+	maxBackoff := 5 * time.Second
 
-	// Start watching events
-	c.dockerClient.WatchEvents(c.ctx, eventCh, errCh)
-
-	c.logger.Noticef("Started watching Docker events")
-
-	// Listen for events
 	for {
+		// Create channels to receive Docker events and errors
+		eventCh := make(chan *core.DockerEvent)
+		errCh := make(chan error)
+
+		// Start watching events
+		c.dockerClient.WatchEvents(c.ctx, eventCh, errCh)
+
+		c.logger.Noticef("Started watching Docker events")
+
+		// Check if context is done
 		select {
-		case event := <-eventCh:
-			// Only process container events
-			if event.Type != "container" {
-				continue
-			}
-
-			// Get container info
-			container, err := c.dockerClient.InspectContainer(event.ID)
-			if err != nil {
-				c.logger.Debugf("Failed to inspect container %s: %v", event.ID, err)
-				continue
-			}
-
-			// Process the event
-			switch event.Action {
-			case "start":
-				c.logger.Debugf("Container %s started", container.Name)
-				c.processLifecycleEvent(container.Name, event.ID, core.ContainerStart)
-			case "die", "stop":
-				c.logger.Debugf("Container %s stopped", container.Name)
-				c.processLifecycleEvent(container.Name, event.ID, core.ContainerStop)
-			}
-		case err := <-errCh:
-			c.logger.Errorf("Error watching events: %v", err)
 		case <-c.ctx.Done():
 			return
+		default:
+			// Continue processing events
+		}
+
+		// Listen for events
+		shouldReconnect := false
+		for !shouldReconnect {
+			select {
+			case event := <-eventCh:
+				// Successfully received an event, reset backoff
+				backoff = 100 * time.Millisecond
+
+				// Only process container events
+				if event.Type != "container" {
+					continue
+				}
+
+				// Get container info
+				container, err := c.dockerClient.InspectContainer(event.ID)
+				if err != nil {
+					c.logger.Debugf("Failed to inspect container %s: %v", event.ID, err)
+					continue
+				}
+
+				// Process the event
+				switch event.Action {
+				case "start":
+					c.logger.Debugf("Container %s started", container.Name)
+					c.processLifecycleEvent(container.Name, event.ID, core.ContainerStart)
+				case "die", "stop":
+					c.logger.Debugf("Container %s stopped", container.Name)
+					c.processLifecycleEvent(container.Name, event.ID, core.ContainerStop)
+				}
+			case err := <-errCh:
+				c.logger.Errorf("Error watching events: %v", err)
+				if err == io.EOF {
+					// Handle EOF by reconnecting after a delay
+					shouldReconnect = true
+					// Apply exponential backoff with a maximum limit
+					if backoff < maxBackoff {
+						backoff *= 2
+					}
+					c.logger.Noticef("Docker events connection closed (EOF). Reconnecting in %v...", backoff)
+					time.Sleep(backoff)
+				}
+			case <-c.ctx.Done():
+				return
+			}
 		}
 	}
 }

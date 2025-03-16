@@ -1,0 +1,4 @@
+jobs:
+  - name: "test-job"
+    command: "echo 'Test job running'"
+    schedule: "@every 1m" 
