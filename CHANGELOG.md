@@ -1,3 +1,12 @@
+## [1.9.1](https://github.com/PremoWeb/chadburn/compare/v1.9.0...v1.9.1) (2025-03-16)
+
+
+### Bug Fixes
+
+* handle Docker socket connection issues with backoff and prevent job de-registration (Issue [#117](https://github.com/PremoWeb/chadburn/issues/117)) ([34ee8b6](https://github.com/PremoWeb/chadburn/commit/34ee8b613230d77c532d3d993ad4bb07b33f6983))
+* handle EOF errors in Docker event watching with exponential backoff ([466ce1a](https://github.com/PremoWeb/chadburn/commit/466ce1a1a485ea74aa9163d1750d2fa2c004c310))
+* lowercase error message to comply with Go style guide (ST1005) ([a76f3bc](https://github.com/PremoWeb/chadburn/commit/a76f3bc0bce714feaa20d68811dfd7440630d3ec))
+
 # [1.9.0](https://github.com/PremoWeb/chadburn/compare/v1.8.2...v1.9.0) (2025-03-16)
 
 
