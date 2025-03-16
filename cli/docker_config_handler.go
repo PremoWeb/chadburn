@@ -64,9 +64,15 @@ func NewDockerHandler(notifier dockerLabelsUpdate, logger core.Logger) (*DockerH
 	return c, nil
 }
 
+// watch polls for changes in Docker containers
 func (c *DockerHandler) watch() {
 	// Poll for changes
 	tick := time.Tick(10000 * time.Millisecond)
+
+	// Add backoff for connection issues
+	connectionBackoff := 100 * time.Millisecond
+	maxConnectionBackoff := 5 * time.Second
+
 	for {
 		select {
 		case <-tick:
@@ -74,7 +80,22 @@ func (c *DockerHandler) watch() {
 			// Do not print or care if there is no container up right now
 			if err != nil && !errors.Is(err, ErrNoContainerWithChadburnEnabled) {
 				c.logger.Debugf("%v", err)
+
+				// Check if it's a connection error
+				if strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+					// Apply exponential backoff
+					if connectionBackoff < maxConnectionBackoff {
+						connectionBackoff *= 2
+					}
+					c.logger.Noticef("Docker daemon connection issue. Waiting %v before next attempt...", connectionBackoff)
+					time.Sleep(connectionBackoff)
+					continue
+				}
+			} else {
+				// Reset backoff on success
+				connectionBackoff = 100 * time.Millisecond
 			}
+
 			c.notifier.dockerLabelsUpdate(labels)
 		case <-c.ctx.Done():
 			return
@@ -137,14 +158,16 @@ func (c *DockerHandler) watchEvents() {
 				}
 			case err := <-errCh:
 				c.logger.Errorf("Error watching events: %v", err)
-				if err == io.EOF {
-					// Handle EOF by reconnecting after a delay
+
+				// Handle all connection errors with backoff
+				if err == io.EOF || strings.Contains(err.Error(), "Cannot connect to the Docker daemon") {
+					// Handle connection errors by reconnecting after a delay
 					shouldReconnect = true
 					// Apply exponential backoff with a maximum limit
 					if backoff < maxBackoff {
 						backoff *= 2
 					}
-					c.logger.Noticef("Docker events connection closed (EOF). Reconnecting in %v...", backoff)
+					c.logger.Noticef("Docker events connection issue. Reconnecting in %v...", backoff)
 					time.Sleep(backoff)
 				}
 			case <-c.ctx.Done():

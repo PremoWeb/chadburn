@@ -192,6 +192,13 @@ func (c *Config) buildSchedulerMiddlewares(sh *core.Scheduler) {
 }
 
 func (c *Config) dockerLabelsUpdate(labels map[string]map[string]string) {
+	// If labels is nil or empty, this might be due to a connection issue
+	// Don't de-register jobs in this case to prevent thrashing
+	if labels == nil || len(labels) == 0 {
+		c.logger.Debugf("No labels received, skipping update to prevent job de-registration")
+		return
+	}
+
 	// Get the current labels
 	var parsedLabelConfig Config
 	parsedLabelConfig.buildFromDockerLabels(labels)
