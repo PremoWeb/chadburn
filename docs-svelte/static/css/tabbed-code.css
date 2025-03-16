@@ -1,0 +1,74 @@
+/**
+ * Tabbed Code Blocks CSS
+ */
+
+.tabbed-code {
+  margin: 1.5rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e1e4e8;
+  background-color: #fff;
+}
+
+.tabbed-code .tab-header {
+  display: flex;
+  border-bottom: 1px solid #e1e4e8;
+  background-color: #f6f8fa;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tabbed-code .tab-button {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6a737d;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tabbed-code .tab-button:hover {
+  color: var(--primary-color, #0366d6);
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.tabbed-code .tab-button.active {
+  color: var(--primary-color, #0366d6);
+  border-bottom-color: var(--primary-color, #0366d6);
+  background-color: #fff;
+}
+
+.tabbed-code .tab-content {
+  position: relative;
+}
+
+.tabbed-code .tab-pane {
+  display: none;
+}
+
+.tabbed-code .tab-pane.active {
+  display: block;
+}
+
+.tabbed-code .code-block-wrapper {
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.tabbed-code pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+  .tabbed-code .tab-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+} 

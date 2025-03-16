@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import ParentNav from '$lib/components/ParentNav.svelte';
-	import SubNav from '$lib/components/SubNav.svelte';
 	import { version } from '$lib/stores/version';
 	import '../app.css';
 </script>
@@ -20,8 +19,6 @@
 			<ParentNav />
 		</div>
 	</header>
-
-	<SubNav />
 
 	<main>
 		<div class="content">
