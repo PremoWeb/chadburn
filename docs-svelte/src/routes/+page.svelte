@@ -27,7 +27,7 @@
 		<h1>Chadburn</h1>
 		<p class="tagline">Modern job scheduler for Docker environments</p>
 		<div class="cta-buttons">
-			<a href="{base}/getting-started" class="btn primary">Get Started</a>
+			<a href="{base}/docs" class="btn primary">Get Started</a>
 			<a href="https://github.com/PremoWeb/Chadburn" class="btn secondary" target="_blank" rel="noopener noreferrer">GitHub</a>
 		</div>
 	</section>
@@ -72,33 +72,33 @@
   -v /path/to/config.ini:/etc/chadburn.conf \
   premoweb/chadburn:latest daemon</code></pre>
 		</div>
-		<p>Check out the <a href="{base}/getting-started">Getting Started Guide</a> for more detailed instructions.</p>
+		<p>Check out the <a href="{base}/docs/quick-start">Getting Started Guide</a> for more detailed instructions.</p>
 	</section>
 
 	<section class="documentation">
 		<h2>Documentation</h2>
 		<div class="doc-links">
-			<a href="{base}/getting-started" class="doc-link">
+			<a href="{base}/docs/quick-start" class="doc-link">
 				<h3>Getting Started</h3>
 				<p>Installation, quick start, and basic concepts</p>
 			</a>
-			<a href="{base}/configuration" class="doc-link">
+			<a href="{base}/docs/guides/configuration" class="doc-link">
 				<h3>Configuration</h3>
 				<p>Configuration file format, environment variables, and command line options</p>
 			</a>
-			<a href="{base}/jobs" class="doc-link">
+			<a href="{base}/docs/concepts/jobs" class="doc-link">
 				<h3>Job Types</h3>
 				<p>Different job types and their configuration options</p>
 			</a>
-			<a href="{base}/docker-integration" class="doc-link">
+			<a href="{base}/docs/docker-integration" class="doc-link">
 				<h3>Docker Integration</h3>
 				<p>Docker labels, container lifecycle events, and dynamic configuration</p>
 			</a>
-			<a href="{base}/examples" class="doc-link">
+			<a href="{base}/docs/examples" class="doc-link">
 				<h3>Examples</h3>
 				<p>Common use cases and Docker Compose examples</p>
 			</a>
-			<a href="{base}/faq" class="doc-link">
+			<a href="{base}/docs/faq" class="doc-link">
 				<h3>FAQ</h3>
 				<p>Frequently asked questions about Chadburn</p>
 			</a>

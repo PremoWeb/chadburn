@@ -5,7 +5,8 @@
 	// Define the main navigation categories
 	const mainNavItems = [
 		{ name: 'Home', path: '/' },
-		{ name: 'Documentation', path: '/getting-started' },
+		{ name: 'Documentation', path: '/docs' },
+		{ name: 'API', path: '/api' },
 		{ name: 'GitHub', url: 'https://github.com/PremoWeb/Chadburn', external: true }
 	];
 </script>
@@ -27,7 +28,7 @@
 					</a>
 				</li>
 			{:else}
-				<li class:active={$page.url.pathname === `${base}${item.path}`}>
+				<li class:active={$page.url.pathname.startsWith(`${base}${item.path}`)}>
 					<a href="{base}{item.path}">{item.name}</a>
 				</li>
 			{/if}
