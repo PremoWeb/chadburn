@@ -6,6 +6,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ScrollToTop from '$lib/components/ScrollToTop.svelte';
+	import WarningBanner from '$lib/components/WarningBanner.svelte';
 	
 	let { children } = $props();
 	
@@ -32,6 +33,7 @@
 	<div class="content-wrapper">
 		<Sidebar />
 		<main class="main-content">
+			<WarningBanner />
 			<div class="page-transition-container">
 				{@render children()}
 			</div>
