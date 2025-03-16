@@ -19,7 +19,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 118,
+    "contributions": 115,
     "isLeadDeveloper": true,
     "name": "Nick Maietta",
     "social": {
@@ -69,7 +69,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 9
+    "contributions": 6
   },
   {
     "login": "jinnatar",
