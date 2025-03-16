@@ -111,3 +111,97 @@ paths: {
   base: '' // Use root path for all environments
 }
 ```
+
+# Chadburn Documentation
+
+This directory contains the Svelte-based documentation for the Chadburn project.
+
+## Development
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) (latest version)
+- Node.js 18 or later
+
+### Setup
+
+1. Install dependencies:
+
+```bash
+cd docs-svelte
+bun install
+```
+
+2. Start the development server:
+
+```bash
+bun run dev
+```
+
+3. Open your browser and navigate to `http://localhost:5173`
+
+## Building
+
+To build the documentation site:
+
+```bash
+bun run build
+```
+
+The built files will be in the `build` directory.
+
+## Deployment
+
+The documentation is automatically deployed to Cloudflare Pages when changes are pushed to the `main` branch.
+
+### Setting up Cloudflare Pages Deployment
+
+To set up the GitHub Actions workflow for deploying to Cloudflare Pages, you need to add the following secrets to your GitHub repository:
+
+1. `CLOUDFLARE_API_TOKEN`: An API token with the "Cloudflare Pages" permission
+2. `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
+
+#### Creating a Cloudflare API Token
+
+1. Log in to your Cloudflare dashboard
+2. Go to "My Profile" > "API Tokens"
+3. Click "Create Token"
+4. Select "Create Custom Token"
+5. Name your token (e.g., "GitHub Actions - Chadburn Docs")
+6. Under "Permissions", add:
+   - Account > Cloudflare Pages > Edit
+   - Account > Account Settings > Read
+7. Under "Account Resources", select your account
+8. Click "Continue to summary" and then "Create Token"
+9. Copy the token value (you won't be able to see it again)
+
+#### Finding Your Cloudflare Account ID
+
+1. Log in to your Cloudflare dashboard
+2. Your account ID is in the URL: `https://dash.cloudflare.com/<account-id>`
+3. It's also visible in the right sidebar when viewing your account details
+
+#### Adding Secrets to GitHub
+
+1. Go to your GitHub repository
+2. Click on "Settings" > "Secrets and variables" > "Actions"
+3. Click "New repository secret"
+4. Add the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets
+
+#### Setting up the Cloudflare Pages Project
+
+Before the first deployment, you need to create a Cloudflare Pages project:
+
+1. Go to your Cloudflare dashboard
+2. Navigate to "Pages"
+3. Click "Create a project"
+4. Choose "Connect to Git"
+5. Select your GitHub repository
+6. Configure your project:
+   - Project name: `chadburn-docs` (must match the `projectName` in the workflow)
+   - Production branch: `main`
+   - Build command: Leave empty (we build in GitHub Actions)
+   - Build directory: Leave empty (we specify in the deployment)
+7. Click "Save and Deploy"
+
+After the initial setup, the GitHub Actions workflow will handle all future deployments.

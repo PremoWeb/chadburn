@@ -13,14 +13,18 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check .",
-		"update-contributors": "node scripts/fetch-contributors.js"
+		"update-contributors": "node scripts/fetch-contributors.js",
+		"start": "bun run build && bun ./build/index.js",
+		"serve": "bun ./build/index.js"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^4.0.0",
+		"@sveltejs/adapter-cloudflare": "^4.0.0",
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.0.0",
+		"@types/node": "^22.13.10",
 		"marked": "^15.0.7",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",

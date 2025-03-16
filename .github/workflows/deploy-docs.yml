@@ -1,4 +1,4 @@
-name: Deploy Documentation
+name: Deploy Documentation to Cloudflare Pages
 
 on:
   push:
@@ -8,9 +8,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
+  deployments: write
 
 # Allow only one concurrent deployment
 concurrency:
@@ -37,12 +36,17 @@ jobs:
       - name: Install dependencies
         run: cd docs-svelte && bun install
 
+      - name: Install Cloudflare adapter
+        run: cd docs-svelte && bun add -d @sveltejs/adapter-cloudflare
+
       - name: Build site
         run: cd docs-svelte && bun run build
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          folder: docs-svelte/build
-          branch: gh-pages
-          clean: true 
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: chadburn-docs
+          directory: docs-svelte/build
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }} 

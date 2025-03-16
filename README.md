@@ -6,6 +6,8 @@
 [![Docker Image Size](https://img.shields.io/docker/image-size/premoweb/chadburn/latest)](https://hub.docker.com/r/premoweb/chadburn)
 [![License](https://img.shields.io/github/license/PremoWeb/Chadburn)](https://github.com/PremoWeb/Chadburn/blob/main/LICENSE)
 
+> ### 📣 **NEW!** Visit our dedicated website at [https://chadburn.dev](https://chadburn.dev) for comprehensive documentation, tutorials, and examples. Our documentation is now powered by SvelteKit and hosted on Cloudflare Pages for improved performance and reliability.
+
 **Chadburn** is a lightweight job scheduler designed for __Docker__ environments, developed in Go. It serves as a contemporary replacement for the traditional [cron](https://en.wikipedia.org/wiki/Cron). Chadburn uses semantic versioning and automatic releases based on commit messages. Commit messages are validated using Git hooks to ensure they follow the Conventional Commits format.
 
 ---
@@ -47,6 +49,8 @@ Chadburn also supports variable substitution in job commands, allowing you to re
 
 ## Configuration
 
+For the most comprehensive and up-to-date documentation, please visit our dedicated website at [https://chadburn.dev](https://chadburn.dev).
+
 A comprehensive wiki is underway to detail Chadburn's usage. Caprover users will soon have access to a One Click App for deploying and managing scheduled jobs via Service Label Overrides.
 
 For others, here's a quick guide to get started with Chadburn:
@@ -64,7 +68,7 @@ You can configure four types of jobs:
 - `job-local`: Executes a command on the host running Chadburn.
 - `job-service-run`: Runs a command inside a new "run-once" service for swarm environments.
 
-For detailed parameters, refer to the [Jobs reference documentation](docs/jobs.md).
+For detailed parameters, refer to the [Jobs reference documentation](https://chadburn.dev/jobs).
 
 #### INI Configuration
 
@@ -108,7 +112,7 @@ docker run -it --rm \
     premoweb/chadburn:latest daemon
 ```
 
-> **Note**: If you encounter permission issues with the Docker socket, refer to our [Docker Socket Permissions Guide](docs/docker-socket-permissions.md) for solutions.
+> **Note**: If you encounter permission issues with the Docker socket, refer to our [Docker Socket Permissions Guide](https://chadburn.dev/docker-socket-permissions) for solutions.
 
 The labels format is: `chadburn.<JOB_TYPE>.<JOB_NAME>.<JOB_PARAMETER>=<PARAMETER_VALUE>`. This configuration method supports all capabilities provided by INI files.
 
@@ -249,9 +253,32 @@ save-folder = /var/log/chadburn
 save-only-on-error = false
 ```
 
+### Metrics (Experimental)
+
+Chadburn includes experimental support for Prometheus metrics, allowing you to monitor job executions and performance. When enabled, Chadburn exposes a metrics endpoint that can be scraped by Prometheus.
+
+To enable metrics, add the `--metrics` flag and specify a listen address:
+
+```bash
+chadburn daemon --config=/etc/chadburn.conf --metrics --listen-address=:8080
+```
+
+Available metrics include:
+- Job counts
+- Job execution totals
+- Error counts
+- Execution durations
+
+A preconfigured setup with Prometheus and Grafana is included for easy visualization of metrics. Testing and verification tools are available in the `metrics-tools/` directory. For more information, see:
+- The [metrics documentation](https://chadburn.dev/metrics) for comprehensive information about Chadburn's metrics capabilities
+
+> **Note**: The metrics functionality is currently experimental and may change in future releases.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+For contribution guidelines, development setup, and best practices, visit our [contribution page](https://chadburn.dev/contributing) on our website.
 
 ## License
 
