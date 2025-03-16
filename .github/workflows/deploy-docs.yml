@@ -52,4 +52,5 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: chadburn-docs
           directory: docs-svelte/.svelte-kit/output/client
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }} 
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: 4 
