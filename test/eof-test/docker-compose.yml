@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  chadburn:
+    build:
+      context: ../..
+      dockerfile: test/eof-test/Dockerfile
+    container_name: chadburn-test
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./config.yml:/etc/chadburn/config.yml
+    environment:
+      - CHADBURN_LOG_LEVEL=debug
+    restart: unless-stopped
+    mem_limit: 256M  # Limit memory to simulate the issue
+
+  # This container will be used to simulate Docker events
+  test-container:
+    image: alpine:latest
+    container_name: test-container
+    command: sh -c "while true; do sleep 30; done"
+    labels:
+      - "chadburn.enabled=true" 
