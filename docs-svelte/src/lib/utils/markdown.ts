@@ -8,6 +8,26 @@ export type Heading = {
 };
 
 /**
+ * Strip YAML frontmatter from markdown content
+ * Frontmatter is delimited by --- at the start and end
+ */
+export function stripFrontmatter(content: string): string {
+	// Check if content starts with --- which indicates frontmatter
+	if (!content.trim().startsWith('---')) {
+		return content;
+	}
+	
+	// Find the second --- which ends the frontmatter
+	const parts = content.split('---');
+	if (parts.length < 3) {
+		return content; // No proper frontmatter found
+	}
+	
+	// Return everything after the second ---
+	return parts.slice(2).join('---').trim();
+}
+
+/**
  * Process markdown content and convert to HTML
  */
 export async function processMarkdown(content: string): Promise<string> {

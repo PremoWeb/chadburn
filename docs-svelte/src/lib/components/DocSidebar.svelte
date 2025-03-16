@@ -48,7 +48,7 @@
 </script>
 
 <div class="sidebar-container" class:mobile-open={isMobileSidebarOpen}>
-	<button class="mobile-toggle" on:click={toggleMobileSidebar}>
+	<button class="mobile-toggle" onclick={toggleMobileSidebar}>
 		{isMobileSidebarOpen ? 'Close Menu' : 'Open Menu'}
 	</button>
 	

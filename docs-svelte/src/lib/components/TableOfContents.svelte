@@ -214,7 +214,7 @@
 					<!-- H2 Heading -->
 					<a 
 						href="#{h2.id}" 
-						on:click={(e) => handleTocClick(e, h2.id)}
+						onclick={(e) => handleTocClick(e, h2.id)}
 						class="toc-link {activeId === h2.id ? 'active' : ''}"
 					>
 						{h2.text}
@@ -227,7 +227,7 @@
 								<li class="toc-subitem">
 									<a 
 										href="#{h3.id}" 
-										on:click={(e) => handleTocClick(e, h3.id)}
+										onclick={(e) => handleTocClick(e, h3.id)}
 										class="toc-link {activeId === h3.id ? 'active' : ''}"
 									>
 										{h3.text}

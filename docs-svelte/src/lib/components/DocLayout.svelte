@@ -307,7 +307,7 @@
 						<h3 class="text-sm font-bold text-yellow-800">Debug Information</h3>
 						<button 
 							class="text-xs bg-yellow-200 hover:bg-yellow-300 text-yellow-800 px-2 py-1 rounded"
-							on:click={toggleDebug}
+							onclick={toggleDebug}
 						>
 							Hide Debug
 						</button>
@@ -395,7 +395,7 @@
 
 <!-- Debug toggle button (only visible when debug is false) -->
 {#if !showDebug}
-	<button class="debug-toggle" on:click={toggleDebug}>
+	<button class="debug-toggle" onclick={toggleDebug}>
 		Show Debug
 	</button>
 {/if} 
