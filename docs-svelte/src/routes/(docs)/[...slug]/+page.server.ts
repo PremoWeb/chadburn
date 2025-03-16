@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-// Use a simpler approach with virtual modules
-const markdownModules = import.meta.glob('/static/markdown/**/*.md', { as: 'raw', eager: true });
+// Use the recommended approach with query parameter instead of deprecated 'as' option
+const markdownModules = import.meta.glob('/static/markdown/**/*.md', { query: '?raw', import: 'default', eager: true });
 
 export const load: PageServerLoad = async ({ params, url }) => {
 	try {
