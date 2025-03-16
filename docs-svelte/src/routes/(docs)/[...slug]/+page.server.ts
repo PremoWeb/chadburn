@@ -1,7 +1,8 @@
 import { error } from '@sveltejs/kit';
-import fs from 'fs';
-import path from 'path';
 import type { PageServerLoad } from './$types';
+
+// Use a simpler approach with virtual modules
+const markdownModules = import.meta.glob('/static/markdown/**/*.md', { as: 'raw', eager: true });
 
 export const load: PageServerLoad = async ({ params, url }) => {
 	try {
@@ -19,65 +20,63 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			targetSlug = 'introduction';
 		}
 		
-		// Try multiple file paths to find the correct markdown file
-		let filePath = '';
-		let content = '';
-		let fileFound = false;
+		// Debug: Log all available markdown files
+		console.log('Available markdown modules:', Object.keys(markdownModules));
 		
-		// Possible file paths to try in order
-		const possiblePaths = [
-			// Direct match (e.g., metrics/quick-start.md for /metrics/quick-start)
-			path.join(process.cwd(), 'static', 'markdown', `${targetSlug}.md`),
+		// Function to find a markdown file by slug
+		function findMarkdownContent(slug: string): string | null {
+			// Try different path patterns
+			const patterns = [
+				// Direct match
+				`/static/markdown/${slug}.md`,
+				// Nested index
+				`/static/markdown/${slug}/index.md`,
+				// Hyphenated
+				`/static/markdown/${slug.replace(/\//g, '-')}.md`
+			];
 			
-			// Nested path with index.md (e.g., metrics/index.md for /metrics)
-			path.join(process.cwd(), 'static', 'markdown', targetSlug, 'index.md'),
-			
-			// Hyphenated path (e.g., metrics-quick-start.md for /metrics/quick-start)
-			path.join(process.cwd(), 'static', 'markdown', `${targetSlug.replace(/\//g, '-')}.md`),
-			
-			// For root path, try index.md
-			path.join(process.cwd(), 'static', 'markdown', 'index.md'),
-			
-			// Alternative extension
-			path.join(process.cwd(), 'static', 'markdown', `${targetSlug}.markdown`),
-		];
-		
-		for (const tryPath of possiblePaths) {
-			if (fs.existsSync(tryPath)) {
-				filePath = tryPath;
-				fileFound = true;
-				break;
+			// For the root path
+			if (!slug || slug === '') {
+				patterns.push('/static/markdown/index.md');
 			}
+			
+			// Try each pattern
+			for (const pattern of patterns) {
+				if (markdownModules[pattern]) {
+					console.log('Found file at path:', pattern);
+					return markdownModules[pattern];
+				}
+			}
+			
+			// If slug contains slashes, try a nested approach
+			if (slug.includes('/')) {
+				const segments = slug.split('/');
+				const lastSegment = segments.pop() || '';
+				const parentPath = segments.join('/');
+				
+				const nestedPattern = `/static/markdown/${parentPath}/${lastSegment}.md`;
+				if (markdownModules[nestedPattern]) {
+					console.log('Found file at nested path:', nestedPattern);
+					return markdownModules[nestedPattern];
+				}
+			}
+			
+			return null;
 		}
 		
-		// If no file was found, try one more approach for nested paths
-		if (!fileFound && targetSlug.includes('/')) {
-			// For paths like 'metrics/quick-start', try both 'metrics/quick-start.md' and 'metrics-quick-start.md'
-			const segments = targetSlug.split('/');
-			const lastSegment = segments.pop() || '';
-			const parentPath = segments.join('/');
-			
-			const nestedPath = path.join(process.cwd(), 'static', 'markdown', parentPath, `${lastSegment}.md`);
-			
-			if (fs.existsSync(nestedPath)) {
-				filePath = nestedPath;
-				fileFound = true;
-			}
-		}
+		// Find the markdown file
+		const content = findMarkdownContent(targetSlug);
 		
-		// If still no file found, throw a 404 error
-		if (!fileFound) {
+		// If no file found, throw a 404 error
+		if (!content) {
+			console.error(`Page not found: ${targetSlug}`);
 			throw error(404, `Page not found: ${targetSlug}`);
 		}
 		
-		// Read the file content
-		content = fs.readFileSync(filePath, 'utf-8');
-		
 		// Return the slug and content
-		const result = { slug: targetSlug, content };
-		
-		return result;
+		return { slug: targetSlug, content };
 	} catch (e: any) {
+		console.error('Error in load function:', e);
 		if (e.status === 404) {
 			throw e; // Re-throw 404 errors
 		}
