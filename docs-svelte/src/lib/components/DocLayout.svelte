@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import DocSidebar from './DocSidebar.svelte';
 	import TableOfContents from './TableOfContents.svelte';
-	import { processMarkdown, extractHeadings, addIdsToHeadings, stripFrontmatter, type Heading } from '$lib/utils/markdown';
+	import { processMarkdown, extractHeadings, addIdsToHeadings, type Heading } from '$lib/utils/markdown';
 	import { onMount } from 'svelte';
 	
 	// Props
@@ -34,6 +34,23 @@
 	let showDebug = $state(debug);
 	let contentAreaTop = $state(0);
 	let contentWrapper: HTMLElement;
+	
+	// Strip YAML frontmatter from markdown content
+	function stripFrontmatter(content: string): string {
+		// Check if content starts with --- which indicates frontmatter
+		if (!content.trim().startsWith('---')) {
+			return content;
+		}
+		
+		// Find the second --- which ends the frontmatter
+		const parts = content.split('---');
+		if (parts.length < 3) {
+			return content; // No proper frontmatter found
+		}
+		
+		// Return everything after the second ---
+		return parts.slice(2).join('---').trim();
+	}
 	
 	// Process markdown content
 	$effect(() => {
