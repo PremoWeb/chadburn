@@ -10,7 +10,7 @@ import (
 	"github.com/PremoWeb/Chadburn/core"
 )
 
-var ErrNoContainerWithChadburnEnabled = errors.New("Couldn't find containers with label 'chadburn.enabled=true'")
+var ErrNoContainerWithChadburnEnabled = errors.New("couldn't find containers with label 'chadburn.enabled=true'")
 
 type DockerHandler struct {
 	dockerClient  core.DockerClient
