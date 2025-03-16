@@ -2,6 +2,7 @@
 	import { base } from '$app/paths';
 	import ParentNav from '$lib/components/ParentNav.svelte';
 	import { version } from '$lib/stores/version';
+	import WarningBanner from '$lib/components/WarningBanner.svelte';
 	import '../app.css';
 </script>
 
@@ -19,6 +20,8 @@
 			<ParentNav />
 		</div>
 	</header>
+
+	<WarningBanner />
 
 	<main>
 		<div class="content">
@@ -63,6 +66,10 @@
 		color: white;
 		padding: 1rem 0;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		position: sticky;
+		top: 0;
+		z-index: 1000;
+		width: 100%;
 	}
 
 	.header-content {
