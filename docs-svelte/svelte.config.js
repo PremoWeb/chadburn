@@ -9,13 +9,7 @@ const config = {
 
 	kit: {
 		// Using adapter-cloudflare for Cloudflare Pages deployment
-		adapter: adapter({
-			// Cloudflare adapter options
-			routes: {
-				include: ['/*'],
-				exclude: ['<all>']
-			}
-		}),
+		adapter: adapter(),
 		paths: {
 			base: '', // Use root path for all environments
 			relative: false // Use root-relative URLs for assets
