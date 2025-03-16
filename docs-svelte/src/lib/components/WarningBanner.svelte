@@ -14,7 +14,7 @@
         <strong>Development Notice:</strong> Chadburn is undergoing a major rewrite. The code is not fully tested and documentation may not reflect current functionality. Please use prior stable versions for production environments.
       </p>
       <p class="donation-text">
-        <strong>Support Needed:</strong> Development costs are mounting. Please consider donating via PayPal or Venmo to <strong>nick@premoweb.com</strong> to help fund AI tools and development time.
+        <strong>Urgent Support Needed:</strong> Over $60 has been spent this month alone on development and domain costs, paid out-of-pocket by the financially strained lead developer. Please help cover these expenses via PayPal or Venmo to <strong>nick@premoweb.com</strong> to ensure continued development toward a stable release with new features. Feel free to reach out to discuss features you'd like to see.
       </p>
     </div>
   </div>
