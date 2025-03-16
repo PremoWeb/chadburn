@@ -2,14 +2,20 @@
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { marked } from 'marked';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ApiSidebar from '$lib/components/ApiSidebar.svelte';
-	import TableOfContents from '$lib/components/TableOfContents.svelte';
+	import ApiTableOfContents from '$lib/components/ApiTableOfContents.svelte';
+	import { processMarkdown, extractHeadings, addIdsToHeadings, type Heading } from '$lib/utils/markdown';
+	
+	// Define the data type
+	type PageData = {
+		content: string;
+		slug: string;
+	};
 	
 	// Get data from the page load function
-	let { data } = $props();
+	let { data } = $props<{ data: PageData }>();
 	
 	// Track if this is the initial page load
 	let isInitialLoad = true;
@@ -22,14 +28,12 @@
 	// Process markdown content
 	$effect(() => {
 		if (data.content) {
-			// Parse markdown to HTML
-			try {
-				currentHtmlContent = marked.parse(data.content);
-			} catch (e) {
-				console.error('Error parsing markdown:', e);
-				currentHtmlContent = '<p>Error parsing content</p>';
-			}
-			isLoading = false;
+			// Process markdown asynchronously
+			processMarkdown(data.content).then(html => {
+				// Add IDs to headings for anchor links
+				currentHtmlContent = addIdsToHeadings(html);
+				isLoading = false;
+			});
 		}
 	});
 	
@@ -43,31 +47,8 @@
 		isInitialLoad = false;
 	});
 	
-	// Extract headings for table of contents
-	function extractHeadings() {
-		if (typeof document === 'undefined') return [];
-		
-		const headings: { id: string; text: string; level: number }[] = [];
-		const contentElement = document.querySelector('.markdown-content');
-		
-		if (!contentElement) return [];
-		
-		// Get all headings h2 and h3
-		const headingElements = contentElement.querySelectorAll('h2, h3');
-		
-		headingElements.forEach((el) => {
-			const id = el.id;
-			const text = el.textContent || '';
-			const level = parseInt(el.tagName.substring(1), 10);
-			
-			headings.push({ id, text, level });
-		});
-		
-		return headings;
-	}
-	
 	// Handle heading extraction after content is rendered
-	let headings = $state<{ id: string; text: string; level: number }[]>([]);
+	let headings = $state<Heading[]>([]);
 	
 	onMount(() => {
 		// Extract headings after initial render
@@ -113,7 +94,7 @@
 	
 	{#if headings.length > 0}
 		<div class="toc-container">
-			<TableOfContents headings={headings} />
+			<ApiTableOfContents headings={headings} />
 		</div>
 	{/if}
 </div>
