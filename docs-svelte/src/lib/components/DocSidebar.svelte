@@ -2,44 +2,14 @@
 	import { page } from '$app/state';
 	import { base } from '$app/paths';
 	
-	// Navigation items for API documentation
-	const navItems = [
-		{
-			section: 'API Reference',
-			items: [
-				{ title: 'Overview', path: '/api/overview' },
-				{ title: 'Authentication', path: '/api/authentication' },
-				{ title: 'Rate Limiting', path: '/api/rate-limiting' }
-			]
-		},
-		{
-			section: 'Endpoints',
-			items: [
-				{ title: 'Jobs', path: '/api/endpoints/jobs' },
-				{ title: 'Schedules', path: '/api/endpoints/schedules' },
-				{ title: 'Metrics', path: '/api/endpoints/metrics' },
-				{ title: 'Webhooks', path: '/api/endpoints/webhooks' },
-				{ title: 'Tags', path: '/api/endpoints/tags' },
-				{ title: 'Users', path: '/api/endpoints/users' },
-				{ title: 'Settings', path: '/api/endpoints/settings' }
-			]
-		},
-		{
-			section: 'Examples',
-			items: [
-				{ title: 'Basic Usage', path: '/api/examples/basic' },
-				{ title: 'Advanced Usage', path: '/api/examples/advanced' }
-			]
-		},
-		{
-			section: 'SDKs & Libraries',
-			items: [
-				{ title: 'Overview', path: '/api/sdks' },
-				{ title: 'Go Client', path: '/api/sdks/go' },
-				{ title: 'Python Client', path: '/api/sdks/python' }
-			]
-		}
-	];
+	// Props
+	const { navItems = [], title = 'Documentation' } = $props<{
+		navItems: Array<{
+			section: string;
+			items: Array<{ title: string; path: string }>;
+		}>;
+		title?: string;
+	}>();
 	
 	// Reactive values using runes
 	let baseUrl = $derived(base);
@@ -60,13 +30,16 @@
 			return true;
 		}
 		
-		// Check if it's a parent path
-		if (path !== '/api' && path !== '/api/overview' && currentPath.startsWith(`${baseUrl}${path}/`)) {
+		// Check if it's a parent path (but not the root)
+		if (path !== '/' && path !== '/api' && path !== '/api/overview' && 
+			path !== '/docs' && path !== '/docs/overview' && 
+			currentPath.startsWith(`${baseUrl}${path}/`)) {
 			return true;
 		}
 		
-		// Special case for index
-		if (path === '/api/overview' && (currentPath === `${baseUrl}/api` || currentPath === `${baseUrl}/api/`)) {
+		// Special case for index pages
+		if ((path === '/api/overview' && (currentPath === `${baseUrl}/api` || currentPath === `${baseUrl}/api/`)) ||
+			(path === '/docs/overview' && (currentPath === `${baseUrl}/docs` || currentPath === `${baseUrl}/docs/`))) {
 			return true;
 		}
 		
@@ -81,7 +54,7 @@
 	
 	<nav class="sidebar">
 		<div class="sidebar-header">
-			<h2>API Documentation</h2>
+			<h2>{title}</h2>
 		</div>
 		
 		{#each navItems as section}
