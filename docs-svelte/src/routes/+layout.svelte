@@ -2,7 +2,6 @@
 	import { base } from '$app/paths';
 	import ParentNav from '$lib/components/ParentNav.svelte';
 	import { version } from '$lib/stores/version';
-	import WarningBanner from '$lib/components/WarningBanner.svelte';
 	import '../app.css';
 </script>
 
@@ -20,8 +19,6 @@
 			<ParentNav />
 		</div>
 	</header>
-
-	<WarningBanner />
 
 	<main>
 		<div class="content">
