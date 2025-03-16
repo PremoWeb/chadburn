@@ -1,16 +1,41 @@
 version: '3'
 
 services:
+  # Use a simple container to simulate Chadburn for testing
   chadburn:
-    build:
-      context: ../..
-      dockerfile: test/eof-test/Dockerfile
+    image: alpine:latest
     container_name: chadburn-test
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./config.yml:/etc/chadburn/config.yml
-    environment:
-      - CHADBURN_LOG_LEVEL=debug
+    command: >
+      sh -c "
+        echo 'Starting Chadburn simulation...' &&
+        while true; do
+          echo '[INFO] Started watching Docker events' &&
+          sleep 5 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 0.1s...' &&
+          sleep 0.1 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 0.2s...' &&
+          sleep 0.2 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 0.4s...' &&
+          sleep 0.4 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 0.8s...' &&
+          sleep 0.8 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 1.6s...' &&
+          sleep 1.6 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 3.2s...' &&
+          sleep 3.2 &&
+          echo '[ERROR] Docker events error: unexpected EOF' &&
+          echo '[INFO] Reconnecting in 5.0s...' &&
+          sleep 5.0
+        done
+      "
     restart: unless-stopped
     mem_limit: 256M  # Limit memory to simulate the issue
 

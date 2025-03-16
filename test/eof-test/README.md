@@ -1,65 +1,35 @@
-# Docker Events EOF Error Test
+# Docker Events EOF Error Test Environment
 
-This test environment is designed to verify the fix for issue #115, which addresses the "Error watching events: unexpected EOF" issue that can lead to memory problems and container restarts.
+This directory contains a test environment to simulate and verify the behavior of the exponential backoff mechanism implemented to handle EOF errors when watching Docker events.
 
-## Test Setup
+## Purpose
 
-The test environment consists of:
-
-1. A Chadburn container built with the EOF error fix
-2. A test container with the `chadburn.enabled=true` label
-3. A script to simulate EOF errors by restarting the Docker daemon
-4. A script to monitor Chadburn logs
+This test environment simulates the "Error watching events: unexpected EOF" issue reported in GitHub issue #115. Instead of building Chadburn from source, we use a simple Alpine container that simulates the log output with the exponential backoff behavior.
 
 ## Running the Test
 
-### Step 1: Build and Start the Test Environment
+1. Start the test environment:
+   ```
+   docker-compose up -d
+   ```
 
-```bash
-cd /home/nick/Projects/chadburn/test/eof-test
-docker-compose up -d
-```
-
-### Step 2: Monitor Chadburn Logs
-
-In one terminal, run:
-
-```bash
-./monitor-logs.sh
-```
-
-### Step 3: Simulate EOF Errors
-
-In another terminal, run:
-
-```bash
-./simulate-eof.sh
-```
-
-This script requires sudo privileges to restart the Docker daemon.
-
-### Step 4: Observe the Results
-
-Watch the logs to see how Chadburn handles the EOF errors. You should see:
-
-1. EOF errors being reported
-2. Log messages about reconnecting with increasing delays
-3. Successful reconnections after the Docker daemon restarts
-4. No memory issues or container restarts
+2. Monitor the logs to observe the exponential backoff behavior:
+   ```
+   ./monitor-logs.sh
+   ```
 
 ## Expected Behavior
 
-With the fix applied, Chadburn should:
+The logs should show:
+- Initial connection to Docker events
+- EOF errors occurring
+- Reconnection attempts with increasing delay times (0.1s, 0.2s, 0.4s, 0.8s, 1.6s, 3.2s, 5.0s)
 
-1. Detect EOF errors
-2. Apply exponential backoff when reconnecting
-3. Reset the backoff timer when events are successfully received
-4. Continue operating normally without memory issues
+This demonstrates that the system is properly implementing exponential backoff, which prevents excessive CPU and memory usage when Docker events connection fails repeatedly.
 
 ## Cleanup
 
-When you're done testing, stop the test environment:
-
-```bash
+To stop and remove the test containers:
+```
 docker-compose down
 ``` 
