@@ -17,7 +17,11 @@
 			items: [
 				{ title: 'Jobs', path: '/api/endpoints/jobs' },
 				{ title: 'Schedules', path: '/api/endpoints/schedules' },
-				{ title: 'Metrics', path: '/api/endpoints/metrics' }
+				{ title: 'Metrics', path: '/api/endpoints/metrics' },
+				{ title: 'Webhooks', path: '/api/endpoints/webhooks' },
+				{ title: 'Tags', path: '/api/endpoints/tags' },
+				{ title: 'Users', path: '/api/endpoints/users' },
+				{ title: 'Settings', path: '/api/endpoints/settings' }
 			]
 		},
 		{
