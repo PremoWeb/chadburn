@@ -5,7 +5,6 @@
 	// Define the data type
 	type PageData = {
 		content: string;
-		slug: string;
 	};
 	
 	// Get data from the page load function
@@ -49,16 +48,11 @@
 			]
 		}
 	];
-	
-	// Get page title from slug
-	$effect(() => {
-		const title = data.slug.split('/').pop()?.replace(/-/g, ' ') || 'API Documentation';
-	});
 </script>
 
 <DocLayout 
 	content={data.content}
-	title={data.slug.split('/').pop()?.replace(/-/g, ' ') || 'API Documentation'}
+	title="API Documentation"
 	navItems={apiNavItems}
 	sidebarTitle="API Documentation"
 /> 

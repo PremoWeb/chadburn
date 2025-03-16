@@ -5,7 +5,6 @@
 	// Define the data type
 	type PageData = {
 		content: string;
-		slug: string;
 	};
 	
 	// Get data from the page load function
@@ -52,7 +51,7 @@
 
 <DocLayout 
 	content={data.content}
-	title={data.slug.split('/').pop()?.replace(/-/g, ' ') || 'Documentation'}
+	title="Documentation"
 	navItems={docsNavItems}
 	sidebarTitle="Documentation"
 /> 
