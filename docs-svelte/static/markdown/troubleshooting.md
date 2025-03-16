@@ -12,12 +12,20 @@ This guide provides solutions for common issues you might encounter when using C
 ERROR Docker events error: permission denied while trying to connect to the Docker daemon socket
 ```
 
-**Solution**: This is a common issue related to Docker socket permissions. See the [Docker Socket Permissions Guide](docker-socket-permissions.md) for detailed solutions.
+**Solution**: This issue is related to Docker socket permissions, which may be more prominent in recent versions due to the migration to the official Docker client library.
+
+See the [Docker Socket Permissions Guide](docker-socket-permissions.md) for detailed solutions.
 
 Quick fixes:
 1. Add the `:z` suffix to the volume mount: `-v /var/run/docker.sock:/var/run/docker.sock:ro,z`
-2. Run the container with the correct Docker group ID: `-e DOCKER_GID=$(getent group docker | cut -d: -f3)`
+2. Run the container with the correct Docker group ID: 
+   ```bash
+   DOCKER_GID=$(getent group docker | cut -d: -f3)
+   docker run -e DOCKER_GID=$DOCKER_GID --user "1000:$DOCKER_GID" ...
+   ```
 3. Run the container as root: `--user root`
+
+**Note for upgraders**: If you're upgrading from an older version of Chadburn and suddenly experiencing this issue, it's likely due to the migration from `fsouza/go-dockerclient` to the official Docker client library. The official client may have different permission requirements.
 
 ### Jobs Not Running
 

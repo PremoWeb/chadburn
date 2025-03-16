@@ -53,6 +53,57 @@ Save this to a file named `docker-compose.yml` and run:
 docker-compose up -d
 ```
 
+## Docker Socket Permissions
+
+> **Important Note**: Recent versions of Chadburn have migrated from the `fsouza/go-dockerclient` library to the official Docker client library. This change may require additional configuration for Docker socket permissions.
+
+If you encounter permission errors like:
+
+```
+Docker events error: permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock
+```
+
+You have several options:
+
+### Option 1: Use SELinux Volume Labels (Recommended for SELinux Systems)
+
+```yaml
+volumes:
+  - /var/run/docker.sock:/var/run/docker.sock:ro,z
+```
+
+### Option 2: Match the Docker Group ID
+
+```yaml
+services:
+  chadburn:
+    # ... other configuration
+    user: "${UID:-1000}:${DOCKER_GID:-999}"
+    environment:
+      - DOCKER_GID=${DOCKER_GID:-999}
+```
+
+When starting the container:
+
+```bash
+# Get the Docker GID
+DOCKER_GID=$(getent group docker | cut -d: -f3)
+
+# Start with the correct GID
+DOCKER_GID=$DOCKER_GID docker-compose up -d
+```
+
+### Option 3: Run as Root (Less Secure)
+
+```yaml
+services:
+  chadburn:
+    # ... other configuration
+    user: "root"
+```
+
+For more detailed information on Docker socket permissions, see the [Docker Socket Permissions Guide](docker-socket-permissions.md).
+
 ## Configuration
 
 After installation, you'll need to create a configuration file. Create a file named `config.yml` with the following basic structure:
