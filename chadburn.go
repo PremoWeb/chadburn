@@ -10,8 +10,8 @@ import (
 	"github.com/op/go-logging"
 )
 
-var version = "1.8.2"
-var build = "2025-03-15T02:39:35Z"
+var version = "1.9.0"
+var build = "2025-03-16T02:31:18Z"
 
 const logFormat = "%{color}%{time:2006-01-02 15:04:05.000} %{shortfile} ▶ %{level}%{color:reset} %{message}"
 

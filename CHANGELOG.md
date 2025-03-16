@@ -1,3 +1,22 @@
+# [1.9.0](https://github.com/PremoWeb/chadburn/compare/v1.8.2...v1.9.0) (2025-03-16)
+
+
+### Bug Fixes
+
+* asset loading issues by adding .nojekyll and setting paths.relative to false ([c25444d](https://github.com/PremoWeb/chadburn/commit/c25444df73ab78b34c0bd8c24786144f4bce144d))
+* **docs:** remove _routes.json file ([3b73955](https://github.com/PremoWeb/chadburn/commit/3b7395578b693ceecfbe2f350ca4207795abb46a))
+* **docs:** remove routes configuration from Cloudflare adapter ([55575b1](https://github.com/PremoWeb/chadburn/commit/55575b16079cd2740ea367bae5b50a406562574e))
+* **docs:** update Cloudflare Pages deployment directory ([8f21143](https://github.com/PremoWeb/chadburn/commit/8f21143051183ccf8d69e80e0286f686da4e25ae))
+* **docs:** update Cloudflare Pages deployment directory to use .svelte-kit/cloudflare ([05cdf64](https://github.com/PremoWeb/chadburn/commit/05cdf64f59baf2668bcfa557c3f81f1edf23a81e))
+* **docs:** update Cloudflare Pages deployment to use Wrangler v4 ([65d7e0c](https://github.com/PremoWeb/chadburn/commit/65d7e0c01a8ed6af4caf11222a8d466bc06dcf96))
+* update contributors script to use ES modules syntax ([c6be872](https://github.com/PremoWeb/chadburn/commit/c6be8724fe9512d9f04da31dc3d1edb6047c30c8))
+
+
+### Features
+
+* add metrics setup documentation page ([f041813](https://github.com/PremoWeb/chadburn/commit/f041813cffd6b3467b8b3b36f667be4a399c48f1))
+* add version display from VERSION file ([c606a67](https://github.com/PremoWeb/chadburn/commit/c606a67b4594f1f0feb7619056b86b4ee9eba09b))
+
 ## [1.8.2](https://github.com/PremoWeb/chadburn/compare/v1.8.1...v1.8.2) (2025-03-15)
 
 
