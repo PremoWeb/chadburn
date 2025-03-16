@@ -1,464 +1,245 @@
 <script lang="ts">
-	import { onMount, createEventDispatcher } from 'svelte';
-	import { fly, fade, crossfade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
-
-	// Create event dispatcher
-	const dispatch = createEventDispatcher();
-
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
+	import type { Heading } from '$lib/utils/markdown';
+	
 	// Props
-	let {
-		contentSelector = '.doc-content',
-		headingSelector = 'h2, h3, h4',
-		title = 'On this page',
-		maxDepth = 6
-	} = $props<{
-		contentSelector?: string;
-		headingSelector?: string;
-		title?: string;
-		maxDepth?: number;
+	const { headings = [] } = $props<{
+		headings?: Heading[];
 	}>();
-
+	
 	// State
-	let headings = $state<{ id: string; text: string; level: number }[]>([]);
-	let activeId = $state<string | null>(null);
-	let content = $state<HTMLElement | null>(null);
-	let observer: MutationObserver | null = $state(null);
-	let intersectionObserver: IntersectionObserver | null = $state(null);
-	let contentChecked = $state(false);
-	let isVisible = $state(false);
-
-	// Watch for changes in headings and dispatch event
-	$effect(() => {
-		dispatch('contentStatus', { hasContent: headings.length > 0 });
-	});
-
-	// Generate a unique ID for a heading if it doesn't have one
-	function generateId(text: string): string {
-		return text
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, '-')
-			.replace(/(^-|-$)/g, '');
-	}
-
-	// Set visibility after a short delay to ensure DOM is updated
-	function showContent() {
-		setTimeout(() => {
-			isVisible = true;
-		}, 50);
-	}
-
-	// Extract headings from the content
-	function extractHeadings() {
-		if (!content) {
-			content = document.querySelector(contentSelector);
-			if (!content) {
-				dispatch('contentStatus', { hasContent: false });
-				return;
-			}
-		}
-
-		const headingElements = content.querySelectorAll(headingSelector);
+	let activeId = $state('');
+	let observer: IntersectionObserver;
+	let toc: HTMLElement;
+	
+	// Reactive values
+	let currentPath = $derived(page.url.pathname);
+	
+	// Define nested heading type
+	type NestedHeading = Heading & { children: Heading[] };
+	
+	// Organize headings into a nested structure
+	const processHeadings = (): NestedHeading[] => {
+		const result: NestedHeading[] = [];
+		const h2Stack: NestedHeading[] = [];
 		
-		// Reset visibility to trigger animations
-		isVisible = false;
-		
-		headings = Array.from(headingElements).map((heading) => {
-			const level = parseInt(heading.tagName.substring(1));
-			if (!heading.id) {
-				heading.id = generateId(heading.textContent || '');
+		// Process headings in order
+		headings.forEach((heading: Heading) => {
+			if (heading.level === 2) {
+				// Create a new h2 entry with empty children array
+				const newH2: NestedHeading = { ...heading, children: [] };
+				h2Stack.push(newH2);
+				result.push(newH2);
+			} else if (heading.level === 3 && h2Stack.length > 0) {
+				// Add h3 to the children of the most recent h2
+				h2Stack[h2Stack.length - 1].children.push(heading);
 			}
-			return {
-				id: heading.id,
-				text: heading.textContent || '',
-				level
-			};
+			// Ignore h1 and h4+ headings
 		});
 		
-		// Dispatch event with content status
-		dispatch('contentStatus', { hasContent: headings.length > 0 });
+		return result;
+	};
+	
+	let nestedHeadings = $state<NestedHeading[]>([]);
+	
+	// Update nested headings when raw headings change
+	$effect(() => {
+		nestedHeadings = processHeadings();
+	});
+	
+	// Set up intersection observer to track which heading is currently in view
+	onMount(() => {
+		const headingElements = headings.map((h: { id: string }) => document.getElementById(h.id)).filter(Boolean);
 		
-		// Show content after a short delay
-		showContent();
-	}
-
-	// Debounced scroll handler
-	let lastScrollTime = 0;
-	const scrollDebounceMs = 100;
-
-	function updateActiveHeading() {
-		const now = Date.now();
-		if (now - lastScrollTime < scrollDebounceMs) return;
-		lastScrollTime = now;
-
-		if (!headings.length) return;
-
-		const scrollPosition = window.scrollY + 100;
-
-		for (let i = headings.length - 1; i >= 0; i--) {
-			const heading = headings[i];
-			const element = document.getElementById(heading.id);
-
-			if (element && heading.level <= maxDepth && element.offsetTop <= scrollPosition) {
-				activeId = heading.id;
-				return;
+		if (headingElements.length === 0) return;
+		
+		// Check if there's a hash in the URL and scroll to that section
+		if (window.location.hash) {
+			const id = window.location.hash.substring(1);
+			const element = document.getElementById(id);
+			if (element) {
+				setTimeout(() => {
+					element.scrollIntoView({ behavior: 'smooth' });
+					activeId = id;
+				}, 100);
 			}
 		}
-
-		activeId = headings[0]?.id || null;
-	}
-
-	// Scroll to a heading when clicked
-	function scrollToHeading(id: string) {
-		const element = document.getElementById(id);
-		if (element) {
+		
+		const options = {
+			rootMargin: '0px 0px -65% 0px', // Adjusted for content area
+			threshold: 0.1
+		};
+		
+		observer = new IntersectionObserver(entries => {
+			// Sort entries by their position in the document
+			const visibleEntries = entries
+				.filter(entry => entry.isIntersecting)
+				.sort((a, b) => {
+					const aRect = a.boundingClientRect;
+					const bRect = b.boundingClientRect;
+					return aRect.top - bRect.top;
+				});
+			
+			// Use the topmost visible heading
+			if (visibleEntries.length > 0) {
+				const topEntry = visibleEntries[0];
+				activeId = topEntry.target.id;
+			}
+		}, options);
+		
+		headingElements.forEach((el: Element | null) => {
+			if (el) observer.observe(el);
+		});
+		
+		return () => {
+			if (observer) {
+				observer.disconnect();
+			}
+		};
+	});
+	
+	// Handle click on TOC item
+	function handleTocClick(e: MouseEvent, id: string) {
+		e.preventDefault();
+		const el = document.getElementById(id);
+		if (el) {
+			// Set active ID immediately for better UX
+			activeId = id;
+			
+			// Calculate offset to account for sticky header if needed
+			const offset = 24; // Adjusted for content area
+			const elementPosition = el.getBoundingClientRect().top;
+			const offsetPosition = elementPosition + window.pageYOffset - offset;
+			
+			// Scroll to the element with offset
 			window.scrollTo({
-				top: element.offsetTop - 20,
+				top: offsetPosition,
 				behavior: 'smooth'
 			});
-		}
-	}
-
-	// Set up content observation
-	function setupContentObserver() {
-		if (!content) {
-			content = document.querySelector(contentSelector);
-			if (!content) {
-				return;
-			}
-		}
-
-		extractHeadings();
-		updateActiveHeading();
-
-		// Use MutationObserver instead of polling
-		if (observer) {
-			observer.disconnect();
-		}
-		
-		observer = new MutationObserver(() => {
-			extractHeadings();
-			updateActiveHeading();
-			setupIntersectionObserver();
-		});
-
-		observer.observe(content, {
-			childList: true,
-			subtree: true,
-			characterData: true
-		});
-
-		return () => {
-			if (observer) {
-				observer.disconnect();
-				observer = null;
-			}
-		};
-	}
-	
-	// Set up intersection observer for headings
-	function setupIntersectionObserver() {
-		if (intersectionObserver) {
-			intersectionObserver.disconnect();
-		}
-		
-		intersectionObserver = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						const id = entry.target.id;
-						if (headings.some((h) => h.id === id)) {
-							activeId = id;
-						}
-					}
-				});
-			},
-			{
-				rootMargin: '-100px 0px -50% 0px',
-				threshold: 0
-			}
-		);
-
-		// Observe heading elements
-		headings.forEach((heading) => {
-			const element = document.getElementById(heading.id);
-			if (element && intersectionObserver) {
-				intersectionObserver.observe(element);
-			}
-		});
-	}
-
-	// Check for content periodically until found
-	function pollForContent() {
-		const checkInterval = setInterval(() => {
-			if (!content) {
-				content = document.querySelector(contentSelector);
-				if (content) {
-					clearInterval(checkInterval);
-					extractHeadings();
-					updateActiveHeading();
-					setupContentObserver();
-					setupIntersectionObserver();
-				}
-			} else {
-				clearInterval(checkInterval);
-			}
-		}, 200);
-		
-		// Clear interval after 5 seconds to prevent infinite polling
-		setTimeout(() => clearInterval(checkInterval), 5000);
-	}
-
-	onMount(() => {
-		// Initial content setup
-		content = document.querySelector(contentSelector);
-
-		if (content) {
-			extractHeadings();
-			updateActiveHeading();
-			setupContentObserver();
-			setupIntersectionObserver();
 			
-			// Show content after a short delay
-			showContent();
-		} else {
-			pollForContent();
+			// Update URL hash without triggering a scroll
+			history.pushState(null, '', `#${id}`);
 		}
-
-		// Fallback scroll listener (debounced)
-		window.addEventListener('scroll', updateActiveHeading, { passive: true });
-
-		return () => {
-			if (observer) {
-				observer.disconnect();
-				observer = null;
-			}
-			if (intersectionObserver) {
-				intersectionObserver.disconnect();
-				intersectionObserver = null;
-			}
-			window.removeEventListener('scroll', updateActiveHeading);
-		};
-	});
-	
-	// Use $effect to check for content changes after updates
-	$effect(() => {
-		// Skip if we've already checked once during this render cycle
-		if (!contentChecked && !content) {
-			contentChecked = true;
-			content = document.querySelector(contentSelector);
-			if (content) {
-				extractHeadings();
-				updateActiveHeading();
-				setupContentObserver();
-				setupIntersectionObserver();
-				
-				// Show content after a short delay
-				showContent();
-			}
-		}
-	});
-	
-	// Calculate animation delay based on index and level
-	function getAnimationDelay(index: number, level: number): number {
-		// Base delay of 30ms per item
-		const baseDelay = 30;
-		// Add extra delay for deeper levels
-		const levelDelay = (level - 2) * 10;
-		return baseDelay * index + levelDelay;
 	}
 	
-	// Custom transition that combines fade and fly
-	function fadeAndFly(node: Element, options: { 
-		delay?: number; 
-		duration?: number; 
-		y?: number;
-		easing?: (t: number) => number;
-	}) {
-		const {
-			delay = 0,
-			duration = 300,
-			y = 20,
-			easing = cubicOut
-		} = options;
-		
-		return {
-			delay,
-			duration,
-			easing,
-			css: (t: number, u: number) => `
-				transform: translateY(${u * y}px);
-				opacity: ${t};
-			`
-		};
+	// Check if a heading or any of its children is active
+	function isHeadingActive(heading: NestedHeading): boolean {
+		if (activeId === heading.id) return true;
+		return heading.children.some(child => activeId === child.id);
 	}
 </script>
 
-<!-- Template with animations -->
-<div class="table-of-contents" in:fade={{ duration: 300, delay: 100 }}>
-	{#if headings.length > 0}
-		<div class="toc-title" 
-			in:fadeAndFly={{ 
-				y: 10, 
-				duration: 300, 
-				delay: 150,
-				easing: cubicOut 
-			}}
-		>
-			{title}
-		</div>
-		<nav>
-			<ul class="toc-list">
-				{#each headings as heading, i}
-					{#if heading.level <= maxDepth}
-						{#if isVisible}
-							<li 
-								class="level-{heading.level}" 
-								class:active={heading.id === activeId}
-							>
-								<div 
-									class="toc-item-wrapper"
-									in:fadeAndFly={{ 
-										y: 20, 
-										duration: 400, 
-										delay: getAnimationDelay(i, heading.level) + 200,
-										easing: cubicOut 
-									}}
-								>
-									<a
-										href="#{heading.id}"
-										onclick={(e) => {
-											e.preventDefault();
-											scrollToHeading(heading.id);
-										}}
-									>
-										{heading.text}
-									</a>
-								</div>
-							</li>
-						{/if}
-					{/if}
-				{/each}
-			</ul>
-		</nav>
-	{:else if isVisible}
-		<div class="empty-toc" in:fade={{ duration: 200, delay: 150 }}>
-			<p>No headings found</p>
-		</div>
-	{/if}
-</div>
-
 <style>
-	.table-of-contents {
+	.toc-container {
 		position: relative;
-		max-height: none !important;
-		overflow: visible !important;
-		overflow-x: visible !important;
-		overflow-y: visible !important;
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		/* padding-top: 0.25rem; */
-		border: 1px solid #eee;
-		background-color: white;
-		border-radius: 4px;
-		box-sizing: border-box;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-		font-size: 0.9rem;
-		will-change: transform, opacity;
+		padding-left: 0.75rem;
+		width: 100%; /* Ensure it takes full width of its container */
 	}
-
-	nav {
-		overflow: visible !important;
-		max-height: none !important;
+	
+	/* Thin left border with gradient fade */
+	.toc-container::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 1px;
+		background: linear-gradient(to bottom, 
+			transparent 0%, 
+			#e5e7eb 10%, 
+			#e5e7eb 90%, 
+			transparent 100%);
 	}
 	
 	.toc-list {
-		overflow: visible !important;
-		max-height: none !important;
-	}
-
-	.toc-title {
-		font-weight: 600;
-		margin-bottom: 8px;
-		margin-top: 0.25rem;
-		color: #495057;
-		font-size: 1rem;
-		padding-bottom: 6px;
-		border-bottom: 1px solid #eee;
-	}
-
-	nav ul {
 		list-style: none;
 		padding: 0;
 		margin: 0;
-	}
-
-	nav li {
-		margin: 6px 0;
-		line-height: 1.4;
+		width: 100%;
 	}
 	
-	.toc-item-wrapper {
-		will-change: transform, opacity;
+	.toc-item {
+		margin-bottom: 0.375rem;
+		font-size: 0.9375rem;
 	}
-
-	nav a {
-		color: #495057;
-		text-decoration: none;
+	
+	.toc-link {
 		display: block;
-		padding: 3px 0;
+		padding: 0.125rem 0.25rem 0.125rem 0.5rem;
+		color: #4b5563;
+		text-decoration: none;
 		border-left: 2px solid transparent;
-		padding-left: 10px;
-		margin-left: -12px;
-		transition: all 0.2s ease;
-		font-size: 0.95rem;
+		transition: all 150ms ease-in-out;
+		line-height: 1.4;
+		word-break: break-word; /* Allow long words to break */
+		hyphens: auto; /* Enable hyphenation */
 	}
-
-	nav a:hover {
-		color: var(--primary-color, #0366d6);
+	
+	.toc-link:hover {
+		color: #2563eb;
+		background-color: rgba(243, 244, 246, 0.5);
 	}
-
-	nav li.active > a {
-		color: var(--primary-color, #0366d6);
-		border-left-color: var(--primary-color, #0366d6);
+	
+	.toc-link.active {
+		color: #2563eb;
+		border-left-color: #2563eb;
+		background-color: rgba(239, 246, 255, 0.6);
 		font-weight: 500;
 	}
-
-	.empty-toc {
-		color: #6c757d;
-		font-style: italic;
-		font-size: 0.9rem;
-		padding: 0.5rem 0;
+	
+	.toc-sublist {
+		list-style: none;
+		padding: 0;
+		margin: 0.25rem 0 0.375rem 0.5rem;
 	}
-
-	/* Indentation for different heading levels */
-	.level-2 {
-		margin-left: 0;
+	
+	.toc-subitem {
+		margin-bottom: 0.25rem;
+		font-size: 0.875rem;
 	}
-
-	.level-3 {
-		margin-left: 12px;
-	}
-
-	.level-4 {
-		margin-left: 24px;
-	}
-
-	.level-5 {
-		margin-left: 36px;
-	}
-
-	.level-6 {
-		margin-left: 48px;
-	}
-
-	@media (max-width: 1024px) {
-		.table-of-contents {
-			position: relative;
-			top: 0;
-			max-height: none;
-			border-radius: 4px;
-			margin-bottom: 1rem;
-		}
+	
+	/* Parent highlight when child is active */
+	.parent-active > a {
+		color: #4338ca;
+		font-weight: 500;
 	}
 </style>
+
+<div class="toc-container" bind:this={toc}>
+	{#if nestedHeadings.length > 0}
+		<ul class="toc-list">
+			{#each nestedHeadings as h2 (h2.id)}
+				<li class="toc-item {h2.children.some(child => child.id === activeId) ? 'parent-active' : ''}">
+					<!-- H2 Heading -->
+					<a 
+						href="#{h2.id}" 
+						on:click={(e) => handleTocClick(e, h2.id)}
+						class="toc-link {activeId === h2.id ? 'active' : ''}"
+					>
+						{h2.text}
+					</a>
+					
+					<!-- H3 Children -->
+					{#if h2.children.length > 0}
+						<ul class="toc-sublist">
+							{#each h2.children as h3 (h3.id)}
+								<li class="toc-subitem">
+									<a 
+										href="#{h3.id}" 
+										on:click={(e) => handleTocClick(e, h3.id)}
+										class="toc-link {activeId === h3.id ? 'active' : ''}"
+									>
+										{h3.text}
+									</a>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</li>
+			{/each}
+		</ul>
+	{:else}
+		<p class="text-xs text-gray-500 italic">No headings found</p>
+	{/if}
+</div>

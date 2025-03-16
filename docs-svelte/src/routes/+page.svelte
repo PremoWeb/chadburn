@@ -27,8 +27,9 @@
 		<h1>Chadburn</h1>
 		<p class="tagline">Modern job scheduler for Docker environments</p>
 		<div class="cta-buttons">
-			<a href="{base}/getting-started" class="btn primary">Get Started</a>
-			<a href="https://github.com/PremoWeb/Chadburn" class="btn secondary" target="_blank" rel="noopener noreferrer">GitHub</a>
+			<a href="{base}/docs" class="btn primary">Get Started</a>
+			<a href="{base}/api" class="btn secondary">API Reference</a>
+			<a href="https://github.com/PremoWeb/Chadburn" class="btn outline" target="_blank" rel="noopener noreferrer">GitHub</a>
 		</div>
 	</section>
 
@@ -62,6 +63,37 @@
 		</div>
 	</section>
 
+	<section class="api-highlight">
+		<div class="api-content">
+			<div class="api-text">
+				<h2>New: REST API Documentation</h2>
+				<p>Control and monitor your Chadburn instance programmatically with our comprehensive REST API.</p>
+				<ul>
+					<li>Create and manage jobs via API calls</li>
+					<li>Monitor job status and execution history</li>
+					<li>Trigger jobs on demand</li>
+					<li>Integrate with your existing systems</li>
+				</ul>
+				<a href="{base}/api" class="btn primary">Explore the API</a>
+			</div>
+			<div class="api-image">
+				<div class="code-snippet">
+					{@html `<pre><code>// Example: Create a new job
+fetch('/api/jobs', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: "backup-database",
+    type: "job-local",
+    schedule: "@daily",
+    command: "/usr/local/bin/backup.sh"
+  })
+})</code></pre>`}
+				</div>
+			</div>
+		</div>
+	</section>
+
 	<Contributors {contributors} {loading} {error} />
 
 	<section class="quick-start">
@@ -72,35 +104,35 @@
   -v /path/to/config.ini:/etc/chadburn.conf \
   premoweb/chadburn:latest daemon</code></pre>
 		</div>
-		<p>Check out the <a href="{base}/getting-started">Getting Started Guide</a> for more detailed instructions.</p>
+		<p>Check out the <a href="{base}/docs/quick-start">Getting Started Guide</a> for more detailed instructions.</p>
 	</section>
 
 	<section class="documentation">
 		<h2>Documentation</h2>
 		<div class="doc-links">
-			<a href="{base}/getting-started" class="doc-link">
+			<a href="{base}/docs/quick-start" class="doc-link">
 				<h3>Getting Started</h3>
 				<p>Installation, quick start, and basic concepts</p>
 			</a>
-			<a href="{base}/configuration" class="doc-link">
+			<a href="{base}/docs/guides/configuration" class="doc-link">
 				<h3>Configuration</h3>
 				<p>Configuration file format, environment variables, and command line options</p>
 			</a>
-			<a href="{base}/jobs" class="doc-link">
+			<a href="{base}/docs/concepts/jobs" class="doc-link">
 				<h3>Job Types</h3>
 				<p>Different job types and their configuration options</p>
 			</a>
-			<a href="{base}/docker-integration" class="doc-link">
+			<a href="{base}/api" class="doc-link highlight">
+				<h3>API Reference</h3>
+				<p>Comprehensive REST API documentation for programmatic control</p>
+			</a>
+			<a href="{base}/docs/docker-integration" class="doc-link">
 				<h3>Docker Integration</h3>
 				<p>Docker labels, container lifecycle events, and dynamic configuration</p>
 			</a>
-			<a href="{base}/examples" class="doc-link">
+			<a href="{base}/docs/examples" class="doc-link">
 				<h3>Examples</h3>
 				<p>Common use cases and Docker Compose examples</p>
-			</a>
-			<a href="{base}/faq" class="doc-link">
-				<h3>FAQ</h3>
-				<p>Frequently asked questions about Chadburn</p>
 			</a>
 		</div>
 	</section>
@@ -135,6 +167,7 @@
 		justify-content: center;
 		gap: 1rem;
 		margin-top: 2rem;
+		flex-wrap: wrap;
 	}
 
 	.btn {
@@ -157,13 +190,23 @@
 	}
 
 	.btn.secondary {
-		background-color: #f5f5f5;
+		background-color: #159957;
+		color: white;
+	}
+
+	.btn.secondary:hover {
+		background-color: #0e7040;
+		text-decoration: none;
+	}
+
+	.btn.outline {
+		background-color: transparent;
 		color: var(--primary-color);
 		border: 1px solid var(--primary-color);
 	}
 
-	.btn.secondary:hover {
-		background-color: #e5e5e5;
+	.btn.outline:hover {
+		background-color: #f5f5f5;
 		text-decoration: none;
 	}
 
@@ -198,6 +241,56 @@
 	.feature-card h3 {
 		margin-top: 0;
 		color: var(--primary-color);
+	}
+
+	.api-highlight {
+		background-color: #f0f7ff;
+		border-radius: 12px;
+		padding: 2rem;
+		margin: 3rem 0;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	}
+
+	.api-content {
+		display: flex;
+		gap: 2rem;
+		align-items: center;
+	}
+
+	.api-text {
+		flex: 1;
+	}
+
+	.api-text h2 {
+		text-align: left;
+		color: var(--primary-color);
+		margin-top: 0;
+	}
+
+	.api-text ul {
+		margin-bottom: 1.5rem;
+		padding-left: 1.5rem;
+	}
+
+	.api-text li {
+		margin-bottom: 0.5rem;
+	}
+
+	.api-image {
+		flex: 1;
+	}
+
+	.code-snippet {
+		background-color: #2d2d2d;
+		color: #f8f8f2;
+		border-radius: 8px;
+		padding: 1.5rem;
+		overflow-x: auto;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.code-snippet pre {
+		margin: 0;
 	}
 
 	.code-example {
@@ -247,6 +340,11 @@
 		margin-bottom: 0;
 	}
 
+	.doc-link.highlight {
+		background-color: #f0f7ff;
+		border: 1px solid #d0e8ff;
+	}
+
 	@media (max-width: 768px) {
 		.hero h1 {
 			font-size: 2.5rem;
@@ -259,6 +357,14 @@
 		.feature-grid,
 		.doc-links {
 			grid-template-columns: 1fr;
+		}
+
+		.api-content {
+			flex-direction: column;
+		}
+
+		.api-text, .api-image {
+			width: 100%;
 		}
 	}
 </style>

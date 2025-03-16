@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import { beforeNavigate, afterNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import Sidebar from '$lib/components/Sidebar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ScrollToTop from '$lib/components/ScrollToTop.svelte';
 	
@@ -30,7 +29,6 @@
 
 <div class="app">
 	<div class="content-wrapper">
-		<Sidebar />
 		<main class="main-content">
 			<div class="page-transition-container">
 				{@render children()}
@@ -66,7 +64,6 @@
 		width: 100%;
 		box-sizing: border-box;
 		padding: 0;
-		max-width: calc(100% - 200px); /* Account for sidebar width */
 		position: relative;
 	}
 	
@@ -79,10 +76,6 @@
 	@media (max-width: 768px) {
 		.content-wrapper {
 			flex-direction: column;
-		}
-		
-		.main-content {
-			max-width: 100%;
 		}
 	}
 </style> 

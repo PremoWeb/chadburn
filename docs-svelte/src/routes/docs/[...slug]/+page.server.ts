@@ -12,9 +12,9 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		// Handle special cases
 		let targetSlug = slug;
 		
-		// If the URL path is /installation, use the installation slug directly
-		if (url.pathname === '/installation') {
-			targetSlug = 'installation';
+		// If the URL path is /docs, use the introduction slug directly
+		if (url.pathname === '/docs') {
+			targetSlug = 'introduction';
 		} else if (!targetSlug) {
 			// Default to introduction if no slug is provided
 			targetSlug = 'introduction';
@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			for (const pattern of patterns) {
 				if (markdownModules[pattern]) {
 					console.log('Found file at path:', pattern);
-					return markdownModules[pattern];
+					return markdownModules[pattern] as string;
 				}
 			}
 			
@@ -57,7 +57,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				const nestedPattern = `/static/markdown/${parentPath}/${lastSegment}.md`;
 				if (markdownModules[nestedPattern]) {
 					console.log('Found file at nested path:', nestedPattern);
-					return markdownModules[nestedPattern];
+					return markdownModules[nestedPattern] as string;
 				}
 			}
 			
@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		}
 		
 		// Return the slug and content
-		return { slug: targetSlug, content };
+		return { slug: targetSlug, content, section: 'docs' };
 	} catch (e: any) {
 		console.error('Error in load function:', e);
 		if (e.status === 404) {
