@@ -9,6 +9,8 @@ nav_order: 4
 
 This guide addresses common permission issues when accessing the Docker socket (`/var/run/docker.sock`) from within containers, particularly in environments with SELinux enabled.
 
+> **Important Update**: Recent versions of Chadburn have migrated from the `fsouza/go-dockerclient` library to the official Docker client library. This change may require additional configuration for Docker socket permissions, especially on systems with SELinux enabled.
+
 ## Problem Description
 
 When running Chadburn in a container that needs to communicate with the Docker daemon on the host, you might encounter permission errors like:
@@ -45,9 +47,9 @@ Ensure the container runs with the same group ID as the Docker group on the host
 
 ```yaml
 services:
-  scheduler:
+  chadburn:
     # ... other configuration
-    user: "root:${DOCKER_GID:-999}"
+    user: "${UID:-1000}:${DOCKER_GID:-999}"
     environment:
       - DOCKER_GID=${DOCKER_GID:-999}
 ```
@@ -79,7 +81,7 @@ Replace `969` with your host's Docker group ID.
 
 ```yaml
 services:
-  scheduler:
+  chadburn:
     # ... other configuration
     user: "root"
 ```
@@ -118,6 +120,31 @@ ausearch -c 'docker' --raw | audit2allow -M my-docker
 semodule -i my-docker.pp
 ```
 
+## Troubleshooting the Official Docker Client
+
+The official Docker client used in recent versions of Chadburn may have different permission requirements than the previous client library. If you're experiencing permission issues after upgrading, try these steps:
+
+1. **Check Docker Socket Ownership**:
+   ```bash
+   ls -la /var/run/docker.sock
+   ```
+   The socket is typically owned by root:docker with permissions 660.
+
+2. **Verify Docker Group ID**:
+   ```bash
+   getent group docker
+   ```
+   Note the group ID (GID) for use in your container configuration.
+
+3. **Check SELinux Context**:
+   ```bash
+   ls -Z /var/run/docker.sock
+   ```
+   This shows the SELinux context of the socket.
+
+4. **Test with Different User Configurations**:
+   Try running the container with different user configurations to identify what works in your environment.
+
 ## Best Practices
 
 1. **Principle of Least Privilege**: Only grant the minimum permissions needed
@@ -126,38 +153,8 @@ semodule -i my-docker.pp
 4. **Container User**: Avoid running as root when possible
 5. **Regular Audits**: Regularly review your permission settings
 
-## Troubleshooting
-
-### Check Docker Socket Ownership
-
-```bash
-ls -la /var/run/docker.sock
-```
-
-### Check Docker Group ID
-
-```bash
-getent group docker
-```
-
-### Check SELinux Status
-
-```bash
-getenforce
-```
-
-### Check SELinux Contexts
-
-```bash
-ls -Z /var/run/docker.sock
-```
-
-### Check Container Logs
-
-```bash
-docker-compose logs scheduler
-```
-
 ## Conclusion
 
 When dealing with Docker socket permissions, always prioritize security. The recommended approach is to use SELinux volume labels (`:z` or `:Z`) combined with proper user/group mapping. For production environments, consider creating a custom SELinux policy for more granular control. 
+
+If you're upgrading from an older version of Chadburn, be aware that the migration to the official Docker client may require adjustments to your container configuration to ensure proper permissions. 
