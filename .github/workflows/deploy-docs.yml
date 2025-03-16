@@ -42,11 +42,14 @@ jobs:
       - name: Build site
         run: cd docs-svelte && bun run build
 
+      - name: List output directories
+        run: find docs-svelte/.svelte-kit -type d | sort
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: chadburn-docs
-          directory: docs-svelte/build
+          directory: docs-svelte/.svelte-kit/output/client
           gitHubToken: ${{ secrets.GITHUB_TOKEN }} 
