@@ -22,6 +22,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history to ensure we have the latest changes
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -33,17 +35,45 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Debug - List content before cleaning
+        run: |
+          echo "Listing docs-svelte directory content before cleaning:"
+          ls -la docs-svelte
+          echo "Listing docs-svelte/static directory content:"
+          ls -la docs-svelte/static
+          echo "Listing docs-svelte/src directory content:"
+          ls -la docs-svelte/src
+
+      - name: Clean build directories
+        run: |
+          rm -rf docs-svelte/.svelte-kit
+          rm -rf docs-svelte/build
+
       - name: Install dependencies
         run: cd docs-svelte && bun install
 
       - name: Install Cloudflare adapter
         run: cd docs-svelte && bun add -d @sveltejs/adapter-cloudflare
 
+      - name: Debug - Check svelte.config.js
+        run: |
+          echo "Content of svelte.config.js:"
+          cat docs-svelte/svelte.config.js
+
       - name: Build site
         run: cd docs-svelte && bun run build
 
       - name: List output directories
         run: find docs-svelte/.svelte-kit -type d | sort
+
+      - name: Debug - List cloudflare directory content
+        run: |
+          echo "Listing cloudflare directory content:"
+          ls -la docs-svelte/.svelte-kit/cloudflare || echo "Cloudflare directory not found"
+          echo "Checking for _routes.json:"
+          find docs-svelte/.svelte-kit -name "_routes.json" || echo "No _routes.json found"
+          echo "Checking Worker bundle:"
+          find docs-svelte/.svelte-kit -name "*.js" -path "*/cloudflare/*" | head -5
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -53,4 +83,5 @@ jobs:
           projectName: chadburn-docs
           directory: docs-svelte/.svelte-kit/cloudflare
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: 4 
+          wranglerVersion: 4
+          branch: main # Explicitly set the branch to ensure we're deploying to production 
