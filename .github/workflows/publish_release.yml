@@ -88,7 +88,13 @@ jobs:
         with:
           go-version: 1.19
 
-      # Step 10: Build Go binaries for multiple platforms
+      # Step 10: Prepare Go dependencies
+      - name: Prepare Go dependencies
+        run: |
+          go mod tidy
+          go mod vendor
+
+      # Step 11: Build Go binaries for multiple platforms
       - name: Build Go Binaries
         id: build_binaries
         run: |
@@ -126,14 +132,14 @@ jobs:
           
           cd ..
 
-      # Step 11: Generate checksums for all archives
+      # Step 12: Generate checksums for all archives
       - name: Generate checksums
         run: |
           cd ./dist
           sha256sum *.tar.gz *.zip > checksums.txt
           cd ..
 
-      # Step 12: Upload binaries as artifacts
+      # Step 13: Upload binaries as artifacts
       - name: Upload binaries as artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -143,7 +149,7 @@ jobs:
             ./dist/*.zip
             ./dist/checksums.txt
 
-      # Step 13: Attach binaries to GitHub Release
+      # Step 14: Attach binaries to GitHub Release
       - name: Attach binaries to GitHub Release
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
