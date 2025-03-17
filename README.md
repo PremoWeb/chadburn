@@ -274,6 +274,49 @@ A preconfigured setup with Prometheus and Grafana is included for easy visualiza
 
 > **Note**: The metrics functionality is currently experimental and may change in future releases.
 
+## Installation
+
+The simplest way to deploy **Chadburn** is using Docker, as outlined above.
+
+If you prefer not to use the provided Docker image, you can download a pre-built binary from the [releases page](https://github.com/PremoWeb/chadburn/releases). Chadburn provides binaries for multiple platforms:
+
+- **Linux**: amd64, arm64, and armv7
+- **macOS**: amd64 and arm64 (Apple Silicon)
+- **Windows**: amd64 and arm64
+
+Each release includes SHA256 checksums for verifying the integrity of the downloaded binaries.
+
+### Installing from Binary
+
+1. Download the appropriate binary for your platform from the [releases page](https://github.com/PremoWeb/chadburn/releases).
+2. Extract the archive:
+   ```bash
+   # For Linux/macOS
+   tar -xzf chadburn-<platform>-<arch>.tar.gz
+   
+   # For Windows
+   # Extract the .zip file using your preferred tool
+   ```
+3. Move the binary to a location in your PATH:
+   ```bash
+   # For Linux/macOS
+   sudo mv chadburn-<platform>-<arch> /usr/local/bin/chadburn
+   chmod +x /usr/local/bin/chadburn
+   
+   # For Windows
+   # Move the .exe file to a suitable location and add it to your PATH
+   ```
+
+### Building from Source
+
+If you prefer to build from source, you'll need Go 1.19 or later:
+
+```bash
+git clone https://github.com/PremoWeb/chadburn.git
+cd chadburn
+go build -o chadburn
+```
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
