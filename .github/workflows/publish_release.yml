@@ -86,13 +86,14 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: 1.21
 
       # Step 10: Prepare Go dependencies
       - name: Prepare Go dependencies
         run: |
           go mod tidy
-          go mod vendor
+          go env
+          go mod vendor -e
 
       # Step 11: Build Go binaries for multiple platforms
       - name: Build Go Binaries
@@ -101,18 +102,18 @@ jobs:
           # Create a directory for binaries
           mkdir -p ./dist
           
-          # Build for Linux (amd64, arm64, arm)
-          GOOS=linux GOARCH=amd64 go build -o ./dist/chadburn-linux-amd64
-          GOOS=linux GOARCH=arm64 go build -o ./dist/chadburn-linux-arm64
-          GOOS=linux GOARCH=arm GOARM=7 go build -o ./dist/chadburn-linux-armv7
+          # Build for Linux (amd64, arm64, arm) with mod=mod flag to avoid vendor issues
+          GOOS=linux GOARCH=amd64 go build -mod=mod -o ./dist/chadburn-linux-amd64
+          GOOS=linux GOARCH=arm64 go build -mod=mod -o ./dist/chadburn-linux-arm64
+          GOOS=linux GOARCH=arm GOARM=7 go build -mod=mod -o ./dist/chadburn-linux-armv7
           
-          # Build for macOS (amd64, arm64)
-          GOOS=darwin GOARCH=amd64 go build -o ./dist/chadburn-darwin-amd64
-          GOOS=darwin GOARCH=arm64 go build -o ./dist/chadburn-darwin-arm64
+          # Build for macOS (amd64, arm64) with mod=mod flag
+          GOOS=darwin GOARCH=amd64 go build -mod=mod -o ./dist/chadburn-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -mod=mod -o ./dist/chadburn-darwin-arm64
           
-          # Build for Windows (amd64, arm64)
-          GOOS=windows GOARCH=amd64 go build -o ./dist/chadburn-windows-amd64.exe
-          GOOS=windows GOARCH=arm64 go build -o ./dist/chadburn-windows-arm64.exe
+          # Build for Windows (amd64, arm64) with mod=mod flag
+          GOOS=windows GOARCH=amd64 go build -mod=mod -o ./dist/chadburn-windows-amd64.exe
+          GOOS=windows GOARCH=arm64 go build -mod=mod -o ./dist/chadburn-windows-arm64.exe
           
           # Create archives for each binary
           cd ./dist
