@@ -48,59 +48,165 @@
 	
 	// Update nested headings when raw headings change
 	$effect(() => {
+		// Reset the active ID when headings change (page navigation)
+		activeId = '';
+		
+		// Process the new headings
 		nestedHeadings = processHeadings();
+		
+		// If we're in the browser, set up the intersection observer for the new headings
+		if (typeof window !== 'undefined') {
+			// Wait a bit for the DOM to be fully rendered with the new content
+			setTimeout(() => {
+				setupIntersectionObserver();
+			}, 200);
+		}
 	});
 	
-	// Set up intersection observer to track which heading is currently in view
+	// Set up intersection observer and page navigation listeners
 	onMount(() => {
-		const headingElements = headings.map((h: { id: string }) => document.getElementById(h.id)).filter(Boolean);
+		// Wait a bit for the DOM to be fully rendered
+		setTimeout(() => {
+			setupIntersectionObserver();
+		}, 200);
 		
-		if (headingElements.length === 0) return;
+		// Track the current path to detect navigation
+		let previousPath = page.url.pathname;
+		
+		// Create an interval to check for page navigation
+		const navigationCheckInterval = setInterval(() => {
+			const currentPath = page.url.pathname;
+			if (currentPath !== previousPath) {
+				console.log(`Page navigation detected: ${previousPath} -> ${currentPath}`);
+				previousPath = currentPath;
+				
+				// Reset active ID on page navigation
+				activeId = '';
+				
+				// Wait for the new page content to render
+				setTimeout(() => {
+					setupIntersectionObserver();
+				}, 200);
+			}
+		}, 100);
+		
+		return () => {
+			// Clean up
+			if (observer) {
+				observer.disconnect();
+			}
+			clearInterval(navigationCheckInterval);
+		};
+	});
+	
+	// Setup the intersection observer
+	function setupIntersectionObserver() {
+		console.log('Setting up intersection observer for TOC...');
+		
+		// First, disconnect any existing observer
+		if (observer) {
+			console.log('Disconnecting existing observer');
+			observer.disconnect();
+			observer = null as unknown as IntersectionObserver;
+		}
+		
+		// If there are no headings, don't bother setting up an observer
+		if (headings.length === 0) {
+			console.warn('No headings to observe');
+			return;
+		}
+		
+		// Get all heading elements from the DOM
+		const headingElements: Element[] = [];
+		
+		// Find all heading elements in the document
+		headings.forEach((heading: Heading) => {
+			const element = document.getElementById(heading.id);
+			if (element) {
+				headingElements.push(element);
+			} else {
+				console.warn(`Heading element with ID "${heading.id}" not found in the DOM`);
+			}
+		});
+		
+		if (headingElements.length === 0) {
+			console.warn('No heading elements found in the DOM');
+			return;
+		}
+		
+		console.log(`Found ${headingElements.length} heading elements in the DOM`);
 		
 		// Check if there's a hash in the URL and scroll to that section
 		if (window.location.hash) {
 			const id = window.location.hash.substring(1);
 			const element = document.getElementById(id);
 			if (element) {
+				console.log(`Found element for hash: #${id}`);
 				setTimeout(() => {
-					element.scrollIntoView({ behavior: 'smooth' });
+					const rect = element.getBoundingClientRect();
+					const offsetPosition = rect.top + window.scrollY - offset;
+					
+					window.scrollTo({
+						top: offsetPosition,
+						behavior: 'smooth'
+					});
+					
 					activeId = id;
 				}, 100);
+			} else {
+				console.warn(`Element with ID "${id}" from URL hash not found`);
 			}
 		}
 		
+		// Configure the intersection observer
 		const options = {
-			rootMargin: '0px 0px -65% 0px', // Adjusted for content area
-			threshold: 0.1
+			// This rootMargin creates a zone in the viewport where headings become active
+			// -80px from top (accounts for fixed headers)
+			// 0px from right and left
+			// -60% from bottom (so headings become active before they reach the middle of the screen)
+			rootMargin: '-80px 0px -60% 0px',
+			// Multiple thresholds for better accuracy
+			threshold: [0, 0.1, 0.25, 0.5, 0.75, 1]
 		};
 		
-		observer = new IntersectionObserver(entries => {
-			// Sort entries by their position in the document
-			const visibleEntries = entries
+		observer = new IntersectionObserver((entries) => {
+			// Get all currently visible headings
+			const visibleHeadings = entries
 				.filter(entry => entry.isIntersecting)
+				.map(entry => ({
+					id: entry.target.id,
+					ratio: entry.intersectionRatio,
+					y: entry.boundingClientRect.y
+				}))
 				.sort((a, b) => {
-					const aRect = a.boundingClientRect;
-					const bRect = b.boundingClientRect;
-					return aRect.top - bRect.top;
+					// First sort by intersection ratio (higher is better)
+					if (b.ratio !== a.ratio) {
+						return b.ratio - a.ratio;
+					}
+					// If ratios are the same, sort by position (higher in the page is better)
+					return a.y - b.y;
 				});
 			
-			// Use the topmost visible heading
-			if (visibleEntries.length > 0) {
-				const topEntry = visibleEntries[0];
-				activeId = topEntry.target.id;
+			// If we have visible headings, update the active ID
+			if (visibleHeadings.length > 0) {
+				// Use the heading with the highest intersection ratio or the topmost one if tied
+				const newActiveId = visibleHeadings[0].id;
+				
+				// Only update if the active ID has changed
+				if (newActiveId !== activeId) {
+					console.log(`Setting active heading to: ${newActiveId} (ratio: ${visibleHeadings[0].ratio.toFixed(2)})`);
+					activeId = newActiveId;
+				}
 			}
 		}, options);
 		
-		headingElements.forEach((el: Element | null) => {
-			if (el) observer.observe(el);
+		// Observe all heading elements
+		headingElements.forEach(element => {
+			observer.observe(element);
 		});
 		
-		return () => {
-			if (observer) {
-				observer.disconnect();
-			}
-		};
-	});
+		console.log('Intersection observer setup complete');
+	}
 	
 	// Handle click on TOC item
 	function handleTocClick(e: Event, id: string) {
@@ -147,59 +253,15 @@
 			allHeadings.forEach(el => {
 				console.log(`- Heading: ${el.tagName}, ID: "${el.id}", Text: "${el.textContent?.trim()}"`);
 			});
-			
-			// Try to find a heading with similar text
-			const headingText = headings.find((h: Heading) => h.id === id)?.text;
-			if (headingText) {
-				console.log(`Looking for heading with text: "${headingText}"`);
-				const headingsByText = Array.from(document.querySelectorAll('h1, h2, h3, h4'))
-					.filter(el => el.textContent?.trim() === headingText);
-				
-				if (headingsByText.length > 0) {
-					console.log(`Found ${headingsByText.length} headings with matching text:`);
-					headingsByText.forEach(el => {
-						console.log(`- Heading: ${el.tagName}, ID: "${el.id}", Text: "${el.textContent?.trim()}"`);
-					});
-					
-					// Try to use the first matching heading
-					if (headingsByText[0].id) {
-						console.log(`Attempting to use alternative ID: "${headingsByText[0].id}"`);
-						const alternativeElement = document.getElementById(headingsByText[0].id);
-						if (alternativeElement) {
-							console.log(`Found element with alternative ID "${headingsByText[0].id}"`);
-							
-							// Update active ID
-							activeId = headingsByText[0].id;
-							
-							// Calculate position with offset
-							const rect = alternativeElement.getBoundingClientRect();
-							const elementPosition = rect.top;
-							const offsetPosition = elementPosition + window.scrollY - offset;
-							
-							// Update URL hash without triggering scroll
-							const currentPath = window.location.pathname + window.location.search;
-							history.pushState(null, '', `${currentPath}#${headingsByText[0].id}`);
-							
-							// Scroll to the element
-							console.log(`Scrolling to position: ${offsetPosition}px`);
-							window.scrollTo({
-								top: offsetPosition,
-								behavior: 'smooth'
-							});
-							
-							return;
-						}
-					}
-				}
-			}
-			
-			console.error(`Could not find any alternative heading to scroll to for ID "${id}"`);
 		}
 	}
 	
 	// Check if a heading or any of its children is active
 	function isHeadingActive(heading: NestedHeading): boolean {
+		// Check if this exact heading is active
 		if (activeId === heading.id) return true;
+		
+		// Check if any of its children are active
 		return heading.children.some(child => activeId === child.id);
 	}
 </script>
@@ -290,6 +352,8 @@
 						href="#{h2.id}" 
 						onclick={(e) => handleTocClick(e, h2.id)}
 						class="toc-link {activeId === h2.id ? 'active' : ''}"
+						data-heading-id={h2.id}
+						data-toc-link="true"
 					>
 						{h2.text}
 					</a>
@@ -303,6 +367,8 @@
 										href="#{h3.id}" 
 										onclick={(e) => handleTocClick(e, h3.id)}
 										class="toc-link {activeId === h3.id ? 'active' : ''}"
+										data-heading-id={h3.id}
+										data-toc-link="true"
 									>
 										{h3.text}
 									</a>

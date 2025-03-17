@@ -84,6 +84,9 @@ export function addIdsToHeadings(html: string): string {
 	const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
 	console.log(`Found ${headings.length} headings to process for IDs`);
 	
+	// Track used IDs to ensure uniqueness
+	const usedIds = new Set<string>();
+	
 	// Process each heading
 	headings.forEach((heading, index) => {
 		// Get the text content of the heading
@@ -92,7 +95,7 @@ export function addIdsToHeadings(html: string): string {
 		// Check if the heading already has an ID
 		if (!heading.id) {
 			// Generate an ID from the text content
-			let id = text
+			let baseId = text
 				.toLowerCase()
 				.replace(/[^\w\s-]/g, '') // Remove special characters
 				.replace(/\s+/g, '-') // Replace spaces with hyphens
@@ -100,16 +103,51 @@ export function addIdsToHeadings(html: string): string {
 				.replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 			
 			// If the ID is empty (e.g., heading only had special characters), use a fallback
-			if (!id) {
-				id = `heading-${index}`;
-				console.warn(`Generated fallback ID "${id}" for empty heading text`);
+			if (!baseId) {
+				baseId = `heading-${index}`;
+				console.warn(`Generated fallback ID "${baseId}" for empty heading text`);
+			}
+			
+			// Ensure the ID is unique
+			let uniqueId = baseId;
+			let counter = 1;
+			
+			// If the ID is already used, append a number to make it unique
+			while (usedIds.has(uniqueId)) {
+				uniqueId = `${baseId}-${counter}`;
+				counter++;
 			}
 			
 			// Set the ID on the heading
-			heading.id = id;
-			console.log(`Generated ID "${id}" for heading "${text}"`);
+			heading.id = uniqueId;
+			usedIds.add(uniqueId);
+			
+			if (uniqueId !== baseId) {
+				console.log(`Generated unique ID "${uniqueId}" for heading "${text}" (base ID "${baseId}" was already used)`);
+			} else {
+				console.log(`Generated ID "${uniqueId}" for heading "${text}"`);
+			}
 		} else {
-			console.log(`Heading "${text}" already has ID "${heading.id}"`);
+			// If the heading already has an ID, make sure it's unique
+			let existingId = heading.id;
+			
+			if (usedIds.has(existingId)) {
+				// If the ID is already used, append a number to make it unique
+				let counter = 1;
+				let uniqueId = existingId;
+				
+				while (usedIds.has(uniqueId)) {
+					uniqueId = `${existingId}-${counter}`;
+					counter++;
+				}
+				
+				console.log(`Changed duplicate ID "${existingId}" to "${uniqueId}" for heading "${text}"`);
+				heading.id = uniqueId;
+				usedIds.add(uniqueId);
+			} else {
+				console.log(`Heading "${text}" already has ID "${existingId}"`);
+				usedIds.add(existingId);
+			}
 		}
 		
 		// Add a data attribute for easier debugging

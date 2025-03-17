@@ -54,6 +54,11 @@
 	
 	// Process markdown content
 	$effect(() => {
+		console.log('Content changed, processing markdown...');
+		
+		// Reset headings when content changes
+		headings = [];
+		
 		if (content && !isLoading) {
 			// Store raw content for debugging
 			rawContent = content;
@@ -87,13 +92,16 @@
 					const level = parseInt(el.tagName.substring(1));
 					const text = el.textContent || '';
 					
+					// Add a data attribute to help with debugging
+					el.setAttribute('data-heading-index', index.toString());
+					
 					extractedHeadings.push({
 						id,
 						text,
 						level
 					});
 					
-					console.log(`Extracted heading: ${el.tagName} "${text}" with ID "${id}"`);
+					console.log(`Extracted heading: ${el.tagName} "${text}" with ID "${id}" (index: ${index})`);
 				});
 				
 				// Update the currentHtmlContent with any ID changes made during extraction
@@ -101,9 +109,35 @@
 				
 				headings = extractedHeadings;
 				console.log('Extracted headings:', headings);
+				
+				// After a short delay, check if the headings are properly rendered in the DOM
+				setTimeout(() => {
+					verifyHeadingsInDOM();
+				}, 500);
 			});
 		}
 	});
+	
+	// Verify that all extracted headings are properly rendered in the DOM
+	function verifyHeadingsInDOM() {
+		console.log('Verifying headings in DOM...');
+		
+		const missingHeadings: string[] = [];
+		
+		headings.forEach(heading => {
+			const element = document.getElementById(heading.id);
+			if (!element) {
+				console.error(`Heading with ID "${heading.id}" not found in the DOM!`);
+				missingHeadings.push(heading.id);
+			}
+		});
+		
+		if (missingHeadings.length > 0) {
+			console.error(`${missingHeadings.length} headings are missing from the DOM:`, missingHeadings);
+		} else {
+			console.log('All headings are properly rendered in the DOM.');
+		}
+	}
 	
 	// Backup extraction method using DOM
 	onMount(() => {
@@ -148,6 +182,41 @@
 		const renderedHeadings = contentArea.querySelectorAll('h1, h2, h3, h4');
 		console.log(`Found ${renderedHeadings.length} headings in the rendered content`);
 		
+		// Check for duplicate IDs
+		const idCounts = new Map<string, number>();
+		const idElements = new Map<string, Element[]>();
+		
+		renderedHeadings.forEach((heading) => {
+			const id = heading.id;
+			if (id) {
+				idCounts.set(id, (idCounts.get(id) || 0) + 1);
+				
+				if (!idElements.has(id)) {
+					idElements.set(id, []);
+				}
+				idElements.get(id)?.push(heading);
+			}
+		});
+		
+		// Log any duplicate IDs
+		let hasDuplicates = false;
+		idCounts.forEach((count, id) => {
+			if (count > 1) {
+				hasDuplicates = true;
+				console.error(`Duplicate ID found: "${id}" appears ${count} times`);
+				
+				const elements = idElements.get(id) || [];
+				elements.forEach((el, index) => {
+					console.error(`  Duplicate #${index + 1}: ${el.tagName} "${el.textContent}"`);
+				});
+			}
+		});
+		
+		if (!hasDuplicates) {
+			console.log('No duplicate IDs found - good!');
+		}
+		
+		// Check each rendered heading
 		renderedHeadings.forEach((heading, index) => {
 			console.log(`Rendered heading ${index + 1}: ${heading.tagName} "${heading.textContent}" (ID: "${heading.id}")`);
 			
@@ -169,6 +238,14 @@
 			const elementById = document.getElementById(heading.id);
 			if (elementById) {
 				console.log(`  ✓ Element can be found by ID "${heading.id}"`);
+				
+				// Check if this is the same element
+				if (elementById === heading) {
+					console.log(`  ✓ getElementById returns the same element`);
+				} else {
+					console.error(`  ✗ getElementById returns a DIFFERENT element!`);
+					console.error(`    - Found element: ${elementById.tagName} "${elementById.textContent}"`);
+				}
 			} else {
 				console.error(`  ✗ Element CANNOT be found by ID "${heading.id}"!`);
 			}
@@ -187,6 +264,32 @@
 				console.error(`  ✗ Not found in rendered content!`);
 			}
 		});
+		
+		// Check which heading is currently active in the TOC
+		const tocComponent = document.querySelector('.toc-container');
+		if (tocComponent) {
+			const activeLink = tocComponent.querySelector('.toc-link.active');
+			if (activeLink) {
+				console.log(`\nActive TOC link: "${activeLink.textContent}" (ID: "${activeLink.getAttribute('data-heading-id')}")`);
+				
+				// Check if the corresponding heading is visible
+				const activeHeadingId = activeLink.getAttribute('data-heading-id');
+				if (activeHeadingId) {
+					const activeHeading = document.getElementById(activeHeadingId);
+					if (activeHeading) {
+						const rect = activeHeading.getBoundingClientRect();
+						console.log(`  Active heading position: top=${rect.top}, bottom=${rect.bottom}, height=${rect.height}`);
+						console.log(`  Is visible in viewport: ${rect.top < window.innerHeight && rect.bottom > 0}`);
+					} else {
+						console.error(`  Active heading with ID "${activeHeadingId}" not found in the DOM!`);
+					}
+				}
+			} else {
+				console.warn('No active TOC link found');
+			}
+		} else {
+			console.warn('TOC component not found');
+		}
 	}
 </script>
 
