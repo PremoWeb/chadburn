@@ -7,6 +7,7 @@
 		{ name: 'Home', path: '/' },
 		{ name: 'Documentation', path: '/docs' },
 		{ name: 'API', path: '/api' },
+		{ name: 'Changelog', path: '/changelog' },
 		{ name: 'GitHub', url: 'https://github.com/PremoWeb/Chadburn', external: true }
 	];
 </script>
