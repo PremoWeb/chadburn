@@ -261,25 +261,138 @@
                             <!-- Assets -->
                             {#if release.assets && release.assets.length > 0}
                                 <div class="mt-8 pt-5 border-t border-gray-100">
-                                    <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center">
-                                        <svg class="w-3.5 h-3.5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                                         </svg>
                                         Downloads ({release.assets.length})
                                     </h3>
-                                    <div class="flex flex-wrap gap-2">
-                                        {#each release.assets as asset}
-                                            <a href={asset.browser_download_url} 
-                                               class="text-xs px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
-                                               download>
-                                                <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-                                                </svg>
-                                                <span class="text-gray-700">{asset.name}</span>
-                                                <span class="text-gray-500 text-xs">({Math.round(asset.size / 1024)} KB)</span>
-                                            </a>
-                                        {/each}
-                                    </div>
+                                    
+                                    <!-- Group assets by platform -->
+                                    {#if release.assets.some(asset => asset.name.includes('.tar.gz') || asset.name.includes('.zip'))}
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                            <!-- Linux Downloads -->
+                                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <div class="flex items-center mb-3">
+                                                    <svg class="w-5 h-5 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    <h4 class="font-medium text-gray-900">Linux</h4>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    {#each release.assets.filter(asset => asset.name.includes('linux')) as asset}
+                                                        <a href={asset.browser_download_url} 
+                                                           class="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                                                           download>
+                                                            <div class="flex items-center">
+                                                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                                                </svg>
+                                                                <div>
+                                                                    <div class="text-sm font-medium text-gray-900">{asset.name.replace('chadburn-', '').replace('.tar.gz', '')}</div>
+                                                                    <div class="text-xs text-gray-500">{(asset.size / (1024 * 1024)).toFixed(2)} MB</div>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-xs bg-blue-100 text-blue-800 py-1 px-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+                                                        </a>
+                                                    {/each}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- macOS Downloads -->
+                                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <div class="flex items-center mb-3">
+                                                    <svg class="w-5 h-5 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    <h4 class="font-medium text-gray-900">macOS</h4>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    {#each release.assets.filter(asset => asset.name.includes('darwin')) as asset}
+                                                        <a href={asset.browser_download_url} 
+                                                           class="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                                                           download>
+                                                            <div class="flex items-center">
+                                                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                                                </svg>
+                                                                <div>
+                                                                    <div class="text-sm font-medium text-gray-900">{asset.name.replace('chadburn-', '').replace('.tar.gz', '')}</div>
+                                                                    <div class="text-xs text-gray-500">{(asset.size / (1024 * 1024)).toFixed(2)} MB</div>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-xs bg-blue-100 text-blue-800 py-1 px-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+                                                        </a>
+                                                    {/each}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Windows Downloads -->
+                                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                                <div class="flex items-center mb-3">
+                                                    <svg class="w-5 h-5 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                    </svg>
+                                                    <h4 class="font-medium text-gray-900">Windows</h4>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    {#each release.assets.filter(asset => asset.name.includes('windows')) as asset}
+                                                        <a href={asset.browser_download_url} 
+                                                           class="flex items-center justify-between p-3 bg-white rounded border border-gray-200 hover:bg-blue-50 hover:border-blue-200 transition-colors group"
+                                                           download>
+                                                            <div class="flex items-center">
+                                                                <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                                                </svg>
+                                                                <div>
+                                                                    <div class="text-sm font-medium text-gray-900">{asset.name.replace('chadburn-', '').replace('.zip', '')}</div>
+                                                                    <div class="text-xs text-gray-500">{(asset.size / (1024 * 1024)).toFixed(2)} MB</div>
+                                                                </div>
+                                                            </div>
+                                                            <span class="text-xs bg-blue-100 text-blue-800 py-1 px-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+                                                        </a>
+                                                    {/each}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Checksums -->
+                                        {#if release.assets.some(asset => asset.name.includes('checksums.txt'))}
+                                            <div class="mt-4">
+                                                <div class="flex items-center mb-2">
+                                                    <svg class="w-4 h-4 mr-2 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                                    </svg>
+                                                    <h4 class="text-sm font-medium text-gray-900">Checksums</h4>
+                                                </div>
+                                                {#each release.assets.filter(asset => asset.name.includes('checksums.txt')) as asset}
+                                                    <a href={asset.browser_download_url} 
+                                                       class="text-sm text-blue-600 hover:underline flex items-center"
+                                                       download>
+                                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                                        </svg>
+                                                        Download SHA256 checksums
+                                                    </a>
+                                                {/each}
+                                            </div>
+                                        {/if}
+                                    {:else}
+                                        <!-- Display other assets if no binaries are found -->
+                                        <div class="flex flex-wrap gap-2">
+                                            {#each release.assets as asset}
+                                                <a href={asset.browser_download_url} 
+                                                   class="text-xs px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors flex items-center gap-1"
+                                                   download>
+                                                    <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                                                    </svg>
+                                                    <span class="text-gray-700">{asset.name}</span>
+                                                    <span class="text-gray-500 text-xs">({Math.round(asset.size / 1024)} KB)</span>
+                                                </a>
+                                            {/each}
+                                        </div>
+                                    {/if}
                                 </div>
                             {:else}
                                 <div class="mt-8 pt-5 border-t border-gray-100">
