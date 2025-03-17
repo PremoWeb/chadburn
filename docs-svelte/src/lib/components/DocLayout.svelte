@@ -70,19 +70,34 @@
 				// Extract headings from the HTML content directly
 				// This is more reliable than waiting for DOM to render
 				const tempDiv = document.createElement('div');
-				tempDiv.innerHTML = html;
+				tempDiv.innerHTML = currentHtmlContent;
 				const headingElements = tempDiv.querySelectorAll('h1, h2, h3, h4');
+				
+				console.log(`Found ${headingElements.length} headings in the processed HTML content`);
 				
 				const extractedHeadings: Heading[] = [];
 				headingElements.forEach((el, index) => {
+					// Ensure the heading has an ID
 					const id = el.id || `heading-${index}`;
+					if (!el.id) {
+						console.warn(`Heading "${el.textContent}" had no ID, assigned: ${id}`);
+						el.id = id;
+					}
+					
 					const level = parseInt(el.tagName.substring(1));
+					const text = el.textContent || '';
+					
 					extractedHeadings.push({
 						id,
-						text: el.textContent || '',
+						text,
 						level
 					});
+					
+					console.log(`Extracted heading: ${el.tagName} "${text}" with ID "${id}"`);
 				});
+				
+				// Update the currentHtmlContent with any ID changes made during extraction
+				currentHtmlContent = tempDiv.innerHTML;
 				
 				headings = extractedHeadings;
 				console.log('Extracted headings:', headings);
@@ -117,6 +132,61 @@
 	// Toggle debug mode
 	function toggleDebug() {
 		showDebug = !showDebug;
+	}
+	
+	// Debug function to check headings and IDs
+	function checkHeadingsAndIds() {
+		console.log('Checking headings and IDs in the rendered content...');
+		
+		// Find all headings in the rendered content
+		const contentArea = document.querySelector('.main-content article');
+		if (!contentArea) {
+			console.error('Content area not found');
+			return;
+		}
+		
+		const renderedHeadings = contentArea.querySelectorAll('h1, h2, h3, h4');
+		console.log(`Found ${renderedHeadings.length} headings in the rendered content`);
+		
+		renderedHeadings.forEach((heading, index) => {
+			console.log(`Rendered heading ${index + 1}: ${heading.tagName} "${heading.textContent}" (ID: "${heading.id}")`);
+			
+			// Check if this heading is in our extracted headings
+			const matchingHeading = headings.find(h => h.id === heading.id);
+			if (matchingHeading) {
+				console.log(`  ✓ Found in extracted headings with ID "${matchingHeading.id}"`);
+			} else {
+				console.error(`  ✗ Not found in extracted headings!`);
+				
+				// Try to find a heading with similar text
+				const similarHeading = headings.find(h => h.text === heading.textContent);
+				if (similarHeading) {
+					console.log(`  ⚠ Found heading with matching text but different ID: "${similarHeading.id}"`);
+				}
+			}
+			
+			// Check if the ID is actually working
+			const elementById = document.getElementById(heading.id);
+			if (elementById) {
+				console.log(`  ✓ Element can be found by ID "${heading.id}"`);
+			} else {
+				console.error(`  ✗ Element CANNOT be found by ID "${heading.id}"!`);
+			}
+		});
+		
+		// Check if all extracted headings are in the rendered content
+		console.log('\nChecking if all extracted headings are in the rendered content...');
+		headings.forEach((heading, index) => {
+			console.log(`Extracted heading ${index + 1}: Level ${heading.level} "${heading.text}" (ID: "${heading.id}")`);
+			
+			// Try to find this heading in the rendered content
+			const elementById = document.getElementById(heading.id);
+			if (elementById) {
+				console.log(`  ✓ Found in rendered content with ID "${heading.id}"`);
+			} else {
+				console.error(`  ✗ Not found in rendered content!`);
+			}
+		});
 	}
 </script>
 
@@ -280,26 +350,71 @@
 		background: #94a3b8;
 	}
 	
-	/* Debug toggle button */
+	/* Debug styles */
+	.debug-panel {
+		position: fixed;
+		top: 0;
+		right: 0;
+		width: 400px;
+		max-width: 90vw;
+		height: 100vh;
+		background: #fff;
+		border-left: 1px solid #ddd;
+		box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+		z-index: 1000;
+		overflow-y: auto;
+		padding: 1rem;
+	}
+	
+	.debug-panel h3 {
+		margin-top: 0;
+		border-bottom: 1px solid #ddd;
+		padding-bottom: 0.5rem;
+	}
+	
+	.debug-panel pre {
+		background: #f5f5f5;
+		padding: 0.5rem;
+		border-radius: 4px;
+		overflow-x: auto;
+		font-size: 12px;
+		max-height: 200px;
+		overflow-y: auto;
+	}
+	
+	.debug-actions {
+		margin-bottom: 1rem;
+	}
+	
+	.debug-actions button {
+		background: #0066cc;
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		cursor: pointer;
+	}
+	
 	.debug-toggle {
 		position: fixed;
 		bottom: 1rem;
 		right: 1rem;
-		background-color: #3b82f6;
+		background: #0066cc;
 		color: white;
 		border: none;
-		border-radius: 0.375rem;
-		padding: 0.5rem 0.75rem;
-		font-size: 0.75rem;
-		font-weight: 600;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
 		cursor: pointer;
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-		z-index: 50;
-		transition: all 150ms ease;
+		z-index: 999;
 	}
 	
-	.debug-toggle:hover {
-		background-color: #2563eb;
+	.debug-content ul {
+		padding-left: 1rem;
+	}
+	
+	.debug-content li {
+		margin-bottom: 0.25rem;
+		font-size: 12px;
 	}
 </style>
 
@@ -410,9 +525,35 @@
 	</div>
 </div>
 
-<!-- Debug toggle button (only visible when debug is false) -->
-{#if !showDebug}
+<!-- Debug panel -->
+{#if showDebug}
+	<div class="debug-panel">
+		<h3>Debug Info</h3>
+		<div class="debug-actions">
+			<button onclick={checkHeadingsAndIds}>Check Headings & IDs</button>
+		</div>
+		<div class="debug-content">
+			<h4>Raw Content</h4>
+			<pre>{rawContent}</pre>
+			
+			<h4>Stripped Content</h4>
+			<pre>{strippedContent}</pre>
+			
+			<h4>Headings ({headings.length})</h4>
+			<ul>
+				{#each headings as heading}
+					<li>
+						{heading.level}: {heading.text} (ID: {heading.id})
+					</li>
+				{/each}
+			</ul>
+		</div>
+	</div>
+{/if}
+
+<!-- Debug toggle button -->
+{#if debug}
 	<button class="debug-toggle" onclick={toggleDebug}>
-		Show Debug
+		{showDebug ? 'Hide Debug' : 'Show Debug'}
 	</button>
 {/if} 

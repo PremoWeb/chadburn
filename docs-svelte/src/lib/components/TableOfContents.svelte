@@ -16,6 +16,9 @@
 	// Reactive values
 	let currentPath = $derived(page.url.pathname);
 	
+	// Offset for scrolling (to account for sticky headers)
+	const offset = 80; // Adjust this value based on your layout
+	
 	// Define nested heading type
 	type NestedHeading = Heading & { children: Heading[] };
 	
@@ -100,26 +103,97 @@
 	});
 	
 	// Handle click on TOC item
-	function handleTocClick(e: MouseEvent, id: string) {
+	function handleTocClick(e: Event, id: string) {
 		e.preventDefault();
-		const el = document.getElementById(id);
-		if (el) {
-			// Set active ID immediately for better UX
+		console.log(`TOC click handler called for ID: "${id}"`);
+		
+		// Find the element with the given ID
+		const element = document.getElementById(id);
+		
+		if (element) {
+			console.log(`Found element with ID "${id}"`);
+			
+			// Update active ID
 			activeId = id;
 			
-			// Calculate offset to account for sticky header if needed
-			const offset = 24; // Adjusted for content area
-			const elementPosition = el.getBoundingClientRect().top;
-			const offsetPosition = elementPosition + window.pageYOffset - offset;
+			// Calculate position with offset
+			const rect = element.getBoundingClientRect();
+			const elementPosition = rect.top;
+			const offsetPosition = elementPosition + window.scrollY - offset;
 			
-			// Scroll to the element with offset
+			// Update URL hash without triggering scroll
+			const currentPath = window.location.pathname + window.location.search;
+			history.pushState(null, '', `${currentPath}#${id}`);
+			
+			// Scroll to the element
+			console.log(`Scrolling to position: ${offsetPosition}px`);
 			window.scrollTo({
 				top: offsetPosition,
 				behavior: 'smooth'
 			});
+		} else {
+			console.error(`Element with ID "${id}" not found!`);
 			
-			// Update URL hash without triggering a scroll
-			history.pushState(null, '', `#${id}`);
+			// Debug: List all elements with IDs
+			console.log('All elements with IDs:');
+			const allElementsWithIds = document.querySelectorAll('[id]');
+			allElementsWithIds.forEach(el => {
+				console.log(`- Element: ${el.tagName}, ID: "${el.id}", Text: "${el.textContent?.trim()}"`);
+			});
+			
+			// Debug: List all headings
+			console.log('All headings:');
+			const allHeadings = document.querySelectorAll('h1, h2, h3, h4');
+			allHeadings.forEach(el => {
+				console.log(`- Heading: ${el.tagName}, ID: "${el.id}", Text: "${el.textContent?.trim()}"`);
+			});
+			
+			// Try to find a heading with similar text
+			const headingText = headings.find((h: Heading) => h.id === id)?.text;
+			if (headingText) {
+				console.log(`Looking for heading with text: "${headingText}"`);
+				const headingsByText = Array.from(document.querySelectorAll('h1, h2, h3, h4'))
+					.filter(el => el.textContent?.trim() === headingText);
+				
+				if (headingsByText.length > 0) {
+					console.log(`Found ${headingsByText.length} headings with matching text:`);
+					headingsByText.forEach(el => {
+						console.log(`- Heading: ${el.tagName}, ID: "${el.id}", Text: "${el.textContent?.trim()}"`);
+					});
+					
+					// Try to use the first matching heading
+					if (headingsByText[0].id) {
+						console.log(`Attempting to use alternative ID: "${headingsByText[0].id}"`);
+						const alternativeElement = document.getElementById(headingsByText[0].id);
+						if (alternativeElement) {
+							console.log(`Found element with alternative ID "${headingsByText[0].id}"`);
+							
+							// Update active ID
+							activeId = headingsByText[0].id;
+							
+							// Calculate position with offset
+							const rect = alternativeElement.getBoundingClientRect();
+							const elementPosition = rect.top;
+							const offsetPosition = elementPosition + window.scrollY - offset;
+							
+							// Update URL hash without triggering scroll
+							const currentPath = window.location.pathname + window.location.search;
+							history.pushState(null, '', `${currentPath}#${headingsByText[0].id}`);
+							
+							// Scroll to the element
+							console.log(`Scrolling to position: ${offsetPosition}px`);
+							window.scrollTo({
+								top: offsetPosition,
+								behavior: 'smooth'
+							});
+							
+							return;
+						}
+					}
+				}
+			}
+			
+			console.error(`Could not find any alternative heading to scroll to for ID "${id}"`);
 		}
 	}
 	

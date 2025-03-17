@@ -71,27 +71,51 @@ export function extractHeadings(selector: string = '.markdown-content'): Heading
 }
 
 /**
- * Add IDs to headings in HTML content for anchor links
+ * Add IDs to headings in HTML for anchor links
+ * @param html HTML content
+ * @returns HTML with IDs added to headings
  */
 export function addIdsToHeadings(html: string): string {
+	// Create a DOM parser
 	const parser = new DOMParser();
 	const doc = parser.parseFromString(html, 'text/html');
 	
-	// Process h1, h2, h3, h4 headings
-	const headings = doc.querySelectorAll('h1, h2, h3, h4');
+	// Find all headings
+	const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+	console.log(`Found ${headings.length} headings to process for IDs`);
 	
-	headings.forEach((heading) => {
+	// Process each heading
+	headings.forEach((heading, index) => {
+		// Get the text content of the heading
+		const text = heading.textContent?.trim() || '';
+		
+		// Check if the heading already has an ID
 		if (!heading.id) {
-			const text = heading.textContent || '';
-			const id = text
+			// Generate an ID from the text content
+			let id = text
 				.toLowerCase()
 				.replace(/[^\w\s-]/g, '') // Remove special characters
 				.replace(/\s+/g, '-') // Replace spaces with hyphens
-				.replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+				.replace(/-+/g, '-') // Replace multiple hyphens with a single one
+				.replace(/^-+|-+$/g, ''); // Remove leading and trailing hyphens
 			
+			// If the ID is empty (e.g., heading only had special characters), use a fallback
+			if (!id) {
+				id = `heading-${index}`;
+				console.warn(`Generated fallback ID "${id}" for empty heading text`);
+			}
+			
+			// Set the ID on the heading
 			heading.id = id;
+			console.log(`Generated ID "${id}" for heading "${text}"`);
+		} else {
+			console.log(`Heading "${text}" already has ID "${heading.id}"`);
 		}
+		
+		// Add a data attribute for easier debugging
+		heading.setAttribute('data-toc-heading', 'true');
 	});
 	
-	return new XMLSerializer().serializeToString(doc.body).replace(/<\/?body>/g, '');
+	// Return the modified HTML
+	return doc.body.innerHTML;
 } 
