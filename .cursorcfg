@@ -1,0 +1,15 @@
+{
+    "exclude": [
+        "node_modules/**/*",
+        "vendor/**/*",
+        ".git/**/*",
+        "dist/**/*",
+        "build/**/*",
+        ".husky/**/*",
+        "go.sum",
+        "package-lock.json",
+        "bun.lock",
+        "**/*.min.js",
+        "**/*.min.css"
+    ]
+} 
