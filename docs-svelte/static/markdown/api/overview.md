@@ -1,5 +1,7 @@
 # Chadburn API Overview
 
+> **Development Notice**: The Chadburn API is designed using an API-first approach, where the API specification is defined and documented before implementation. This ensures a consistent and well-thought-out API design that serves as the foundation for all client implementations.
+
 Chadburn provides a comprehensive HTTP API that allows you to interact with the scheduler programmatically. This API enables you to create, read, update, and delete jobs, as well as monitor the status of your scheduled tasks.
 
 ## API Basics
@@ -62,6 +64,7 @@ Chadburn's API is organized around the following resources:
 - `POST /api/v1/jobs` - Create a new job
 - `PUT /api/v1/jobs/{id}` - Update a job
 - `DELETE /api/v1/jobs/{id}` - Delete a job
+- `POST /api/v1/jobs/{id}/run` - Run a job immediately
 
 ### Schedules
 
@@ -70,11 +73,31 @@ Chadburn's API is organized around the following resources:
 - `POST /api/v1/schedules` - Create a new schedule
 - `PUT /api/v1/schedules/{id}` - Update a schedule
 - `DELETE /api/v1/schedules/{id}` - Delete a schedule
+- `GET /api/v1/schedules/{id}/jobs` - Get jobs using a schedule
+- `POST /api/v1/schedules/validate` - Validate a cron expression
+
+### Users
+
+- `GET /api/v1/users` - List all users
+- `GET /api/v1/users/{id}` - Get a specific user
+- `POST /api/v1/users` - Create a new user
+- `PUT /api/v1/users/{id}` - Update a user
+- `DELETE /api/v1/users/{id}` - Delete a user
+- `POST /api/v1/users/{id}/password` - Change user password
+- `GET /api/v1/users/{id}/activity` - Get user activity
+
+### Settings
+
+- `GET /api/v1/settings` - Get all settings
+- `PUT /api/v1/settings` - Update settings
+- `POST /api/v1/settings/notifications/email/test` - Test email settings
+- `POST /api/v1/settings/notifications/slack/test` - Test Slack settings
+- `GET /api/v1/settings/system-info` - Get system information
 
 ### Metrics
 
 - `GET /api/v1/metrics` - Get metrics in Prometheus format
-- `GET /api/v1/metrics/summary` - Get a summary of metrics
+- `GET /api/v1/metrics/summary` - Get metrics summary
 
 ## Rate Limiting
 
