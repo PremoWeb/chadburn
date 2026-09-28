@@ -75,12 +75,14 @@ func NewScheduler(l Logger) *Scheduler {
 func (s *Scheduler) AddJob(j Job) error {
 	if j.GetSchedule() == "" {
 		JobRegisterErrorsTotal.Inc()
+		s.Logger.Errorf("Failed to register job %q with schedule %q: %v", j.GetName(), j.GetSchedule(), ErrEmptySchedule)
 		return ErrEmptySchedule
 	}
 
 	id, err := s.cron.AddJob(j.GetSchedule(), &jobWrapper{s, j})
 	if err != nil {
 		JobRegisterErrorsTotal.Inc()
+		s.Logger.Errorf("Failed to register job %q with schedule %q: %v", j.GetName(), j.GetSchedule(), err)
 		return err
 	}
 	j.SetCronJobID(int(id)) // Cast to int in order to avoid pushing cron external to common
