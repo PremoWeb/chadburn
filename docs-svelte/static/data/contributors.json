@@ -19,7 +19,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 177,
+    "contributions": 178,
     "isLeadDeveloper": true,
     "name": "Nick Maietta",
     "social": {
@@ -47,7 +47,7 @@
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
-    "contributions": 108
+    "contributions": 109
   },
   {
     "login": "semantic-release-bot",
@@ -220,6 +220,28 @@
     "repos_url": "https://api.github.com/users/gerundt/repos",
     "events_url": "https://api.github.com/users/gerundt/events{/privacy}",
     "received_events_url": "https://api.github.com/users/gerundt/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false,
+    "contributions": 1
+  },
+  {
+    "login": "bensynapse",
+    "id": 118375461,
+    "node_id": "U_kgDOBw5EJQ",
+    "avatar_url": "https://avatars.githubusercontent.com/u/118375461?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/bensynapse",
+    "html_url": "https://github.com/bensynapse",
+    "followers_url": "https://api.github.com/users/bensynapse/followers",
+    "following_url": "https://api.github.com/users/bensynapse/following{/other_user}",
+    "gists_url": "https://api.github.com/users/bensynapse/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/bensynapse/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/bensynapse/subscriptions",
+    "organizations_url": "https://api.github.com/users/bensynapse/orgs",
+    "repos_url": "https://api.github.com/users/bensynapse/repos",
+    "events_url": "https://api.github.com/users/bensynapse/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/bensynapse/received_events",
     "type": "User",
     "user_view_type": "public",
     "site_admin": false,
